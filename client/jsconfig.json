@@ -1,0 +1,13 @@
+{
+  //Don't touch!!!! only god knows why this shit is showing as error without crashing
+  "files": [],
+  "references": [
+
+  ],
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  }
+}
