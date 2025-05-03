@@ -1,24 +1,28 @@
 # Gym-Membership-Management-System
 Locally hosted webapp for managing memberships
 
-##TODOs
-- Sidebar
-  - Dynamic logged user display
+## HOW TO RUN
+1. open project root folder
+2. open new terminal
+3. execute "cd client"
+4. execute "pnpm i"
+5. execute "pnpm dev"
+6. repeat steps 2-5, but for step 3. execute "cd server" instead
 
+## TODOs
 - Home
   - Analytics : Bar graphs for statistical data
   - Update log
   - Generate reports
 
 - Members
-  - Functional table
-    - CRUD forms
-    - Sorting
+  - Table
+    - Edit and Cancel members
     - Searching
     - Pagination
     - Filter
-  - Use UUID as PK
   - Add e-mail column
+  - Add profile-picture column and storing function
   - Data Culling
 
 - Visits
@@ -27,7 +31,7 @@ Locally hosted webapp for managing memberships
   - Visit log
 
 - Accounts
-  - Owner, Staff
+  - Owner and Staff Authorization levels
 
 - Backup
   - Separate database

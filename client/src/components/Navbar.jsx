@@ -1,6 +1,6 @@
-import { SidebarTrigger } from "./ui/sidebar"
 import { Moon, Sun } from "lucide-react"
 import { useTheme } from "./theme/ThemeProvider"
+import { SidebarTrigger } from "./ui/sidebar"
 
 const Navbar = () => {
     const { theme, toggleTheme } = useTheme()

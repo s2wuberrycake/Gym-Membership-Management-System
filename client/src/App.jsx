@@ -1,8 +1,10 @@
-import { BrowserRouter, Routes, Route, Outlet } from 'react-router-dom'
-import { SidebarProvider } from "./components/ui/sidebar"
+import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom"
 import Navbar from "./components/Navbar"
 import AppSidebar from "./components/AppSidebar"
 import Cookies from "js-cookie"
+
+import { SidebarProvider } from "./components/ui/sidebar"
+import { Toaster } from "sonner"
 
 import Home from "./pages/Home"
 import Members from "./pages/Members"
@@ -15,9 +17,9 @@ import RequireAuth from "./components/RequireAuth"
 
 function Layout() {
   const defaultOpen = Cookies.get("sidebar_state") === "true"
-
   return (
     <div className="flex">
+      <Toaster position="bottom-right" />
       <SidebarProvider defaultOpen={defaultOpen}>
         <AppSidebar />
         <main className="w-full">
@@ -35,7 +37,6 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Protected Routes */}
         <Route element={<RequireAuth><Layout /></RequireAuth>}>
           <Route path="/" element={<Home />} />
           <Route path="members" element={<Members />} />
@@ -44,8 +45,6 @@ function App() {
           <Route path="accounts" element={<Accounts />} />
           <Route path="backup" element={<Backup />} />
         </Route>
-
-        {/* Public Routes */}
         <Route path="/login" element={<Login />} />
       </Routes>
     </BrowserRouter>

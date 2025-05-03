@@ -1,4 +1,7 @@
-import { BookUser, BookX, CalendarClock, ChevronUp, DatabaseBackup, Home, User2, UserLock } from "lucide-react"
+import { jwtDecode } from "jwt-decode"
+import { Link, useNavigate } from "react-router-dom"
+import { useCallback , useEffect , useState } from "react"
+import axios from "axios"
 import {
   Sidebar,
   SidebarContent,
@@ -12,10 +15,8 @@ import {
   SidebarMenuItem,
   SidebarSeparator,
 } from "@/components/ui/sidebar"
-import { Link, useNavigate } from "react-router-dom"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu"
-import { useCallback } from "react"
-import axios from "axios"
+import { BookUser, BookX, CalendarClock, ChevronUp, DatabaseBackup, Home, User2, UserLock } from "lucide-react"
 
 // Sidebar menu items
 const menuDashboard = [
@@ -24,7 +25,7 @@ const menuDashboard = [
     url: "/",
     icon: Home,
   }
-];
+]
 
 const menuMembers = [
   {
@@ -42,7 +43,7 @@ const menuMembers = [
     url: "/visits",
     icon: CalendarClock,
   }
-];
+]
 
 const menuSettings = [
   {
@@ -55,13 +56,15 @@ const menuSettings = [
     url: "/backup",
     icon: DatabaseBackup,
   }
-];
+]
 
 const AppSidebar = () => {
-  const navigate = useNavigate();
+  const [username, setUsername] = useState("username")
+
+  const navigate = useNavigate()
 
   const handleLogout = useCallback(async () => {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("token")
     try {
       if (token) {
         await axios.post(
@@ -72,15 +75,28 @@ const AppSidebar = () => {
               Authorization: `Bearer ${token}`,
             },
           }
-        );
+        )
       }
     } catch (error) {
-      console.log("Server logout skipped or failed.");
+      console.log("Server logout skipped or failed.")
     }
 
-    localStorage.removeItem("token");
-    navigate("/login");
-  }, [navigate]);
+    localStorage.removeItem("token")
+    navigate("/login")
+  }, [navigate])
+
+  useEffect(() => {
+    const token = localStorage.getItem("token")
+    if (token) {
+      try {
+        const decoded = jwtDecode(localStorage.getItem("token"))
+        console.log("Decoded token:", decoded)
+        setUsername(decoded.username || decoded.name || "user")
+      } catch (err) {
+        console.error("Invalid token:", err)
+      }
+    }
+  }, [])
 
   return (
     <Sidebar collapsible="icon">
@@ -159,7 +175,7 @@ const AppSidebar = () => {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <SidebarMenuButton>
-                  <User2 /> ラムレザル＝ヴァレンタイン <ChevronUp className="ml-auto" />
+                  <User2 /> {username} <ChevronUp className="ml-auto" />
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
@@ -173,7 +189,7 @@ const AppSidebar = () => {
         </SidebarMenu>
       </SidebarFooter>
     </Sidebar>
-  );
-};
+  )
+}
 
-export default AppSidebar;
+export default AppSidebar

@@ -1,17 +1,17 @@
-// src/pages/Login.jsx
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import axios from "axios"
 import { Toaster, toast } from "sonner"
 
+import bgImage from "../assets/bgtest.jpg"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
 import {
   Card,
   CardHeader,
   CardTitle,
   CardContent,
 } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
 
 const Login = () => {
   const [values, setValues] = useState({ username: "", password: "" })
@@ -26,7 +26,7 @@ const Login = () => {
           const response = await axios.get("http://localhost:3000/auth/home", {
             headers: { Authorization: `Bearer ${token}` },
           })
-          if (response.status === 201) {
+          if (response.status === 200) {
             navigate("/")
           }
         } catch (err) {
@@ -49,7 +49,7 @@ const Login = () => {
     e.preventDefault()
     try {
       const response = await axios.post("http://localhost:3000/auth/login", values)
-      if (response.status === 201) {
+      if (response.status === 200) {
         localStorage.setItem("token", response.data.token)
         navigate("/")
       }
@@ -69,8 +69,8 @@ const Login = () => {
 
   return (
     <div
-      className="min-h-screen bg-cover bg-center bg-no-repeat relative">
-      <div className="absolute inset-0 bg-black/70 z-0"></div>
+      className="min-h-screen bg-cover bg-center bg-no-repeat relative" style={{ backgroundImage: `url(${bgImage})` }}>
+      <div className=""></div>
       <Toaster />
       <div className="relative z-10 flex items-center justify-center min-h-screen">
         <Card className="w-full max-w-md p-6">
@@ -104,7 +104,7 @@ const Login = () => {
               <Button type="submit" className="w-full">Login</Button>
             </form>
             <p className="pt-5 text-center text-xs text-muted-foreground">
-              Membership Management System
+              会員管理システム
             </p>
           </CardContent>
         </Card>
