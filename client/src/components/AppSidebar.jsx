@@ -1,6 +1,6 @@
-import { jwtDecode } from "jwt-decode"
+import { useCallback, useEffect, useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
-import { useCallback , useEffect , useState } from "react"
+import { jwtDecode } from "jwt-decode"
 import axios from "axios"
 import {
   Sidebar,
@@ -13,54 +13,71 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarSeparator,
+  SidebarSeparator
 } from "@/components/ui/sidebar"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu"
-import { BookUser, BookX, CalendarClock, ChevronUp, DatabaseBackup, Home, User2, UserLock } from "lucide-react"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger
+} from "./ui/dropdown-menu"
+import {
+  BookUser,
+  BookX,
+  CalendarClock,
+  ChevronUp,
+  DatabaseBackup,
+  Home,
+  User2,
+  UserLock
+} from "lucide-react"
 
-// Sidebar menu items
-const menuDashboard = [
+// Sidebar menu structure
+const menuSections = [
   {
-    title: "Home",
-    url: "/",
-    icon: Home,
+    label: "Dashboard",
+    items: [{ title: "Home", url: "/", icon: Home }]
+  },
+  {
+    label: "Members",
+    items: [
+      { title: "Memberships", url: "/members", icon: BookUser },
+      { title: "Cancelled Memberships", url: "/archive", icon: BookX },
+      { title: "Visit Log", url: "/visits", icon: CalendarClock }
+    ]
+  },
+  {
+    label: "Settings",
+    items: [
+      { title: "Accounts Manager", url: "/accounts", icon: UserLock, adminOnly: true },
+      { title: "Backups and Restore", url: "/backup", icon: DatabaseBackup }
+    ]
   }
 ]
 
-const menuMembers = [
-  {
-    title: "Memberships",
-    url: "/members",
-    icon: BookUser,
-  },
-  {
-    title: "Cancelled Memberships",
-    url: "/archive",
-    icon: BookX,
-  },
-  {
-    title: "Visit Log",
-    url: "/visits",
-    icon: CalendarClock,
-  }
-]
-
-const menuSettings = [
-  {
-    title: "Accounts Manager",
-    url: "/accounts",
-    icon: UserLock,
-  },
-  {
-    title: "Backups and Restore",
-    url: "/backup",
-    icon: DatabaseBackup,
-  }
-]
+const RenderMenuGroup = ({ label, items }) => (
+  <SidebarGroup>
+    <SidebarGroupLabel>{label}</SidebarGroupLabel>
+    <SidebarGroupContent>
+      <SidebarMenu>
+        {items.map(item => (
+          <SidebarMenuItem key={item.title}>
+            <SidebarMenuButton asChild>
+              <Link to={item.url}>
+                <item.icon />
+                <span>{item.title}</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        ))}
+      </SidebarMenu>
+    </SidebarGroupContent>
+  </SidebarGroup>
+)
 
 const AppSidebar = () => {
   const [username, setUsername] = useState("username")
-
+  const [role, setRole] = useState(null)
   const navigate = useNavigate()
 
   const handleLogout = useCallback(async () => {
@@ -72,12 +89,12 @@ const AppSidebar = () => {
           {},
           {
             headers: {
-              Authorization: `Bearer ${token}`,
-            },
+              Authorization: `Bearer ${token}`
+            }
           }
         )
       }
-    } catch (error) {
+    } catch {
       console.log("Server logout skipped or failed.")
     }
 
@@ -89,9 +106,9 @@ const AppSidebar = () => {
     const token = localStorage.getItem("token")
     if (token) {
       try {
-        const decoded = jwtDecode(localStorage.getItem("token"))
-        console.log("Decoded token:", decoded)
+        const decoded = jwtDecode(token)
         setUsername(decoded.username || decoded.name || "user")
+        setRole(decoded.role || null)
       } catch (err) {
         console.error("Invalid token:", err)
       }
@@ -112,61 +129,13 @@ const AppSidebar = () => {
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
-      <SidebarSeparator className="w-full mx-auto"/>
+
+      <SidebarSeparator className="w-full mx-auto" />
+
       <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>Dashboard</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {menuDashboard.map(item => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <Link to={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        <SidebarGroup>
-          <SidebarGroupLabel>Members</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {menuMembers.map(item => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <Link to={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        <SidebarGroup>
-          <SidebarGroupLabel>Settings</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {menuSettings.map(item => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <Link to={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {menuSections.map(section => (
+          <RenderMenuGroup key={section.label} label={section.label} items={section.items} />
+        ))}
       </SidebarContent>
 
       <SidebarFooter>

@@ -1,0 +1,49 @@
+import {
+  fetchDurations,
+  fetchMembers,
+  insertMember,
+  editMember
+} from "../services/membersService.js"
+
+export const getDurations = async (req, res, next) => {
+  try {
+    const durations = await fetchDurations()
+    res.json(durations)
+  } catch (err) {
+    next(err)
+  }
+}
+
+export const getAllMembers = async (req, res, next) => {
+  try {
+    const members = await fetchMembers()
+    res.json(members)
+  } catch (err) {
+    next(err)
+  }
+}
+
+export const createMember = async (req, res, next) => {
+  try {
+    console.log("📥 Incoming member payload:", req.body)
+
+    await insertMember(req.body)
+
+    console.log("✅ Member inserted")
+    res.json({ success: true, message: "Member added" })
+  } catch (err) {
+    next(err)
+  }
+}
+
+
+export const updateMember = async (req, res, next) => {
+  try {
+    const { id } = req.params
+    await editMember(id, req.body)
+
+    res.json({ success: true })
+  } catch (err) {
+    next(err)
+  }
+}
