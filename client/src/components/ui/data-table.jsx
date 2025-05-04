@@ -7,8 +7,8 @@ import {
   flexRender,
 } from "@tanstack/react-table"
 import {
-  ArrowUpNarrowWide,
   ArrowDownWideNarrow,
+  ArrowUpWideNarrow,
 } from "lucide-react"
 
 const DataTable = ({ columns, data }) => {
@@ -53,7 +53,7 @@ const DataTable = ({ columns, data }) => {
                       <ArrowDownWideNarrow className="w-4 h-4" />
                     )}
                     {header.column.getIsSorted() === "desc" && (
-                      <ArrowUpNarrowWide className="w-4 h-4" />
+                      <ArrowUpWideNarrow className="w-4 h-4" />
                     )}
                   </div>
                 </th>

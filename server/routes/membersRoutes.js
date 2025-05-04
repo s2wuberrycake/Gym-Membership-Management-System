@@ -1,5 +1,5 @@
 import express from "express"
-import { defaultDb } from "../lib/db.js"
+import { defaultDb } from "../config/dbConfig.js"
 
 const router = express.Router()
 

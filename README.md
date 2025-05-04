@@ -21,6 +21,7 @@ Locally hosted webapp for managing memberships
     - Searching
     - Pagination
     - Filter
+    - Automatic flagging of expired members
   - Add e-mail column
   - Add profile-picture column and storing function
   - Data Culling
