@@ -18,11 +18,8 @@ Locally hosted webapp for managing memberships
 - Members
   - Table
     - Edit and Cancel members
-    - Searching
-    - Pagination
-    - Filter
     - Automatic flagging of expired members
-  - Add e-mail column
+  - Add e-mail column (email validation : must contain @, optional field)
   - Add profile-picture column and storing function
   - Data Culling
 

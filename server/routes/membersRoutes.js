@@ -3,7 +3,7 @@ import { defaultDb } from "../config/dbConfig.js"
 
 const router = express.Router()
 
-// GET: Fetch membership durations for duration selection
+// GET: Fetch membership durations
 router.get("/durations", async (req, res) => {
   try {
     const [rows] = await defaultDb.query("SELECT * FROM extend_date")
@@ -14,8 +14,7 @@ router.get("/durations", async (req, res) => {
   }
 })
 
-
-// GET: Fetch mmbers
+// GET: Fetch members
 router.get("/", async (req, res) => {
   try {
     const [rows] = await defaultDb.query(`
@@ -39,9 +38,10 @@ router.get("/", async (req, res) => {
   }
 })
 
-// POST: Create new member
+// POST: Create new member (no email)
 router.post("/", async (req, res) => {
   try {
+    console.log("Received payload:", req.body)
     const {
       first_name,
       last_name,
@@ -49,12 +49,12 @@ router.post("/", async (req, res) => {
       address,
       expiration_date,
       status_id = 1,
-      join_date = new Date(),
+      join_date = new Date()
     } = req.body
 
     const [result] = await defaultDb.query(
       `INSERT INTO members (
-        first_name, last_name, contact_number, address,
+        first_name, last_name, contact_number, address, 
         join_date, expiration_date, status_id
       ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
       [
@@ -64,10 +64,9 @@ router.post("/", async (req, res) => {
         address,
         join_date,
         expiration_date,
-        status_id,
+        status_id
       ]
     )
-    
 
     res.json({ success: true, member_id: result.insertId })
   } catch (err) {
@@ -76,7 +75,7 @@ router.post("/", async (req, res) => {
   }
 })
 
-// PUT: Edit member (TO USE LATER)
+// PUT: Edit member (no email)
 router.put("/:id", async (req, res) => {
   try {
     const { id } = req.params
@@ -86,7 +85,7 @@ router.put("/:id", async (req, res) => {
       contact_number,
       address,
       expiration_date,
-      status_id,
+      status_id
     } = req.body
 
     await defaultDb.query(
@@ -100,7 +99,7 @@ router.put("/:id", async (req, res) => {
         address,
         expiration_date,
         status_id,
-        id,
+        id
       ]
     )
 

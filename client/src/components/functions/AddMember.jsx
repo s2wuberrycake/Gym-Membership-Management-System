@@ -206,7 +206,7 @@ const AddMember = ({ refreshMembers }) => {
                 <SelectTrigger id="duration">
                   <SelectValue placeholder="Select Duration" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent sideOffset={4}>
                   {durations
                     .filter((d) => d.extend_date_id !== 1)
                     .map((d) => (

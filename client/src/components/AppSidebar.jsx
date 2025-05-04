@@ -178,7 +178,7 @@ const AppSidebar = () => {
                   <User2 /> {username} <ChevronUp className="ml-auto" />
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
+              <DropdownMenuContent align="end" sideOffset={10}>
                 <DropdownMenuItem>Account</DropdownMenuItem>
                 <DropdownMenuItem variant="destructive" onSelect={handleLogout}>
                   Log Out
