@@ -55,6 +55,13 @@ CREATE TABLE extend_date (
     date_label VARCHAR(50) NOT NULL
 );
 
+INSERT INTO extend_date (extend_date_id, days, date_label) VALUES
+(1, 0, 'None'),
+(2, 28, '1 Month'),
+(3, 84, '3 Months'),
+(4, 168, '6 Months'),
+(5, 336, '12 Months');
+
 CREATE TABLE status_types (
     status_id INT PRIMARY KEY,
     status_label VARCHAR(50) NOT NULL

@@ -19,7 +19,6 @@ Locally hosted webapp for managing memberships
   - Table
     - Edit and Cancel members
     - Automatic flagging of expired members
-  - Add e-mail column (email validation : must contain @, optional field)
   - Add profile-picture column and storing function
   - Data Culling
 

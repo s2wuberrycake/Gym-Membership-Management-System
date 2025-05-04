@@ -47,7 +47,7 @@ export default function Members() {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 mb-4">
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div className="flex items-center gap-4 flex-wrap">
           <h2 className="text-2xl font-bold">Members</h2>

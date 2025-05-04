@@ -21,9 +21,10 @@ const AddMember = ({ refreshMembers }) => {
   const [form, setForm] = useState({
     first_name: "",
     last_name: "",
+    email: "",               // ✅ Add this
     contact_number: "",
     address: "",
-    durationId: "",
+    durationId: ""
   })
 
   const [errors, setErrors] = useState({})
@@ -38,7 +39,7 @@ const AddMember = ({ refreshMembers }) => {
 
   const validateField = (name, value) => {
     let error = ""
-
+  
     if (name === "first_name") {
       if (!value.trim()) {
         error = "First name is required"
@@ -51,19 +52,27 @@ const AddMember = ({ refreshMembers }) => {
       } else if (!/^[a-zA-Z\s]+$/.test(value)) {
         error = "Last name must contain only letters and spaces"
       }
+    } else if (name === "email") {
+      if (value.trim() !== "") {
+        const emailRegex = /^[^@\s]+@[^@\s]+\.[cC][oO][mM]$/
+        if (!emailRegex.test(value)) {
+          error = "Email must be in format name@host.com"
+        }
+      }
     } else if (name === "address" && !value.trim()) {
       error = "Address is required"
     } else if (name === "contact_number") {
       const digitsOnly = value.replace(/\D/g, "")
       if (!/^\d{11}$/.test(digitsOnly)) {
-        error = "Contact number must be exactly 11 digits"
+        error = "Contact number must be exactly 11 digits and can only contain numbers"
       }
     } else if (name === "durationId" && !value) {
       error = "Please select a membership duration"
     }
-
+  
     setErrors((prev) => ({ ...prev, [name]: error }))
   }
+  
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -79,18 +88,25 @@ const AddMember = ({ refreshMembers }) => {
   }
 
   const validateForm = () => {
-    const fields = ["first_name", "last_name", "address", "contact_number", "durationId"]
+    const fields = ["first_name", "last_name", "address", "contact_number", "durationId", "email"]
     fields.forEach((field) => validateField(field, form[field]))
-
-    return fields.every((field) => {
+  
+    const isValid = fields.every((field) => {
       const value = form[field]
       if (field === "contact_number") return /^\d{11}$/.test(value)
       if (field === "durationId") return value !== ""
       if (field === "first_name" || field === "last_name")
         return /^[a-zA-Z\s]+$/.test(value.trim())
+      if (field === "email") {
+        if (!value) return true
+        return /^[^@\s]+@[^@\s]+\.[cC][oO][mM]$/.test(value)
+      }
       return value.trim() !== ""
     })
+  
+    return isValid
   }
+  
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -121,13 +137,14 @@ const AddMember = ({ refreshMembers }) => {
       if (res.ok) {
         toast.success("Member added!")
         if (refreshMembers) refreshMembers()
-        setForm({
-          first_name: "",
-          last_name: "",
-          contact_number: "",
-          address: "",
-          durationId: "",
-        })
+          setForm({
+            first_name: "",
+            last_name: "",
+            email: "",
+            contact_number: "",
+            address: "",
+            durationId: ""
+          })          
         setErrors({})
       } else {
         setErrors({ submit: "Failed to add member" })
@@ -172,6 +189,20 @@ const AddMember = ({ refreshMembers }) => {
             </div>
 
             <div>
+              <Label className="mb-1 font-bold">Email (optional)</Label>
+              <Input
+                id="email"
+                name="email"
+                value={form.email}
+                onChange={handleChange}
+                placeholder="example@email.com"
+              />
+              {errors.email && (
+  <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+)}
+            </div>
+
+            <div>
               <Label className="mb-1 font-bold">Contact Number</Label>
               <Input
                 id="contact_number"
@@ -206,7 +237,7 @@ const AddMember = ({ refreshMembers }) => {
                 <SelectTrigger id="duration">
                   <SelectValue placeholder="Select Duration" />
                 </SelectTrigger>
-                <SelectContent sideOffset={4}>
+                <SelectContent>
                   {durations
                     .filter((d) => d.extend_date_id !== 1)
                     .map((d) => (

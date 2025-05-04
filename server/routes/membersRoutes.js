@@ -3,7 +3,7 @@ import { defaultDb } from "../config/dbConfig.js"
 
 const router = express.Router()
 
-// GET: Fetch membership durations
+// GET: Fetch membership durations for duration selection
 router.get("/durations", async (req, res) => {
   try {
     const [rows] = await defaultDb.query("SELECT * FROM extend_date")
@@ -14,7 +14,8 @@ router.get("/durations", async (req, res) => {
   }
 })
 
-// GET: Fetch members
+
+// GET: Fetch mmbers
 router.get("/", async (req, res) => {
   try {
     const [rows] = await defaultDb.query(`
@@ -38,13 +39,15 @@ router.get("/", async (req, res) => {
   }
 })
 
-// POST: Create new member (no email)
+// POST: Create new member
 router.post("/", async (req, res) => {
   try {
-    console.log("Received payload:", req.body)
+    console.log("📥 Incoming member payload:", req.body)
+
     const {
       first_name,
       last_name,
+      email,
       contact_number,
       address,
       expiration_date,
@@ -52,14 +55,26 @@ router.post("/", async (req, res) => {
       join_date = new Date()
     } = req.body
 
+    console.log("📦 Final insert values:", {
+      first_name,
+      last_name,
+      email,
+      contact_number,
+      address,
+      join_date,
+      expiration_date,
+      status_id
+    })
+
     const [result] = await defaultDb.query(
       `INSERT INTO members (
-        first_name, last_name, contact_number, address, 
+        first_name, last_name, email, contact_number, address,
         join_date, expiration_date, status_id
-      ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         first_name,
         last_name,
+        email || null, // allow null email
         contact_number,
         address,
         join_date,
@@ -68,33 +83,50 @@ router.post("/", async (req, res) => {
       ]
     )
 
+    console.log("✅ Member inserted with ID:", result.insertId)
+
     res.json({ success: true, member_id: result.insertId })
   } catch (err) {
-    console.error("Error creating member:", err)
+    console.error("❌ Error creating member:", err)
     res.status(500).json({ error: "Internal Server Error" })
   }
 })
 
-// PUT: Edit member (no email)
+
+
+// PUT: Edit member (TO USE LATER)
 router.put("/:id", async (req, res) => {
   try {
     const { id } = req.params
     const {
       first_name,
       last_name,
+      email,
       contact_number,
       address,
       expiration_date,
       status_id
     } = req.body
 
+    console.log("✏️ Editing member:", {
+      id,
+      first_name,
+      last_name,
+      email,
+      contact_number,
+      address,
+      expiration_date,
+      status_id
+    })
+
     await defaultDb.query(
       `UPDATE members
-       SET first_name = ?, last_name = ?, contact_number = ?, address = ?, expiration_date = ?, status_id = ?
+       SET first_name = ?, last_name = ?, email = ?, contact_number = ?, address = ?, expiration_date = ?, status_id = ?
        WHERE member_id = ?`,
       [
         first_name,
         last_name,
+        email || null, // allow null email
         contact_number,
         address,
         expiration_date,
@@ -105,9 +137,10 @@ router.put("/:id", async (req, res) => {
 
     res.json({ success: true })
   } catch (err) {
-    console.error("Error updating member:", err)
+    console.error("❌ Error updating member:", err)
     res.status(500).json({ error: "Internal Server Error" })
   }
 })
+
 
 export default router
