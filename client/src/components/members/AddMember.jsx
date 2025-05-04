@@ -17,7 +17,7 @@ import {
 import { Label } from "@/components/ui/label"
 import { toast } from "sonner"
 import { fetchDurations, addMember } from "@/lib/api/members"
-import { validateMemberForm } from "@/lib/utils/validate"
+import { validateMemberForm, validateField } from "@/lib/helper/validate"
 
 const AddMember = ({ refreshMembers, isSheetOpen }) => {
   const [form, setForm] = useState({
@@ -30,6 +30,7 @@ const AddMember = ({ refreshMembers, isSheetOpen }) => {
   })
 
   const [errors, setErrors] = useState({})
+  const [touched, setTouched] = useState({})
   const [durations, setDurations] = useState([])
 
   useEffect(() => {
@@ -39,46 +40,53 @@ const AddMember = ({ refreshMembers, isSheetOpen }) => {
   }, [])
 
   useEffect(() => {
-  if (!isSheetOpen) {
-    setForm({
-      first_name: "",
-      last_name: "",
-      email: "",
-      contact_number: "",
-      address: "",
-      durationId: ""
-    })
-    setErrors({})
-  }
-}, [isSheetOpen])
+    if (!isSheetOpen) {
+      setForm({
+        first_name: "",
+        last_name: "",
+        email: "",
+        contact_number: "",
+        address: "",
+        durationId: ""
+      })
+      setErrors({})
+      setTouched({})
+    }
+  }, [isSheetOpen])
 
-
-  const handleChange = (e) => {
+  const handleChange = e => {
     const { name, value } = e.target
     if (name === "contact_number" && /[^0-9]/.test(value)) return
 
-    const updatedForm = { ...form, [name]: value }
-    setForm(updatedForm)
+    setForm(prev => ({ ...prev, [name]: value }))
+    setTouched(prev => ({ ...prev, [name]: true }))
 
-    const { errors: newErrors } = validateMemberForm(updatedForm)
-    setErrors(newErrors)
+    const error = validateField(name, value)
+    setErrors(prev => ({ ...prev, [name]: error }))
   }
 
+  const handleSelect = value => {
+    setForm(prev => ({ ...prev, durationId: value }))
+    setTouched(prev => ({ ...prev, durationId: true }))
 
-  const handleSelect = (value) => {
-    const updatedForm = { ...form, durationId: value }
-    setForm(updatedForm)
-  
-    const { errors: newErrors } = validateMemberForm(updatedForm)
-    setErrors(newErrors)
+    const error = validateField("durationId", value)
+    setErrors(prev => ({ ...prev, durationId: error }))
   }
-  
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault()
 
     const { errors: newErrors, isValid } = validateMemberForm(form)
     setErrors(newErrors)
+    setTouched({
+      first_name: true,
+      last_name: true,
+      email: true,
+      contact_number: true,
+      address: true,
+      durationId: true
+    })
+
     if (!isValid) return
 
     const selected = durations.find(d => d.extend_date_id == form.durationId)
@@ -100,6 +108,7 @@ const AddMember = ({ refreshMembers, isSheetOpen }) => {
       await addMember(payload)
       toast.success("Member added!")
       if (refreshMembers) refreshMembers()
+
       setForm({
         first_name: "",
         last_name: "",
@@ -109,6 +118,7 @@ const AddMember = ({ refreshMembers, isSheetOpen }) => {
         durationId: ""
       })
       setErrors({})
+      setTouched({})
     } catch (err) {
       console.error("Submit error", err)
       setErrors({ submit: "Failed to add member" })
@@ -121,7 +131,7 @@ const AddMember = ({ refreshMembers, isSheetOpen }) => {
         <SheetTitle className="mb-4">Add Member</SheetTitle>
         <SheetDescription asChild>
           <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-          <div>
+            <div>
               <Label className="mb-1 font-bold">First Name</Label>
               <Input
                 id="first_name"
@@ -129,7 +139,7 @@ const AddMember = ({ refreshMembers, isSheetOpen }) => {
                 value={form.first_name}
                 onChange={handleChange}
               />
-              {errors.first_name && (
+              {touched.first_name && errors.first_name && (
                 <p className="text-red-500 text-sm mt-1">{errors.first_name}</p>
               )}
             </div>
@@ -142,7 +152,7 @@ const AddMember = ({ refreshMembers, isSheetOpen }) => {
                 value={form.last_name}
                 onChange={handleChange}
               />
-              {errors.last_name && (
+              {touched.last_name && errors.last_name && (
                 <p className="text-red-500 text-sm mt-1">{errors.last_name}</p>
               )}
             </div>
@@ -154,9 +164,8 @@ const AddMember = ({ refreshMembers, isSheetOpen }) => {
                 name="email"
                 value={form.email}
                 onChange={handleChange}
-                placeholder="member@gmail.com"
               />
-              {errors.email && (
+              {touched.email && errors.email && (
                 <p className="text-red-500 text-sm mt-1">{errors.email}</p>
               )}
             </div>
@@ -169,7 +178,7 @@ const AddMember = ({ refreshMembers, isSheetOpen }) => {
                 value={form.contact_number}
                 onChange={handleChange}
               />
-              {errors.contact_number && (
+              {touched.contact_number && errors.contact_number && (
                 <p className="text-red-500 text-sm mt-1">{errors.contact_number}</p>
               )}
             </div>
@@ -182,7 +191,7 @@ const AddMember = ({ refreshMembers, isSheetOpen }) => {
                 value={form.address}
                 onChange={handleChange}
               />
-              {errors.address && (
+              {touched.address && errors.address && (
                 <p className="text-red-500 text-sm mt-1">{errors.address}</p>
               )}
             </div>
@@ -209,7 +218,7 @@ const AddMember = ({ refreshMembers, isSheetOpen }) => {
                     ))}
                 </SelectContent>
               </Select>
-              {errors.durationId && (
+              {touched.durationId && errors.durationId && (
                 <p className="text-red-500 text-sm mt-1">{errors.durationId}</p>
               )}
             </div>

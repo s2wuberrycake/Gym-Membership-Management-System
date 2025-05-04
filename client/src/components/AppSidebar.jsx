@@ -2,6 +2,9 @@ import { useCallback, useEffect, useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { jwtDecode } from "jwt-decode"
 import axios from "axios"
+import { hasRole } from "@/lib/helper/hasRole"
+import { LOGOUT_API } from "@/lib/api"
+
 import {
   Sidebar,
   SidebarContent,
@@ -15,12 +18,14 @@ import {
   SidebarMenuItem,
   SidebarSeparator
 } from "@/components/ui/sidebar"
+
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger
 } from "./ui/dropdown-menu"
+
 import {
   BookUser,
   BookX,
@@ -32,7 +37,6 @@ import {
   UserLock
 } from "lucide-react"
 
-// Sidebar menu structure
 const menuSections = [
   {
     label: "Dashboard",
@@ -49,27 +53,35 @@ const menuSections = [
   {
     label: "Settings",
     items: [
-      { title: "Accounts Manager", url: "/accounts", icon: UserLock, adminOnly: true },
-      { title: "Backups and Restore", url: "/backup", icon: DatabaseBackup }
+      { title: "Accounts Manager", url: "/accounts", icon: UserLock, roles: ["admin"] },
+      { title: "Backups and Restore", url: "/backup", icon: DatabaseBackup, roles: ["admin"] }
     ]
   }
 ]
 
-const RenderMenuGroup = ({ label, items }) => (
+const RenderMenuGroup = ({ label, items, role }) => (
   <SidebarGroup>
     <SidebarGroupLabel>{label}</SidebarGroupLabel>
     <SidebarGroupContent>
       <SidebarMenu>
-        {items.map(item => (
-          <SidebarMenuItem key={item.title}>
-            <SidebarMenuButton asChild>
-              <Link to={item.url}>
-                <item.icon />
-                <span>{item.title}</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        ))}
+        {items.map(item => {
+          const isAllowed = !item.roles || hasRole(role, item.roles)
+
+          return (
+            <SidebarMenuItem key={item.title}>
+              <SidebarMenuButton
+                asChild
+                disabled={!isAllowed}
+                className={!isAllowed ? "pointer-events-none opacity-50" : ""}
+              >
+                <Link to={isAllowed ? item.url : "#"}>
+                  <item.icon />
+                  <span>{item.title}</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          )
+        })}
       </SidebarMenu>
     </SidebarGroupContent>
   </SidebarGroup>
@@ -84,15 +96,11 @@ const AppSidebar = () => {
     const token = localStorage.getItem("token")
     try {
       if (token) {
-        await axios.post(
-          "http://localhost:3000/auth/logout",
-          {},
-          {
-            headers: {
-              Authorization: `Bearer ${token}`
-            }
+        await axios.post(LOGOUT_API, {}, {
+          headers: {
+            Authorization: `Bearer ${token}`
           }
-        )
+        })
       }
     } catch {
       console.log("Server logout skipped or failed.")
@@ -134,7 +142,7 @@ const AppSidebar = () => {
 
       <SidebarContent>
         {menuSections.map(section => (
-          <RenderMenuGroup key={section.label} label={section.label} items={section.items} />
+          <RenderMenuGroup key={section.label} label={section.label} items={section.items} role={role} />
         ))}
       </SidebarContent>
 

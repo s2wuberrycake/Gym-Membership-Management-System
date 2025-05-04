@@ -1,5 +1,5 @@
 // src/lib/api/members.js
-import { MEMBERS_API, DURATIONS_API } from "../api"
+import { MEMBERS_API, DURATIONS_API } from "."
 
 export async function fetchDurations() {
   const res = await fetch(DURATIONS_API)

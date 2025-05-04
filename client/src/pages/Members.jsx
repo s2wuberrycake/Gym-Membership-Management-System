@@ -9,7 +9,6 @@ import ColumnToggle from "@/components/ui/column-toggle"
 import { toast } from "sonner"
 import { MEMBERS_API } from "@/lib/api"
 
-// Maps for cycling filter status
 const statusLabel = {
   all: "All Status",
   active: "Active Only",

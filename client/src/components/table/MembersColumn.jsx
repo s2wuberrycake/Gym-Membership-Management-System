@@ -1,6 +1,16 @@
 import { createColumnHelper } from "@tanstack/react-table"
-import { Badge } from "@/components/ui/badge"
 import { format } from "date-fns"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu"
+import { MoreHorizontal } from "lucide-react"
 
 const columnHelper = createColumnHelper()
 
@@ -63,11 +73,35 @@ export const membersColumns = [
   columnHelper.display({
     id: "actions",
     header: "Actions",
-    cell: ({ row }) => (
-      <div className="flex gap-2">
-        <button className="btn btn-xs btn-info">Edit</button>
-        <button className="btn btn-xs btn-error">Cancel</button>
-      </div>
-    )
+    cell: ({ row }) => {
+      const member = row.original
+
+      return (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="h-8 w-8 p-0">
+              <span className="sr-only">Open menu</span>
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+            <DropdownMenuItem onClick={() => console.log("View", member)}>
+              View
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => console.log("Edit", member)}>
+              Edit
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onClick={() => console.log("Cancel", member)}
+              className="text-red-600"
+            >
+              Cancel
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )
+    }
   })
 ]
