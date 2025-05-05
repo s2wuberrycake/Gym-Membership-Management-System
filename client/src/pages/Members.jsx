@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react"
+import { useNavigate } from "react-router-dom"
 import DataTable from "@/components/ui/data-table"
 import { membersColumns } from "@/components/table/MembersColumn"
 import { Button } from "@/components/ui/button"
@@ -26,7 +27,10 @@ export default function Members() {
   const [globalFilter, setGlobalFilter] = useState("")
   const [tableRef, setTableRef] = useState(null)
   const [statusFilter, setStatusFilter] = useState("all")
-  const [isSheetOpen, setIsSheetOpen] = useState(false)
+  const [isAddOpen, setIsAddOpen] = useState(false)
+  const [isEditOpen, setIsEditOpen] = useState(false)
+  const [selectedMember, setSelectedMember] = useState(null)
+  const navigate = useNavigate()
 
   const fetchMembers = () => {
     fetch(MEMBERS_API)
@@ -41,6 +45,11 @@ export default function Members() {
   useEffect(() => {
     fetchMembers()
   }, [])
+
+  const handleEdit = member => {
+    setSelectedMember(member)
+    setIsEditOpen(true)
+  }
 
   const cycleStatusFilter = () => {
     setStatusFilter(prev => nextStatus[prev])
@@ -66,19 +75,17 @@ export default function Members() {
             {statusLabel[statusFilter]}
           </Button>
         </div>
-        <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+
+        <Sheet open={isAddOpen} onOpenChange={setIsAddOpen}>
           <SheetTrigger asChild>
             <Button className="ml-auto">Add Member</Button>
           </SheetTrigger>
-          <AddMember
-            refreshMembers={fetchMembers}
-            isSheetOpen={isSheetOpen}
-          />
+          <AddMember refreshMembers={fetchMembers} isSheetOpen={isAddOpen} />
         </Sheet>
       </div>
 
       <DataTable
-        columns={membersColumns}
+        columns={membersColumns(navigate)}
         data={filteredData}
         globalFilter={globalFilter}
         onGlobalFilterChange={setGlobalFilter}

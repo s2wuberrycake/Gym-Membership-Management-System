@@ -28,6 +28,7 @@ CREATE TABLE members (
     member_id CHAR(36) PRIMARY KEY DEFAULT (UUID()),
     first_name VARCHAR(100),
     last_name VARCHAR(100),
+    email VARCHAR(255),
     contact_number VARCHAR(20),
     address TEXT,
     join_date DATE,

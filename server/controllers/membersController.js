@@ -1,6 +1,7 @@
 import {
   fetchDurations,
   fetchMembers,
+  fetchMemberById,
   insertMember,
   editMember
 } from "../services/membersService.js"
@@ -23,6 +24,21 @@ export const getAllMembers = async (req, res, next) => {
   }
 }
 
+export const getMemberById = async (req, res, next) => {
+  try {
+    const { id } = req.params
+    const member = await fetchMemberById(id)
+
+    if (!member) {
+      return res.status(404).json({ success: false, message: "Member not found" })
+    }
+
+    res.json(member)
+  } catch (err) {
+    next(err)
+  }
+}
+
 export const createMember = async (req, res, next) => {
   try {
     console.log("📥 Incoming member payload:", req.body)
@@ -35,7 +51,6 @@ export const createMember = async (req, res, next) => {
     next(err)
   }
 }
-
 
 export const updateMember = async (req, res, next) => {
   try {

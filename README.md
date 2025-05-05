@@ -17,7 +17,9 @@ Locally hosted webapp for managing memberships
 
 - Members
   - Table
-    - Edit and Cancel members
+    - View members info 
+    - Edit members info (apply ability to edit join and expiry date but only for admin role)
+    - Cancel members
     - Automatic flagging of expired members
   - Add profile-picture column and storing function
   - Data Culling

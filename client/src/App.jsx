@@ -13,6 +13,7 @@ import Visits from "./pages/Visits"
 import Accounts from "./pages/Accounts"
 import Backup from "./pages/Backup"
 import Login from "./pages/Login"
+import Member from "./pages/Member"
 
 import RequireAuth from "./auth/RequireAuth"
 import RoleProtectedRoute from "./auth/RoleProtectedRoute"
@@ -41,7 +42,12 @@ function App() {
       <Routes>
         <Route element={<RequireAuth><Layout /></RequireAuth>}>
           <Route path="/" element={<Home />} />
-          <Route path="members" element={<Members />} />
+
+          <Route path="members">
+            <Route index element={<Members />} />
+            <Route path=":id" element={<Member />} />
+          </Route>
+
           <Route path="archive" element={<Archive />} />
           <Route path="visits" element={<Visits />} />
 
