@@ -59,3 +59,12 @@ export const cancelMemberById = async (id, cancel_date) => {
   })
   return await handleResponse(res)
 }
+
+export const restoreMember = async (id, expiration_date) => {
+  const res = await fetch(`${MEMBERS_API}/${id}/restore`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ expiration_date })
+  })
+  return await handleResponse(res)
+}

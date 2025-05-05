@@ -16,7 +16,7 @@ const statusStyles = {
   cancelled: "bg-red-100 text-red-800"
 }
 
-export const archiveColumns = (visibleColumns = {}) => {
+export const archiveColumns = (visibleColumns = {}, actions = {}) => {
   const columns = [
     columnHelper.accessor("id", {
       header: "UUID",
@@ -75,8 +75,9 @@ export const archiveColumns = (visibleColumns = {}) => {
         const member = row.original
 
         const handleRestore = () => {
-          console.log("Restore member clicked for:", member.id)
-          // TODO: Hook up actual restore logic
+          if (actions.openRestore) {
+            actions.openRestore(member.id)
+          }
         }
 
         return (

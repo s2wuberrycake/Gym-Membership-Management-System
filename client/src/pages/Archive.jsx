@@ -6,10 +6,11 @@ import { ListRestart } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import { ARCHIVE_API } from "@/lib/api"
+import RestoreMember from "@/components/members/RestoreMember"
+import { Sheet } from "@/components/ui/sheet"
 
 export default function Archive() {
   const [data, setData] = useState([])
-
   const [globalFilter, setGlobalFilter] = useState(() => {
     return localStorage.getItem("archiveGlobalFilter") || ""
   })
@@ -22,6 +23,9 @@ export default function Archive() {
   })
 
   const [tableRef, setTableRef] = useState(null)
+
+  const [isRestoreOpen, setIsRestoreOpen] = useState(false)
+  const [selectedMemberId, setSelectedMemberId] = useState(null)
 
   useEffect(() => {
     localStorage.setItem("archiveGlobalFilter", globalFilter)
@@ -87,6 +91,11 @@ export default function Archive() {
     })
   }
 
+  const handleOpenRestore = id => {
+    setSelectedMemberId(id)
+    setIsRestoreOpen(true)
+  }
+
   return (
     <div className="space-y-4 mb-4 overflow-y-auto custom-scrollbar">
       <div className="flex items-center justify-between flex-wrap gap-4">
@@ -109,24 +118,34 @@ export default function Archive() {
           >
             Cancel Date
           </Button>
-          <Button
-            variant="ghost"
-            onClick={resetFilters}
-            className="p-2"
-          >
+          <Button variant="ghost" onClick={resetFilters} className="p-2">
             <ListRestart className="w-4 h-4" />
           </Button>
         </div>
       </div>
 
       <DataTable
-        columns={archiveColumns(visibleColumns)}
+        columns={archiveColumns(visibleColumns, {
+          openRestore: handleOpenRestore
+        })}
         data={data}
         globalFilter={globalFilter}
         onGlobalFilterChange={setGlobalFilter}
         setTableRef={setTableRef}
         globalFilterFn={globalFilterFn}
       />
+
+      <Sheet open={isRestoreOpen} onOpenChange={setIsRestoreOpen}>
+        <RestoreMember
+          memberId={selectedMemberId}
+          isSheetOpen={isRestoreOpen}
+          onClose={() => {
+            setIsRestoreOpen(false)
+            setSelectedMemberId(null)
+          }}
+          refreshMember={fetchCancelledMembers}
+        />
+      </Sheet>
     </div>
   )
 }

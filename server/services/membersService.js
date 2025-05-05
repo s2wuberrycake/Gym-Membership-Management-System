@@ -220,3 +220,68 @@ export const cancelMember = async (id) => {
     connection.release()
   }
 }
+
+
+export const restoreMember = async (id, expiration_date) => {
+  const connection = await defaultDb.getConnection()
+  try {
+    await connection.beginTransaction()
+
+    const [rows] = await connection.query("SELECT * FROM cancelled_members WHERE member_id = ?", [id])
+    if (!rows.length) throw new Error("Cancelled member not found")
+
+    const cancelledMember = rows[0]
+    const today = new Date().toISOString().split("T")[0]
+    const formattedExpiration = new Date(expiration_date).toISOString().split("T")[0]
+
+    await connection.query(
+      `INSERT INTO members (
+        member_id, first_name, last_name, email, contact_number, address,
+        original_join_date, recent_join_date, expiration_date, status_id
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        cancelledMember.member_id,
+        cancelledMember.first_name,
+        cancelledMember.last_name,
+        cancelledMember.email,
+        cancelledMember.contact_number,
+        cancelledMember.address,
+        cancelledMember.original_join_date,
+        today,
+        formattedExpiration,
+        1 // status_id for "Active"
+      ]
+    )
+
+    await connection.query("DELETE FROM cancelled_members WHERE member_id = ?", [id])
+
+    await connection.commit()
+  } catch (err) {
+    await connection.rollback()
+    throw err
+  } finally {
+    connection.release()
+  }
+}
+
+export const fetchCancelledMemberById = async (id) => {
+  const [rows] = await defaultDb.query(
+    `SELECT 
+      cm.member_id AS id,
+      cm.first_name,
+      cm.last_name,
+      cm.email,
+      cm.contact_number,
+      cm.address,
+      cm.original_join_date,
+      cm.cancel_date,
+      cm.status_id,
+      st.status_label AS status
+    FROM cancelled_members cm
+    LEFT JOIN status_types st ON cm.status_id = st.status_id
+    WHERE cm.member_id = ?`,
+    [id]
+  )
+
+  return rows[0] || null
+}
