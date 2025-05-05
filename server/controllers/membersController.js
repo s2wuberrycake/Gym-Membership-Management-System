@@ -41,11 +41,11 @@ export const getMemberById = async (req, res, next) => {
 
 export const createMember = async (req, res, next) => {
   try {
-    console.log("📥 Incoming member payload:", req.body)
+    console.log("DEBUG >> Incoming member payload:", req.body)
 
     await insertMember(req.body)
 
-    console.log("✅ Member inserted")
+    console.log("DEBUG >> Member inserted")
     res.json({ success: true, message: "Member added" })
   } catch (err) {
     next(err)

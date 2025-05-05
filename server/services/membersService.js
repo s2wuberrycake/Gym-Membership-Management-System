@@ -37,7 +37,7 @@ export const insertMember = async (data) => {
     join_date = new Date()
   } = data
 
-  console.log("📦 Final insert values:", {
+  console.log("DEBUG >> Final insert values:", {
     first_name,
     last_name,
     email,
@@ -105,7 +105,7 @@ export const editMember = async (id, data) => {
     status_id
   } = data
 
-  console.log("✏️ Editing member:", {
+  console.log("DEBUG >> Editing member:", {
     id,
     first_name,
     last_name,

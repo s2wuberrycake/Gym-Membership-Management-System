@@ -73,11 +73,27 @@ const EditMember = ({ member, isSheetOpen, onClose, refreshMember }) => {
       return
     }
   
+    const now = new Date()
+    now.setHours(0, 0, 0, 0) // Clear time for accurate comparison
+  
+    let updatedStatusId = parseInt(form.status_id)
+  
+    if (form.expiration_date) {
+      const expDate = new Date(form.expiration_date)
+      expDate.setHours(0, 0, 0, 0)
+  
+      if (expDate <= now) {
+        updatedStatusId = 2 // Expired
+      } else if (expDate > now) {
+        updatedStatusId = 1 // Active
+      }
+    }
+  
     const payload = {
       ...form,
       join_date: form.join_date ? format(form.join_date, "yyyy-MM-dd") : null,
       expiration_date: form.expiration_date ? format(form.expiration_date, "yyyy-MM-dd") : null,
-      status_id: parseInt(form.status_id)
+      status_id: updatedStatusId
     }
   
     try {
@@ -92,7 +108,8 @@ const EditMember = ({ member, isSheetOpen, onClose, refreshMember }) => {
     } finally {
       setSubmitting(false)
     }
-  }  
+  }
+  
 
   return (
     <form onSubmit={handleSubmit} className="p-6 space-y-4 max-w-md">

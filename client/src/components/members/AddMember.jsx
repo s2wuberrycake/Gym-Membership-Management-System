@@ -18,6 +18,8 @@ import { Label } from "@/components/ui/label"
 import { toast } from "sonner"
 import { fetchDurations, addMember } from "@/lib/api/members"
 import { validateMemberForm, validateField } from "@/lib/helper/validate"
+import { calculateExpirationDate } from "@/lib/helper/date"
+
 
 const AddMember = ({ refreshMembers, isSheetOpen }) => {
   const [form, setForm] = useState({
@@ -92,13 +94,7 @@ const AddMember = ({ refreshMembers, isSheetOpen }) => {
     const selected = durations.find(d => d.extend_date_id == form.durationId)
     const daysToAdd = selected ? selected.days : 0
     const today = new Date()
-    const expirationDate = new Date(today.getTime() + daysToAdd * 24 * 60 * 60 * 1000)
-
-    const year = expirationDate.getFullYear()
-    const month = String(expirationDate.getMonth() + 1).padStart(2, "0")
-    const day = String(expirationDate.getDate()).padStart(2, "0")
-    const formattedDate = `${year}-${month}-${day}`
-
+    const formattedDate = calculateExpirationDate(today, daysToAdd)
     const payload = {
       ...form,
       expiration_date: formattedDate
