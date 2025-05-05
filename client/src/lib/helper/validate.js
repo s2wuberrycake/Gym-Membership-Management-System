@@ -20,7 +20,7 @@ export function validateMemberForm(form) {
   return { errors, isValid }
 }
 
-export function validateEditMemberForm(form) {
+export function validateEditMemberForm(form, originalJoinDate) {
   const errors = {}
   let isValid = true
 
@@ -39,12 +39,18 @@ export function validateEditMemberForm(form) {
     isValid = false
   }
 
-  const joinDate = form.join_date ? new Date(form.join_date) : null
-  const expDate = form.expiration_date ? new Date(form.expiration_date) : null
+  const normalizeDate = d => {
+    const date = new Date(d)
+    date.setHours(0, 0, 0, 0)
+    return date
+  }
+
+  const joinDate = form.recent_join_date ? normalizeDate(form.recent_join_date) : null
+  const expDate = form.expiration_date ? normalizeDate(form.expiration_date) : null
+  const originalDate = originalJoinDate ? normalizeDate(originalJoinDate) : null
 
   if (joinDate && expDate) {
-    const diffInMs = expDate - joinDate
-    const diffInDays = diffInMs / (1000 * 60 * 60 * 24)
+    const diffInDays = (expDate - joinDate) / (1000 * 60 * 60 * 24)
 
     if (diffInDays < 28) {
       errors.expiration_date = "Expiration date must be at least 28 days after join date"
@@ -57,8 +63,14 @@ export function validateEditMemberForm(form) {
     }
   }
 
+  if (joinDate && originalDate && joinDate < originalDate) {
+    errors.recent_join_date = "Recent join date cannot be earlier than original join date"
+    isValid = false
+  }
+
   return { errors, isValid }
 }
+
 
 export function validateField(name, value) {
   switch (name) {

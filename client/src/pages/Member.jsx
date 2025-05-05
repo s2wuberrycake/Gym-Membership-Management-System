@@ -11,6 +11,7 @@ import { toast } from "sonner"
 import { CornerDownLeft } from "lucide-react"
 import EditMember from "@/components/members/EditMember"
 import ExtendMember from "@/components/members/ExtendMember"
+import CancelMember from "@/components/members/CancelMember"
 
 const Member = () => {
   const navigate = useNavigate()
@@ -20,6 +21,7 @@ const Member = () => {
   const [error, setError] = useState(null)
   const [isEditOpen, setIsEditOpen] = useState(false)
   const [isExtendOpen, setIsExtendOpen] = useState(false)
+  const [isCancelOpen, setIsCancelOpen] = useState(false)
 
   const loadMember = async () => {
     try {
@@ -43,12 +45,9 @@ const Member = () => {
   const handleExtendMembership = () => {
     setIsExtendOpen(true)
   }
-
+  
   const handleCancelMembership = () => {
-    const confirm = window.confirm("Are you sure you want to cancel this membership?")
-    if (!confirm) return
-    toast.success("Membership cancelled (simulate)")
-    setMember(prev => ({ ...prev, status: "cancelled" }))
+    setIsCancelOpen(true)
   }
 
   if (loading) return <div className="p-4">Loading...</div>
@@ -78,8 +77,12 @@ const Member = () => {
             <p><strong>Address:</strong> {member.address}</p>
             <p><strong>Status:</strong> {member.status}</p>
             <p>
-              <strong>Join Date:</strong>{" "}
-              {member.join_date ? format(new Date(member.join_date), "MMMM d, yyyy") : "N/A"}
+              <strong>Original Join Date:</strong>{" "}
+              {member.original_join_date ? format(new Date(member.original_join_date), "MMMM d, yyyy") : "N/A"}
+            </p>
+            <p>
+              <strong>Recent Join Date:</strong>{" "}
+              {member.recent_join_date ? format(new Date(member.recent_join_date), "MMMM d, yyyy") : "N/A"}
             </p>
             <p>
               <strong>Expiration Date:</strong>{" "}
@@ -115,9 +118,19 @@ const Member = () => {
             />
           </Sheet>
           
-          <Button onClick={handleCancelMembership} variant="destructive">
-            Cancel Membership
-          </Button>
+          <Sheet open={isCancelOpen} onOpenChange={setIsCancelOpen}>
+            <SheetTrigger asChild>
+              <Button onClick={handleCancelMembership} variant="destructive">
+                Cancel Membership
+              </Button>
+            </SheetTrigger>
+            <CancelMember
+              member={member}
+              isSheetOpen={isCancelOpen}
+              onClose={() => setIsCancelOpen(false)}
+              refreshMember={loadMember}
+            />
+          </Sheet>
         </div>
       </div>
     </>

@@ -2,26 +2,21 @@ import { createColumnHelper } from "@tanstack/react-table"
 import { format } from "date-fns"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { FolderOpen } from "lucide-react"
+import { Undo2 } from "lucide-react"
 
 const columnHelper = createColumnHelper()
 
-const truncate = (text, maxLength = 25) => {
-  if (!text) return "" // handles null, undefined, empty string
-  return text.length > maxLength ? text.slice(0, maxLength) + "..." : text
-}
-
+const truncate = (text, max = 16) =>
+  text.length > max ? text.slice(0, max) + "..." : text
 
 const formatDate = value =>
   value ? format(new Date(value), "MMM dd, yyyy") : "-"
 
 const statusStyles = {
-  active: "bg-green-100 text-green-800",
-  expired: "bg-yellow-100 text-yellow-800",
   cancelled: "bg-red-100 text-red-800"
 }
 
-export const membersColumns = (navigate, visibleColumns = {}) => {
+export const archiveColumns = (visibleColumns = {}) => {
   const columns = [
     columnHelper.accessor("id", {
       header: "UUID",
@@ -36,26 +31,28 @@ export const membersColumns = (navigate, visibleColumns = {}) => {
     columnHelper.accessor("last_name", {
       header: "Last Name",
       cell: info => truncate(info.getValue())
-    }),
+    })
+  ]
 
-    visibleColumns.contactNumber &&
+  if (visibleColumns.contactNumber) {
+    columns.push(
       columnHelper.accessor("contact_number", {
         header: "Contact No.",
         cell: info => info.getValue()
-      }),
+      })
+    )
+  }
 
-    visibleColumns.joinDate &&
-      columnHelper.accessor("recent_join_date", {
-        header: "Recent Join Date",
+  if (visibleColumns.cancelDate) {
+    columns.push(
+      columnHelper.accessor("cancel_date", {
+        header: "Cancel Date",
         cell: info => formatDate(info.getValue())
-      }),
+      })
+    )
+  }
 
-    visibleColumns.expireDate &&
-      columnHelper.accessor("expiration_date", {
-        header: "Expiration Date",
-        cell: info => formatDate(info.getValue())
-      }),
-
+  columns.push(
     columnHelper.accessor("status", {
       header: "Status",
       cell: info => {
@@ -67,27 +64,33 @@ export const membersColumns = (navigate, visibleColumns = {}) => {
 
         return <Badge className={badgeClass}>{label}</Badge>
       }
-    }),
+    })
+  )
 
+  columns.push(
     columnHelper.display({
       id: "actions",
-      header: "View",
+      header: "Restore",
       cell: ({ row }) => {
         const member = row.original
+
+        const handleRestore = () => {
+          console.log("Restore member clicked for:", member.id)
+          // TODO: Hook up actual restore logic
+        }
 
         return (
           <Button
             variant="ghost"
             className="h-8 w-8 p-0"
-            onClick={() => navigate(`/members/${member.id}`)}
+            onClick={handleRestore}
           >
-            <span className="sr-only">View</span>
-            <FolderOpen className="h-4 w-4" />
+            <Undo2 className="h-4 w-4" />
           </Button>
         )
       }
     })
-  ]
+  )
 
-  return columns.filter(Boolean) // Remove false values
+  return columns
 }

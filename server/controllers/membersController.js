@@ -4,7 +4,8 @@ import {
   fetchMemberById,
   insertMember,
   editMember,
-  updateMemberExpiration
+  updateMemberExpiration,
+  cancelMember
 } from "../services/membersService.js"
 
 export const getDurations = async (req, res, next) => {
@@ -82,6 +83,21 @@ export const extendMembership = async (req, res, next) => {
       success: true,
       message: "Membership extended",
       data: { expiration_date, status }
+    })
+  } catch (err) {
+    next(err)
+  }
+}
+
+export const cancelMemberById = async (req, res, next) => {
+  try {
+    const { id } = req.params
+
+    await cancelMember(id)
+
+    res.json({
+      success: true,
+      message: "Member cancelled and moved to archive"
     })
   } catch (err) {
     next(err)

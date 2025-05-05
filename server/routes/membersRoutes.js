@@ -5,16 +5,20 @@ import {
   createMember,
   updateMember,
   getMemberById,
-  extendMembership
+  extendMembership,
+  cancelMemberById
 } from "../controllers/membersController.js"
+
 
 const router = express.Router()
 
 router.get("/durations", getDurations)
 router.get("/", getAllMembers)
 router.post("/", createMember)
-router.put("/:id", updateMember)
-router.put("/:id/extend", extendMembership)
 router.get("/:id", getMemberById)
+router.put("/:id/extend", extendMembership)
+router.put("/:id", updateMember)
+router.delete("/:id/cancel", cancelMemberById)
+
 
 export default router

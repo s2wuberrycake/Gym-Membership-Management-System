@@ -98,6 +98,8 @@ const AddMember = ({ refreshMembers, isSheetOpen }) => {
 
     const payload = {
       ...form,
+      original_join_date: today.toISOString().split("T")[0],
+      recent_join_date: today.toISOString().split("T")[0],
       expiration_date
     }
 
@@ -132,12 +134,12 @@ const AddMember = ({ refreshMembers, isSheetOpen }) => {
         <SheetDescription asChild>
           <form onSubmit={handleSubmit}>
             <div className="p-6 pb-2 max-w-md">
-              <h2 className="text-xl font-semibold">Add a New Member</h2>
+              <h2 className="pb-0.5 text-xl font-bold">Add a New Member</h2>
             </div>
 
             <div className="p-6 pt-2 space-y-4 max-w-md">
             <div>
-              <Label>First Name</Label>
+              <Label className="pb-0.5">First Name</Label>
               <Input
                 name="first_name"
                 value={form.first_name}
@@ -149,7 +151,7 @@ const AddMember = ({ refreshMembers, isSheetOpen }) => {
             </div>
 
             <div>
-              <Label>Last Name</Label>
+              <Label className="pb-0.5">Last Name</Label>
               <Input
                 name="last_name"
                 value={form.last_name}
@@ -161,7 +163,7 @@ const AddMember = ({ refreshMembers, isSheetOpen }) => {
             </div>
 
             <div>
-              <Label>Email (optional)</Label>
+              <Label className="pb-0.5">Email (optional)</Label>
               <Input
                 name="email"
                 value={form.email}
@@ -173,7 +175,7 @@ const AddMember = ({ refreshMembers, isSheetOpen }) => {
             </div>
 
             <div>
-              <Label>Contact Number</Label>
+              <Label className="pb-0.5">Contact Number</Label>
               <Input
                 name="contact_number"
                 value={form.contact_number}
@@ -185,7 +187,7 @@ const AddMember = ({ refreshMembers, isSheetOpen }) => {
             </div>
 
             <div>
-              <Label>Address</Label>
+              <Label className="pb-0.5">Address</Label>
               <Input
                 name="address"
                 value={form.address}
@@ -197,7 +199,7 @@ const AddMember = ({ refreshMembers, isSheetOpen }) => {
             </div>
 
             <div>
-              <Label>Membership Duration</Label>
+              <Label className="pb-0.5">Membership Duration</Label>
               <p className="mb-2 text-sm text-muted-foreground leading-tight">
                 Select initial membership duration availed by the client
               </p>

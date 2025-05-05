@@ -1,39 +1,45 @@
 import { MEMBERS_API, DURATIONS_API } from "."
 
-// Api for accessing duration selection
-export async function fetchDurations() {
-  const res = await fetch(DURATIONS_API)
-  if (!res.ok) throw new Error("Failed to fetch durations")
+// Helper to handle API response with error message fallback
+const handleResponse = async res => {
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({}))
+    throw new Error(error.message || "An error occurred")
+  }
   return await res.json()
 }
 
-// Api for adding new member
+export async function fetchDurations() {
+  const res = await fetch(DURATIONS_API)
+  return await handleResponse(res)
+}
+
+export async function fetchMembers() {
+  const res = await fetch(MEMBERS_API)
+  return await handleResponse(res)
+}
+
 export async function addMember(payload) {
   const res = await fetch(MEMBERS_API, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload)
   })
-  if (!res.ok) throw new Error("Failed to add member")
-  return await res.json()
+  return await handleResponse(res)
 }
 
-// Api for accessing member info
 export const fetchMemberById = async memberId => {
   const res = await fetch(`${MEMBERS_API}/${memberId}`)
-  if (!res.ok) throw new Error("Failed to fetch member")
-  return await res.json()
+  return await handleResponse(res)
 }
 
-// Api for updating existing member
 export const updateMemberById = async (memberId, payload) => {
   const res = await fetch(`${MEMBERS_API}/${memberId}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload)
   })
-  if (!res.ok) throw new Error("Failed to update member")
-  return await res.json()
+  return await handleResponse(res)
 }
 
 export const extendMember = async (id, expiration_date, status) => {
@@ -42,7 +48,14 @@ export const extendMember = async (id, expiration_date, status) => {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ expiration_date, status })
   })
+  return await handleResponse(res)
+}
 
-  if (!res.ok) throw new Error("Failed to extend membership")
-  return await res.json()
+export const cancelMemberById = async (id, cancel_date) => {
+  const res = await fetch(`${MEMBERS_API}/${id}/cancel`, {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ cancel_date })
+  })
+  return await handleResponse(res)
 }
