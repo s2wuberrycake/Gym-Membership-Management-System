@@ -14,9 +14,8 @@ app.use(express.json())
 app.use("/auth", authRouter)
 app.use("/api/members", membersRouter)
 
-// ✅ Global Error Handler (must be last middleware)
 app.use(errorHandler)
 
 app.listen(process.env.PORT, () => {
-  console.log(`やったー!! サーバーはポート ${process.env.PORT} に正常に接続しました`)
+  console.log(`DEBUG >> Sucessfuly connected at PORT ${process.env.PORT}!!`)
 })

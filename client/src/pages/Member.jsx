@@ -5,11 +5,7 @@ import { format } from "date-fns"
 import { Button } from "@/components/ui/button"
 import {
   Sheet,
-  SheetContent,
-  SheetTrigger,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription
+  SheetTrigger
 } from "@/components/ui/sheet"
 import { toast } from "sonner"
 import { CornerDownLeft } from "lucide-react"

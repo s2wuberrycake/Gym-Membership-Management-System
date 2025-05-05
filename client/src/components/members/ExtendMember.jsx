@@ -71,12 +71,8 @@ const ExtendMember = ({ memberId, isSheetOpen, onClose, refreshMember }) => {
   
       const selected = durations.find(d => d.extend_date_id == durationId)
       const daysToAdd = selected ? selected.days : 0
-  
-      // Get current member info
       const member = await fetchMemberById(memberId)
-  
       const newExpiration = calculateExtendedExpiration(member.expiration_date, daysToAdd)
-  
       const newStatus = new Date(newExpiration) > new Date() ? "active" : member.status
   
       await extendMember(memberId, newExpiration, newStatus)
@@ -92,18 +88,24 @@ const ExtendMember = ({ memberId, isSheetOpen, onClose, refreshMember }) => {
     }
   }
   
-
   return (
     <SheetContent className="overflow-y-auto">
       <SheetHeader>
         <SheetTitle className="mb-4">Extend Membership</SheetTitle>
         <SheetDescription asChild>
           <form onSubmit={handleSubmit}>
+            <div className="p-6 pb-2 max-w-md">
+              <h2 className="text-xl font-semibold">Extend a Membership Validity</h2>
+              <p className="">Select the duration to extend this member's membership validity. Extending membership validity of
+                              members with expired status will re-enroll them back as an active member
+              </p>
+            </div>
+            
             <div className="p-6 pt-2 space-y-4 max-w-md">
               <div>
                 <Label>Membership Duration</Label>
                 <p className="mb-2 text-sm text-muted-foreground leading-tight">
-                  Select the duration to extend this member’s expiration
+                  
                 </p>
                 <Select value={durationId} onValueChange={handleSelect}>
                   <SelectTrigger>

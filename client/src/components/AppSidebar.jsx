@@ -131,7 +131,7 @@ const AppSidebar = () => {
             <SidebarMenuButton asChild className="hover:bg-transparent active:bg-transparent focus:outline-none">
               <Link to="/">
                 <img src="./src/assets/logo.png" alt="logo" width={20} height={20} />
-                <span>会員管理システム</span>
+                <p className="pl-2">Membership Management System</p>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -152,7 +152,11 @@ const AppSidebar = () => {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <SidebarMenuButton>
-                  <User2 /> {username} <ChevronUp className="ml-auto" />
+                  <User2 />
+                  <div className="px-2">
+                    {username}
+                  </div>
+                  <ChevronUp className="ml-auto" />
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" sideOffset={10}>
