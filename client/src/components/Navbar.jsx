@@ -12,8 +12,6 @@ const Navbar = () => {
           focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none
           [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground py-2 group/toggle h-8 w-8 px-0"/>
 
-      {/* TODO : functional search bar */}
-
       <div className="flex items-center gap-4">
         <button
           onClick={toggleTheme}

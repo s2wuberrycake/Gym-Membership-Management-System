@@ -20,7 +20,6 @@ import { fetchDurations, addMember } from "@/lib/api/members"
 import { validateMemberForm, validateField } from "@/lib/helper/validate"
 import { calculateExpirationDate } from "@/lib/helper/date"
 
-
 const AddMember = ({ refreshMembers, isSheetOpen }) => {
   const [form, setForm] = useState({
     first_name: "",
@@ -34,6 +33,7 @@ const AddMember = ({ refreshMembers, isSheetOpen }) => {
   const [errors, setErrors] = useState({})
   const [touched, setTouched] = useState({})
   const [durations, setDurations] = useState([])
+  const [submitting, setSubmitting] = useState(false)
 
   useEffect(() => {
     fetchDurations()
@@ -94,13 +94,15 @@ const AddMember = ({ refreshMembers, isSheetOpen }) => {
     const selected = durations.find(d => d.extend_date_id == form.durationId)
     const daysToAdd = selected ? selected.days : 0
     const today = new Date()
-    const formattedDate = calculateExpirationDate(today, daysToAdd)
+    const expiration_date = calculateExpirationDate(today, daysToAdd)
+
     const payload = {
       ...form,
-      expiration_date: formattedDate
+      expiration_date
     }
 
     try {
+      setSubmitting(true)
       await addMember(payload)
       toast.success("Member added!")
       if (refreshMembers) refreshMembers()
@@ -118,19 +120,25 @@ const AddMember = ({ refreshMembers, isSheetOpen }) => {
     } catch (err) {
       console.error("Submit error", err)
       setErrors({ submit: "Failed to add member" })
+    } finally {
+      setSubmitting(false)
     }
   }
 
   return (
-    <SheetContent>
+    <SheetContent className="overflow-y-auto">
       <SheetHeader>
         <SheetTitle className="mb-4">Add Member</SheetTitle>
         <SheetDescription asChild>
-          <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+          <form onSubmit={handleSubmit}>
+            <div className="p-6 pb-2 max-w-md">
+              <h2 className="text-xl font-semibold">Add a New Member</h2>
+            </div>
+
+            <div className="p-6 pt-2 space-y-4 max-w-md">
             <div>
-              <Label className="mb-1 font-bold">First Name</Label>
+              <Label>First Name</Label>
               <Input
-                id="first_name"
                 name="first_name"
                 value={form.first_name}
                 onChange={handleChange}
@@ -141,9 +149,8 @@ const AddMember = ({ refreshMembers, isSheetOpen }) => {
             </div>
 
             <div>
-              <Label className="mb-1 font-bold">Last Name</Label>
+              <Label>Last Name</Label>
               <Input
-                id="last_name"
                 name="last_name"
                 value={form.last_name}
                 onChange={handleChange}
@@ -154,9 +161,8 @@ const AddMember = ({ refreshMembers, isSheetOpen }) => {
             </div>
 
             <div>
-              <Label className="mb-1 font-bold">Email (optional)</Label>
+              <Label>Email (optional)</Label>
               <Input
-                id="email"
                 name="email"
                 value={form.email}
                 onChange={handleChange}
@@ -167,9 +173,8 @@ const AddMember = ({ refreshMembers, isSheetOpen }) => {
             </div>
 
             <div>
-              <Label className="mb-1 font-bold">Contact Number</Label>
+              <Label>Contact Number</Label>
               <Input
-                id="contact_number"
                 name="contact_number"
                 value={form.contact_number}
                 onChange={handleChange}
@@ -180,9 +185,8 @@ const AddMember = ({ refreshMembers, isSheetOpen }) => {
             </div>
 
             <div>
-              <Label className="mb-1 font-bold">Address</Label>
+              <Label>Address</Label>
               <Input
-                id="address"
                 name="address"
                 value={form.address}
                 onChange={handleChange}
@@ -193,12 +197,12 @@ const AddMember = ({ refreshMembers, isSheetOpen }) => {
             </div>
 
             <div>
-              <Label className="font-bold">Membership Duration</Label>
-              <p className="mb-1 text-sm text-muted-foreground">
+              <Label>Membership Duration</Label>
+              <p className="mb-2 text-sm text-muted-foreground leading-tight">
                 Select initial membership duration availed by the client
               </p>
               <Select value={form.durationId} onValueChange={handleSelect}>
-                <SelectTrigger id="duration">
+                <SelectTrigger>
                   <SelectValue placeholder="Select Duration" />
                 </SelectTrigger>
                 <SelectContent>
@@ -223,9 +227,10 @@ const AddMember = ({ refreshMembers, isSheetOpen }) => {
               <p className="text-red-500 text-sm text-center">{errors.submit}</p>
             )}
 
-            <Button type="submit" className="w-full">
-              Add Member
+            <Button type="submit" disabled={submitting} className="w-full">
+              {submitting ? "Adding..." : "Add Member"}
             </Button>
+            </div>
           </form>
         </SheetDescription>
       </SheetHeader>

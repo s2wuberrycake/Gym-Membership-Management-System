@@ -37,14 +37,17 @@ export const insertMember = async (data) => {
     join_date = new Date()
   } = data
 
+  const formattedJoinDate = new Date(join_date).toISOString().split("T")[0]
+  const formattedExpiration = new Date(expiration_date).toISOString().split("T")[0]
+
   console.log("DEBUG >> Final insert values:", {
     first_name,
     last_name,
     email,
     contact_number,
     address,
-    join_date,
-    expiration_date,
+    join_date: formattedJoinDate,
+    expiration_date: formattedExpiration,
     status_id
   })
 
@@ -59,8 +62,8 @@ export const insertMember = async (data) => {
       email || null,
       contact_number,
       address,
-      join_date,
-      expiration_date,
+      formattedJoinDate,
+      formattedExpiration,
       status_id
     ]
   )
@@ -133,4 +136,24 @@ export const editMember = async (id, data) => {
       id
     ]
   )
+}
+
+export const updateMemberExpiration = async (id, expiration_date, statusLabel) => {
+  const [rows] = await defaultDb.query(
+    "SELECT status_id FROM status_types WHERE status_label = ?",
+    [statusLabel]
+  )
+
+  if (!rows.length) {
+    throw new Error(`Status label "${statusLabel}" not found`)
+  }
+
+  const status_id = rows[0].status_id
+
+  const [result] = await defaultDb.query(
+    "UPDATE members SET expiration_date = ?, status_id = ? WHERE member_id = ?",
+    [expiration_date, status_id, id]
+  )
+
+  return result
 }

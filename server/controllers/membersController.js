@@ -3,7 +3,8 @@ import {
   fetchMembers,
   fetchMemberById,
   insertMember,
-  editMember
+  editMember,
+  updateMemberExpiration
 } from "../services/membersService.js"
 
 export const getDurations = async (req, res, next) => {
@@ -58,6 +59,30 @@ export const updateMember = async (req, res, next) => {
     await editMember(id, req.body)
 
     res.json({ success: true })
+  } catch (err) {
+    next(err)
+  }
+}
+
+export const extendMembership = async (req, res, next) => {
+  try {
+    const { id } = req.params
+    const { expiration_date, status } = req.body
+
+    if (!expiration_date || !status) {
+      return res.status(400).json({
+        success: false,
+        message: "Expiration date and status are required"
+      })
+    }
+
+    await updateMemberExpiration(id, expiration_date, status)
+
+    res.json({
+      success: true,
+      message: "Membership extended",
+      data: { expiration_date, status }
+    })
   } catch (err) {
     next(err)
   }

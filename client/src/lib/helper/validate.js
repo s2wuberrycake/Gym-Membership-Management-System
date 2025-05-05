@@ -39,6 +39,24 @@ export function validateEditMemberForm(form) {
     isValid = false
   }
 
+  const joinDate = form.join_date ? new Date(form.join_date) : null
+  const expDate = form.expiration_date ? new Date(form.expiration_date) : null
+
+  if (joinDate && expDate) {
+    const diffInMs = expDate - joinDate
+    const diffInDays = diffInMs / (1000 * 60 * 60 * 24)
+
+    if (diffInDays < 28) {
+      errors.expiration_date = "Expiration date must be at least 28 days after join date"
+      isValid = false
+    }
+
+    if (joinDate > expDate) {
+      errors.expiration_date = "Expiration date must be after join date"
+      isValid = false
+    }
+  }
+
   return { errors, isValid }
 }
 

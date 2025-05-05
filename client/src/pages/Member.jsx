@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import {
   Sheet,
   SheetContent,
+  SheetTrigger,
   SheetHeader,
   SheetTitle,
   SheetDescription
@@ -13,6 +14,7 @@ import {
 import { toast } from "sonner"
 import { CornerDownLeft } from "lucide-react"
 import EditMember from "@/components/members/EditMember"
+import ExtendMember from "@/components/members/ExtendMember"
 
 const Member = () => {
   const navigate = useNavigate()
@@ -21,6 +23,7 @@ const Member = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [isEditOpen, setIsEditOpen] = useState(false)
+  const [isExtendOpen, setIsExtendOpen] = useState(false)
 
   const loadMember = async () => {
     try {
@@ -42,13 +45,12 @@ const Member = () => {
   }
 
   const handleExtendMembership = () => {
-    toast.info("Extend Membership clicked (UI coming soon)")
+    setIsExtendOpen(true)
   }
 
   const handleCancelMembership = () => {
     const confirm = window.confirm("Are you sure you want to cancel this membership?")
     if (!confirm) return
-
     toast.success("Membership cancelled (simulate)")
     setMember(prev => ({ ...prev, status: "cancelled" }))
   }
@@ -61,14 +63,15 @@ const Member = () => {
     <>
       <div className="p-6 max-w-2xl mx-auto space-y-6">
         <div>
-        <Button
-          variant="outline"
-          onClick={() => navigate(-1)}
-          className="mb-4 flex items-center gap-2"
-        >
-          <CornerDownLeft className="w-4 h-4" />
-          Return
-        </Button>
+          <Button
+            variant="outline"
+            onClick={() => navigate(-1)}
+            className="mb-4 flex items-center gap-2"
+          >
+            <CornerDownLeft className="w-4 h-4" />
+            Return
+          </Button>
+
           <h1 className="text-2xl font-bold mb-4">
             Viewing Member: {member.first_name} {member.last_name}
           </h1>
@@ -78,33 +81,49 @@ const Member = () => {
             <p><strong>Phone:</strong> {member.contact_number}</p>
             <p><strong>Address:</strong> {member.address}</p>
             <p><strong>Status:</strong> {member.status}</p>
-            <p><strong>Join Date:</strong> {member.join_date ? format(new Date(member.join_date), "MMMM d, yyyy") : "N/A"}</p>
-            <p><strong>Expiration Date:</strong> {member.expiration_date ? format(new Date(member.expiration_date), "MMMM d, yyyy") : "N/A"}</p>
+            <p>
+              <strong>Join Date:</strong>{" "}
+              {member.join_date ? format(new Date(member.join_date), "MMMM d, yyyy") : "N/A"}
+            </p>
+            <p>
+              <strong>Expiration Date:</strong>{" "}
+              {member.expiration_date ? format(new Date(member.expiration_date), "MMMM d, yyyy") : "N/A"}
+            </p>
           </div>
         </div>
 
         <div className="flex gap-3">
-          <Button onClick={handleEditInfo}>Edit Info</Button>
-          <Button onClick={handleExtendMembership} variant="outline">Extend Membership</Button>
-          <Button onClick={handleCancelMembership} variant="destructive">Cancel Membership</Button>
+          <Sheet open={isEditOpen} onOpenChange={setIsEditOpen}>
+            <SheetTrigger asChild>
+              <Button onClick={handleEditInfo}>Edit Info</Button>
+            </SheetTrigger>
+            <EditMember
+              member={member}
+              isSheetOpen={isEditOpen}
+              onClose={() => setIsEditOpen(false)}
+              refreshMember={loadMember}
+            />
+          </Sheet>
+
+          <Sheet open={isExtendOpen} onOpenChange={setIsExtendOpen}>
+            <SheetTrigger asChild>
+              <Button variant="outline" onClick={handleExtendMembership}>
+                Extend Membership
+              </Button>
+            </SheetTrigger>
+            <ExtendMember
+              memberId={member.id}
+              isSheetOpen={isExtendOpen}
+              onClose={() => setIsExtendOpen(false)}
+              refreshMember={loadMember}
+            />
+          </Sheet>
+          
+          <Button onClick={handleCancelMembership} variant="destructive">
+            Cancel Membership
+          </Button>
         </div>
       </div>
-
-      <Sheet open={isEditOpen} onOpenChange={setIsEditOpen}>
-  <SheetContent className="max-w-md w-full overflow-y-auto">
-    <SheetHeader>
-      <SheetTitle>Edit Member</SheetTitle>
-      <SheetDescription>Update member information below</SheetDescription>
-    </SheetHeader>
-    <EditMember
-      member={member}
-      isSheetOpen={isEditOpen}
-      onClose={() => setIsEditOpen(false)}
-      refreshMember={loadMember}
-    />
-  </SheetContent>
-</Sheet>
-
     </>
   )
 }

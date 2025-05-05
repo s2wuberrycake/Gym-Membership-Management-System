@@ -25,7 +25,7 @@ export const fetchMemberById = async memberId => {
   return await res.json()
 }
 
-// ✅ NEW: Api for updating existing member
+// Api for updating existing member
 export const updateMemberById = async (memberId, payload) => {
   const res = await fetch(`${MEMBERS_API}/${memberId}`, {
     method: "PUT",
@@ -33,5 +33,16 @@ export const updateMemberById = async (memberId, payload) => {
     body: JSON.stringify(payload)
   })
   if (!res.ok) throw new Error("Failed to update member")
+  return await res.json()
+}
+
+export const extendMember = async (id, expiration_date, status) => {
+  const res = await fetch(`${MEMBERS_API}/${id}/extend`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ expiration_date, status })
+  })
+
+  if (!res.ok) throw new Error("Failed to extend membership")
   return await res.json()
 }
