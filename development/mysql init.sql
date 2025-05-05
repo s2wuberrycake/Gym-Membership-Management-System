@@ -21,7 +21,8 @@ CREATE TABLE accounts (
 );
 
 INSERT INTO accounts (username, password, role_id) VALUES
-('admin', '$2b$10$otKCl.7wXvqA1t4QbVdyqeTlXSE.MvhCqeVfyy7k7oMUa/YJymGzG', 1);
+('admin', '$2b$10$otKCl.7wXvqA1t4QbVdyqeTlXSE.MvhCqeVfyy7k7oMUa/YJymGzG', 1),
+('staff', '$2b$10$h8GLDavmj2co2jx2bsn8iOpGBzDD3vbV5.3IMzjnPL.DeVI4r/jaS', 2);
 
 -- MAIN TABLES
 CREATE TABLE members (

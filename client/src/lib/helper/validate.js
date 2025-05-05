@@ -20,6 +20,28 @@ export function validateMemberForm(form) {
   return { errors, isValid }
 }
 
+export function validateEditMemberForm(form) {
+  const errors = {}
+  let isValid = true
+
+  const requiredFields = ["first_name", "last_name", "address", "contact_number"]
+
+  for (const field of requiredFields) {
+    const error = validateField(field, form[field])
+    if (error) {
+      errors[field] = error
+      isValid = false
+    }
+  }
+
+  if (form.email && !/^[^@\s]+@[^@\s]+\.[cC][oO][mM]$/.test(form.email)) {
+    errors.email = "Email must be in format name@host.com"
+    isValid = false
+  }
+
+  return { errors, isValid }
+}
+
 export function validateField(name, value) {
   switch (name) {
     case "first_name":

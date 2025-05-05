@@ -1,28 +1,31 @@
 import React, { useEffect, useState } from "react"
-import {
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle
-} from "@/components/ui/sheet"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Label } from "@/components/ui/label"
-import { toast } from "sonner"
 import { updateMemberById } from "@/lib/api/members"
-import { validateMemberForm, validateField } from "@/lib/helper/validate"
+import { toast } from "sonner"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { format } from "date-fns"
+import { CalendarIcon } from "lucide-react"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Calendar } from "@/components/ui/calendar"
+import { cn } from "@/lib/utils"
+import { validateField, validateEditMemberForm } from "@/lib/helper/validate"
 
-const EditMember = ({ member, onClose, onUpdated }) => {
+const EditMember = ({ member, isSheetOpen, onClose, refreshMember }) => {
   const [form, setForm] = useState({
     first_name: "",
     last_name: "",
     email: "",
     contact_number: "",
-    address: ""
+    address: "",
+    join_date: null,
+    expiration_date: null,
+    status_id: 1
   })
 
   const [errors, setErrors] = useState({})
   const [touched, setTouched] = useState({})
+  const [submitting, setSubmitting] = useState(false)
 
   useEffect(() => {
     if (member) {
@@ -31,7 +34,10 @@ const EditMember = ({ member, onClose, onUpdated }) => {
         last_name: member.last_name || "",
         email: member.email || "",
         contact_number: member.contact_number || "",
-        address: member.address || ""
+        address: member.address || "",
+        join_date: member.join_date ? new Date(member.join_date) : null,
+        expiration_date: member.expiration_date ? new Date(member.expiration_date) : null,
+        status_id: member.status_id || 1
       })
       setErrors({})
       setTouched({})
@@ -51,8 +57,8 @@ const EditMember = ({ member, onClose, onUpdated }) => {
 
   const handleSubmit = async e => {
     e.preventDefault()
-
-    const { errors: newErrors, isValid } = validateMemberForm(form)
+  
+    const { errors: newErrors, isValid } = validateEditMemberForm(form)
     setErrors(newErrors)
     setTouched({
       first_name: true,
@@ -61,102 +67,143 @@ const EditMember = ({ member, onClose, onUpdated }) => {
       contact_number: true,
       address: true
     })
-
-    if (!isValid) return
-
-    try {
-      await updateMemberById(member.member_id, form)
-      toast.success("Member updated!")
-      if (onUpdated) onUpdated()
-      if (onClose) onClose()
-    } catch (err) {
-      console.error("Update error", err)
-      setErrors({ submit: "Failed to update member" })
+  
+    if (!isValid) {
+      console.log("Form is not valid", newErrors)
+      return
     }
-  }
+  
+    const payload = {
+      ...form,
+      join_date: form.join_date ? format(form.join_date, "yyyy-MM-dd") : null,
+      expiration_date: form.expiration_date ? format(form.expiration_date, "yyyy-MM-dd") : null,
+      status_id: parseInt(form.status_id)
+    }
+  
+    try {
+      setSubmitting(true)
+      await updateMemberById(member.id, payload)
+      toast.success("Member updated successfully")
+      refreshMember()
+      onClose()
+    } catch (err) {
+      console.error("Update failed:", err)
+      toast.error("Failed to update member")
+    } finally {
+      setSubmitting(false)
+    }
+  }  
 
   return (
-    <SheetContent>
-      <SheetHeader>
-        <SheetTitle className="mb-4">Edit Member</SheetTitle>
-        <SheetDescription asChild>
-          <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-            <div>
-              <Label className="mb-1 font-bold">First Name</Label>
-              <Input
-                id="first_name"
-                name="first_name"
-                value={form.first_name}
-                onChange={handleChange}
-              />
-              {touched.first_name && errors.first_name && (
-                <p className="text-red-500 text-sm mt-1">{errors.first_name}</p>
+    <form onSubmit={handleSubmit} className="p-6 space-y-4 max-w-md">
+      <h2 className="text-xl font-semibold">Edit Member Info</h2>
+
+      <div>
+        <Label>First Name</Label>
+        <Input
+          name="first_name"
+          value={form.first_name}
+          onChange={handleChange}
+        />
+        {touched.first_name && errors.first_name && (
+          <p className="text-red-500 text-sm mt-1">{errors.first_name}</p>
+        )}
+      </div>
+
+      <div>
+        <Label>Last Name</Label>
+        <Input
+          name="last_name"
+          value={form.last_name}
+          onChange={handleChange}
+        />
+        {touched.last_name && errors.last_name && (
+          <p className="text-red-500 text-sm mt-1">{errors.last_name}</p>
+        )}
+      </div>
+
+      <div>
+        <Label>Email (optional)</Label>
+        <Input
+          name="email"
+          value={form.email}
+          onChange={handleChange}
+        />
+        {touched.email && errors.email && (
+          <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+        )}
+      </div>
+
+      <div>
+        <Label>Contact Number</Label>
+        <Input
+          name="contact_number"
+          value={form.contact_number}
+          onChange={handleChange}
+        />
+        {touched.contact_number && errors.contact_number && (
+          <p className="text-red-500 text-sm mt-1">{errors.contact_number}</p>
+        )}
+      </div>
+
+      <div>
+        <Label>Address</Label>
+        <Input
+          name="address"
+          value={form.address}
+          onChange={handleChange}
+        />
+        {touched.address && errors.address && (
+          <p className="text-red-500 text-sm mt-1">{errors.address}</p>
+        )}
+      </div>
+
+      <div>
+        <Label>Join Date</Label>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              className={cn(
+                "w-full justify-start text-left font-normal",
+                !form.join_date && "text-muted-foreground"
               )}
-            </div>
-
-            <div>
-              <Label className="mb-1 font-bold">Last Name</Label>
-              <Input
-                id="last_name"
-                name="last_name"
-                value={form.last_name}
-                onChange={handleChange}
-              />
-              {touched.last_name && errors.last_name && (
-                <p className="text-red-500 text-sm mt-1">{errors.last_name}</p>
-              )}
-            </div>
-
-            <div>
-              <Label className="mb-1 font-bold">Email (optional)</Label>
-              <Input
-                id="email"
-                name="email"
-                value={form.email}
-                onChange={handleChange}
-              />
-              {touched.email && errors.email && (
-                <p className="text-red-500 text-sm mt-1">{errors.email}</p>
-              )}
-            </div>
-
-            <div>
-              <Label className="mb-1 font-bold">Contact Number</Label>
-              <Input
-                id="contact_number"
-                name="contact_number"
-                value={form.contact_number}
-                onChange={handleChange}
-              />
-              {touched.contact_number && errors.contact_number && (
-                <p className="text-red-500 text-sm mt-1">{errors.contact_number}</p>
-              )}
-            </div>
-
-            <div>
-              <Label className="mb-1 font-bold">Address</Label>
-              <Input
-                id="address"
-                name="address"
-                value={form.address}
-                onChange={handleChange}
-              />
-              {touched.address && errors.address && (
-                <p className="text-red-500 text-sm mt-1">{errors.address}</p>
-              )}
-            </div>
-
-            {errors.submit && (
-              <p className="text-red-500 text-sm text-center">{errors.submit}</p>
-            )}
-
-            <Button type="submit" className="w-full">
-              Save Changes
+            >
+              <CalendarIcon className="mr-2 h-4 w-4" />
+              {form.join_date ? format(form.join_date, "MMMM d, yyyy") : "Pick a date"}
             </Button>
-          </form>
-        </SheetDescription>
-      </SheetHeader>
-    </SheetContent>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar mode="single" selected={form.join_date} onSelect={date => setForm(prev => ({ ...prev, join_date: date }))} initialFocus />
+          </PopoverContent>
+        </Popover>
+      </div>
+
+      <div>
+        <Label>Expiration Date</Label>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              className={cn(
+                "w-full justify-start text-left font-normal",
+                !form.expiration_date && "text-muted-foreground"
+              )}
+            >
+              <CalendarIcon className="mr-2 h-4 w-4" />
+              {form.expiration_date ? format(form.expiration_date, "MMMM d, yyyy") : "Pick a date"}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar mode="single" selected={form.expiration_date} onSelect={date => setForm(prev => ({ ...prev, expiration_date: date }))} initialFocus />
+          </PopoverContent>
+        </Popover>
+      </div>
+
+      <Button type="submit" disabled={submitting} className="w-full">
+        {submitting ? "Saving..." : "Save Changes"}
+      </Button>
+    </form>
   )
 }
 

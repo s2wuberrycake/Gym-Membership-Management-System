@@ -3,7 +3,13 @@ import { useParams, useNavigate } from "react-router-dom"
 import { fetchMemberById } from "@/lib/api/members"
 import { format } from "date-fns"
 import { Button } from "@/components/ui/button"
-import { Sheet } from "@/components/ui/sheet"
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription
+} from "@/components/ui/sheet"
 import { toast } from "sonner"
 import { CornerDownLeft } from "lucide-react"
 import EditMember from "@/components/members/EditMember"
@@ -85,13 +91,20 @@ const Member = () => {
       </div>
 
       <Sheet open={isEditOpen} onOpenChange={setIsEditOpen}>
-        <EditMember
-          member={member}
-          isSheetOpen={isEditOpen}
-          onClose={() => setIsEditOpen(false)}
-          refreshMember={loadMember}
-        />
-      </Sheet>
+  <SheetContent className="max-w-md w-full overflow-y-auto">
+    <SheetHeader>
+      <SheetTitle>Edit Member</SheetTitle>
+      <SheetDescription>Update member information below</SheetDescription>
+    </SheetHeader>
+    <EditMember
+      member={member}
+      isSheetOpen={isEditOpen}
+      onClose={() => setIsEditOpen(false)}
+      refreshMember={loadMember}
+    />
+  </SheetContent>
+</Sheet>
+
     </>
   )
 }
