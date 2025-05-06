@@ -1,10 +1,14 @@
 import express from "express"
-import { getCancelledMembers, restoreCancelledMember, getCancelledMemberById } from "../controllers/archiveController.js"
+import {
+  getCancelledMembersController,
+  restoreCancelledMemberController,
+  getCancelledMemberByIdController
+} from "../controllers/archiveController.js"
 
 const router = express.Router()
 
-router.get("/", getCancelledMembers)
-router.get("/:id", getCancelledMemberById)
-router.post("/restore/:id", restoreCancelledMember)
+router.get("/", getCancelledMembersController)
+router.get("/:id", getCancelledMemberByIdController)
+router.post("/restore/:id", restoreCancelledMemberController)
 
 export default router

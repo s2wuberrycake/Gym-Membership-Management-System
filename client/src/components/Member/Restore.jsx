@@ -14,13 +14,12 @@ import {
   SelectItem
 } from "@/components/ui/select"
 import { toast } from "sonner"
-import { fetchDurations } from "@/lib/api/members"
+import { getDurations } from "@/lib/api/members"
 import {
-  fetchCancelledMemberById,
-  restoreMemberById
+  getCancelledMemberById,
+  restoreCancelledMemberById
 } from "@/lib/api/archive"
 import { validateField } from "@/lib/helper/validate"
-import { calculateExtendedExpiration } from "@/lib/helper/date"
 
 const RestoreMember = ({ memberId, isSheetOpen, onClose, refreshMember }) => {
   const [member, setMember] = useState(null)
@@ -32,14 +31,14 @@ const RestoreMember = ({ memberId, isSheetOpen, onClose, refreshMember }) => {
 
   useEffect(() => {
     if (memberId && isSheetOpen) {
-      fetchCancelledMemberById(memberId)
+      getCancelledMemberById(memberId)
         .then(setMember)
         .catch(err => console.error("Failed to load member", err))
     }
   }, [memberId, isSheetOpen])
 
   useEffect(() => {
-    fetchDurations()
+    getDurations()
       .then(setDurations)
       .catch(err => console.error("Failed to load durations", err))
   }, [])
@@ -71,15 +70,7 @@ const RestoreMember = ({ memberId, isSheetOpen, onClose, refreshMember }) => {
     try {
       setSubmitting(true)
 
-      const selected = durations.find(d => d.extend_date_id == durationId)
-      const daysToAdd = selected ? selected.days : 0
-
-      const today = new Date()
-      today.setHours(0, 0, 0, 0)
-
-      const newExpiration = calculateExtendedExpiration(today, daysToAdd)
-
-      await restoreMemberById(memberId, newExpiration)
+      await restoreCancelledMemberById(memberId, durationId)
 
       toast.success("Member restored successfully")
       onClose()

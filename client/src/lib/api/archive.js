@@ -1,33 +1,32 @@
 import { ARCHIVE_API } from "."
 
-// Fetch all cancelled members
-export const fetchCancelledMembers = async () => {
-  const res = await fetch(ARCHIVE_API)
-  if (!res.ok) throw new Error("Failed to fetch cancelled members")
+const handleResponse = async res => {
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({}))
+    throw new Error(error.message || "An error occurred")
+  }
   return await res.json()
 }
 
-// Fetch a single cancelled member by ID
-export const fetchCancelledMemberById = async (id) => {
+// Get all cancelled members
+export const getAllCancelledMembers = async () => {
+  const res = await fetch(ARCHIVE_API)
+  return await handleResponse(res)
+}
+
+// Get single cancelled member by ID
+export const getCancelledMemberById = async id => {
   const res = await fetch(`${ARCHIVE_API}/${id}`)
-  if (!res.ok) throw new Error("Failed to fetch cancelled member")
-  return await res.json()
+  return await handleResponse(res)
 }
 
 // Restore a cancelled member by ID
-export const restoreMemberById = async (id, expiration_date) => {
+export const restoreCancelledMemberById = async (id, extend_date_id) => {
   const res = await fetch(`${ARCHIVE_API}/restore/${id}`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({ expiration_date })
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ extend_date_id }) // <-- Fix is here
   })
-
-  if (!res.ok) {
-    const error = await res.json()
-    throw new Error(error.error || "Failed to restore member")
-  }
-
-  return await res.json()
+  return await handleResponse(res)
 }
+

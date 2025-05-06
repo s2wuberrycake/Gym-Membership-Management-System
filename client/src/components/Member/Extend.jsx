@@ -15,9 +15,8 @@ import {
 } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
 import { toast } from "sonner"
-import { fetchDurations, extendMember, fetchMemberById } from "@/lib/api/members"
+import { getDurations, extendMember, getMemberById } from "@/lib/api/members"
 import { validateField } from "@/lib/helper/validate"
-import { calculateExtendedExpiration } from "@/lib/helper/date"
 
 const ExtendMember = ({ memberId, isSheetOpen, onClose, refreshMember }) => {
   const [member, setMember] = useState(null)
@@ -29,14 +28,14 @@ const ExtendMember = ({ memberId, isSheetOpen, onClose, refreshMember }) => {
 
   useEffect(() => {
     if (memberId && isSheetOpen) {
-      fetchMemberById(memberId)
+      getMemberById(memberId)
         .then(setMember)
         .catch(err => console.error("Failed to load member", err))
     }
   }, [memberId, isSheetOpen])
 
   useEffect(() => {
-    fetchDurations()
+    getDurations()
       .then(setDurations)
       .catch(err => console.error("Failed to load durations", err))
   }, [])
@@ -59,34 +58,18 @@ const ExtendMember = ({ memberId, isSheetOpen, onClose, refreshMember }) => {
 
   const handleSubmit = async e => {
     e.preventDefault()
-
+  
     if (!durationId) {
       setTouched(true)
       setError("Please select a duration")
       return
     }
-
+  
     try {
       setSubmitting(true)
-
-      const selected = durations.find(d => d.extend_date_id == durationId)
-      const daysToAdd = selected ? selected.days : 0
-
-      const member = await fetchMemberById(memberId)
-
-      const today = new Date()
-      today.setHours(0, 0, 0, 0)
-
-      const currentExp = new Date(member.expiration_date)
-      currentExp.setHours(0, 0, 0, 0)
-
-      const isExpired = currentExp < today
-
-      const newExpiration = calculateExtendedExpiration(member.expiration_date, daysToAdd)
-      const newStatus = isExpired ? "active" : member.status
-
-      await extendMember(memberId, newExpiration, newStatus)
-
+  
+      await extendMember(memberId, durationId)
+  
       toast.success("Membership extended")
       onClose()
       if (refreshMember) refreshMember()
@@ -97,7 +80,7 @@ const ExtendMember = ({ memberId, isSheetOpen, onClose, refreshMember }) => {
       setSubmitting(false)
     }
   }
-
+  
   return (
     <SheetContent className="overflow-y-auto">
       <SheetHeader>

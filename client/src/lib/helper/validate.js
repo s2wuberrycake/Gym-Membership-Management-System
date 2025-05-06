@@ -1,3 +1,5 @@
+import { DateTime } from "luxon"
+
 export function validateMemberForm(form) {
   const errors = {}
   let isValid = true
@@ -39,38 +41,40 @@ export function validateEditMemberForm(form, originalJoinDate) {
     isValid = false
   }
 
-  const normalizeDate = d => {
-    const date = new Date(d)
-    date.setHours(0, 0, 0, 0)
-    return date
-  }
+  const normalizeDate = d =>
+    d ? DateTime.fromJSDate(d).setZone("Asia/Manila").startOf("day") : null
 
-  const joinDate = form.recent_join_date ? normalizeDate(form.recent_join_date) : null
-  const expDate = form.expiration_date ? normalizeDate(form.expiration_date) : null
-  const originalDate = originalJoinDate ? normalizeDate(originalJoinDate) : null
+  const joinDate = normalizeDate(form.recent_join_date)
+  const expDate = normalizeDate(form.expiration_date)
+  const originalDate = normalizeDate(originalJoinDate)
+
+  const validationMessages = []
 
   if (joinDate && expDate) {
-    const diffInDays = (expDate - joinDate) / (1000 * 60 * 60 * 24)
+    const diffInDays = expDate.diff(joinDate, "days").days
 
     if (diffInDays < 28) {
-      errors.expiration_date = "Expiration date must be at least 28 days after join date"
+      validationMessages.push("Expiration date must be at least 28 days after join date")
       isValid = false
     }
 
     if (joinDate > expDate) {
-      errors.expiration_date = "Expiration date must be after join date"
+      validationMessages.push("Expiration date must be after join date")
       isValid = false
     }
   }
 
   if (joinDate && originalDate && joinDate < originalDate) {
-    errors.recent_join_date = "Recent join date cannot be earlier than original join date"
+    validationMessages.push("Recent join date cannot be earlier than original join date")
     isValid = false
+  }
+
+  if (validationMessages.length > 0) {
+    errors.expirationValidation = validationMessages.join("\n")
   }
 
   return { errors, isValid }
 }
-
 
 export function validateField(name, value) {
   switch (name) {

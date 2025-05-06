@@ -4,33 +4,28 @@ import axios from "axios"
 import { AUTH_HOME_API } from "@/lib/api"
 
 const RequireAuth = ({ children }) => {
-  const [loading, setLoading] = useState(true)
+  const [authorized, setAuthorized] = useState(false)
   const navigate = useNavigate()
 
   useEffect(() => {
-    const validateToken = async () => {
+    const checkAuth = async () => {
       const token = localStorage.getItem("token")
-      if (!token) {
-        navigate("/login")
-        return
-      }
+      if (!token) return navigate("/login")
 
       try {
-        const res = await axios.get(AUTH_HOME_API, {
+        await axios.get(AUTH_HOME_API, {
           headers: { Authorization: `Bearer ${token}` }
         })
-        if (res.status !== 200) throw new Error()
+        setAuthorized(true)
       } catch {
         navigate("/login")
-      } finally {
-        setLoading(false)
       }
     }
 
-    validateToken()
+    checkAuth()
   }, [navigate])
 
-  if (loading) return null
+  if (!authorized) return null
   return children
 }
 

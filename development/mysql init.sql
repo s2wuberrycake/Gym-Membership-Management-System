@@ -32,7 +32,8 @@ CREATE TABLE members (
     email VARCHAR(255),
     contact_number VARCHAR(20),
     address TEXT,
-    join_date DATE,
+	original_join_date DATE,
+    recent_join_date DATE,
     expiration_date DATE,
     status_id INT,
     FOREIGN KEY (status_id) REFERENCES status_types(status_id)
@@ -42,14 +43,14 @@ CREATE TABLE cancelled_members (
     member_id CHAR(36) PRIMARY KEY,
     first_name VARCHAR(100),
     last_name VARCHAR(100),
+    email VARCHAR(255),
     contact_number VARCHAR(20),
     address TEXT,
-    join_date DATE,
+	original_join_date DATE,
     cancel_date DATE,
     status_id INT DEFAULT 3,
     FOREIGN KEY (status_id) REFERENCES status_types(status_id)
 );
--- Note: cancel_date to be filled via backend (CURRENT_DATE)
 
 CREATE TABLE extend_date (
     extend_date_id INT PRIMARY KEY,
@@ -59,10 +60,10 @@ CREATE TABLE extend_date (
 
 INSERT INTO extend_date (extend_date_id, days, date_label) VALUES
 (1, 0, 'None'),
-(2, 28, '1 Month'),
-(3, 84, '3 Months'),
-(4, 168, '6 Months'),
-(5, 336, '12 Months');
+(2, 30, '1 Month'),
+(3, 90, '3 Months'),
+(4, 180, '6 Months'),
+(5, 360, '12 Months');
 
 CREATE TABLE status_types (
     status_id INT PRIMARY KEY,

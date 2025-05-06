@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
+import { getAllMembers } from "@/lib/api/members"
+
+import { ListRestart } from "lucide-react"
+
 import DataTable from "@/components/ui/data-table"
 import { membersColumns } from "@/components/table/MembersColumn"
+import TableSearch from "@/components/ui/table-search"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetTrigger } from "@/components/ui/sheet"
-import AddMember from "@/components/members/AddMember"
-import TableSearch from "@/components/ui/table-search"
 import { toast } from "sonner"
-import { MEMBERS_API } from "@/lib/api"
-import { ListRestart } from "lucide-react"
+import AddMember from "@/components/Member/Add"
 
 const statusLabel = {
   all: "All Status",
@@ -45,7 +47,6 @@ export default function Members() {
 
   const [isAddOpen, setIsAddOpen] = useState(false)
 
-  // Persist changes
   useEffect(() => {
     localStorage.setItem("membersGlobalFilter", globalFilter)
   }, [globalFilter])
@@ -58,14 +59,14 @@ export default function Members() {
     localStorage.setItem("membersStatusFilter", statusFilter)
   }, [statusFilter])
 
-  const fetchMembers = () => {
-    fetch(MEMBERS_API)
-      .then(res => res.json())
-      .then(setData)
-      .catch(err => {
-        console.error("Error fetching members:", err)
-        toast.error("Failed to load members")
-      })
+  const fetchMembers = async () => {
+    try {
+      const members = await getAllMembers()
+      setData(members)
+    } catch (err) {
+      console.error("Error fetching members:", err)
+      toast.error("Failed to load members")
+    }
   }
 
   useEffect(() => {

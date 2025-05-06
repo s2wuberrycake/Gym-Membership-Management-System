@@ -1,7 +1,7 @@
 import express from "express"
 import cors from "cors"
 import dotenv from "dotenv"
-import authRouter from "./routes/authRoutes.js"
+import authRouter from "./routes/authorizeRoutes.js"
 import membersRouter from "./routes/membersRoutes.js"
 import archiveRouter from "./routes/archiveRoutes.js"
 import { errorHandler } from "./middleware/errorMiddleware.js"

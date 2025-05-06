@@ -1,20 +1,21 @@
 import React, { useEffect, useState } from "react"
+import { getAllCancelledMembers } from "@/lib/api/archive"
+
+import { ListRestart } from "lucide-react"
+
 import DataTable from "@/components/ui/data-table"
 import { archiveColumns } from "@/components/table/ArchiveColumn"
 import TableSearch from "@/components/ui/table-search"
-import { ListRestart } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
-import { ARCHIVE_API } from "@/lib/api"
-import RestoreMember from "@/components/members/RestoreMember"
 import { Sheet } from "@/components/ui/sheet"
+import RestoreMember from "@/components/Member/Restore"
 
 export default function Archive() {
   const [data, setData] = useState([])
   const [globalFilter, setGlobalFilter] = useState(() => {
     return localStorage.getItem("archiveGlobalFilter") || ""
   })
-
   const [visibleColumns, setVisibleColumns] = useState(() => {
     const saved = localStorage.getItem("archiveVisibleColumns")
     return saved
@@ -23,7 +24,6 @@ export default function Archive() {
   })
 
   const [tableRef, setTableRef] = useState(null)
-
   const [isRestoreOpen, setIsRestoreOpen] = useState(false)
   const [selectedMemberId, setSelectedMemberId] = useState(null)
 
@@ -35,18 +35,18 @@ export default function Archive() {
     localStorage.setItem("archiveVisibleColumns", JSON.stringify(visibleColumns))
   }, [visibleColumns])
 
-  const fetchCancelledMembers = () => {
-    fetch(ARCHIVE_API)
-      .then(res => res.json())
-      .then(setData)
-      .catch(err => {
-        console.error("Error fetching cancelled members:", err)
-        toast.error("Failed to load cancelled members")
-      })
+  const fetchData = async () => {
+    try {
+      const cancelledMembers = await getAllCancelledMembers()
+      setData(cancelledMembers)
+    } catch (err) {
+      console.error("Error loading cancelled members:", err)
+      toast.error(err.message || "Failed to load cancelled members")
+    }
   }
 
   useEffect(() => {
-    fetchCancelledMembers()
+    fetchData()
   }, [])
 
   const toggleColumn = column => {
@@ -143,7 +143,7 @@ export default function Archive() {
             setIsRestoreOpen(false)
             setSelectedMemberId(null)
           }}
-          refreshMember={fetchCancelledMembers}
+          refreshMember={fetchData}
         />
       </Sheet>
     </div>

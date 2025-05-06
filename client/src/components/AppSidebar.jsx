@@ -2,7 +2,6 @@ import { useCallback, useEffect, useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { jwtDecode } from "jwt-decode"
 import axios from "axios"
-import { hasRole } from "@/lib/helper/hasRole"
 import { LOGOUT_API } from "@/lib/api"
 
 import {
@@ -25,6 +24,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger
 } from "./ui/dropdown-menu"
+
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger
+} from "@/components/ui/tooltip"
 
 import {
   BookUser,
@@ -65,20 +71,36 @@ const RenderMenuGroup = ({ label, items, role }) => (
     <SidebarGroupContent>
       <SidebarMenu>
         {items.map(item => {
-          const isAllowed = !item.roles || hasRole(role, item.roles)
+          const isRestricted = item.roles && !item.roles.includes(role)
+
+          const menuButton = (
+            <SidebarMenuButton
+              asChild
+              className={isRestricted ? "pointer-events-none opacity-50" : ""}
+            >
+              <Link to={item.url}>
+                <item.icon />
+                <span>{item.title}</span>
+              </Link>
+            </SidebarMenuButton>
+          )
 
           return (
             <SidebarMenuItem key={item.title}>
-              <SidebarMenuButton
-                asChild
-                disabled={!isAllowed}
-                className={!isAllowed ? "pointer-events-none opacity-50" : ""}
-              >
-                <Link to={isAllowed ? item.url : "#"}>
-                  <item.icon />
-                  <span>{item.title}</span>
-                </Link>
-              </SidebarMenuButton>
+              {isRestricted ? (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div>{menuButton}</div>
+                    </TooltipTrigger>
+                    <TooltipContent side="right" className="h-9 flex items-center text-sm">
+                      Admin only
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              ) : (
+                menuButton
+              )}
             </SidebarMenuItem>
           )
         })}

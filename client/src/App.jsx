@@ -1,5 +1,7 @@
 import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom"
 import Cookies from "js-cookie"
+import { useEffect, useState } from "react"
+import axios from "axios"
 
 import Navbar from "./components/Navbar"
 import AppSidebar from "./components/AppSidebar"
@@ -15,11 +17,11 @@ import Backup from "./pages/Backup"
 import Login from "./pages/Login"
 import Member from "./pages/Member"
 
-import RequireAuth from "./auth/RequireAuth"
-import RoleProtectedRoute from "./auth/RoleProtectedRoute"
+import RequireRole from "./auth/RequireRole"
 
 function Layout() {
   const defaultOpen = Cookies.get("sidebar_state") === "true"
+
   return (
     <div className="flex">
       <Toaster position="bottom-right" />
@@ -40,21 +42,30 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route element={<RequireAuth><Layout /></RequireAuth>}>
+        <Route element={<Layout />}>
           <Route path="/" element={<Home />} />
-
           <Route path="members">
             <Route index element={<Members />} />
             <Route path=":id" element={<Member />} />
           </Route>
-
           <Route path="archive" element={<Archive />} />
           <Route path="visits" element={<Visits />} />
-
-          <Route element={<RoleProtectedRoute allowedRoles={["admin"]} />}>
-            <Route path="accounts" element={<Accounts />} />
-            <Route path="backup" element={<Backup />} />
-          </Route>
+          <Route
+            path="accounts"
+            element={
+              <RequireRole allowedRoles={["admin"]}>
+                <Accounts />
+              </RequireRole>
+            }
+          />
+          <Route
+            path="backup"
+            element={
+              <RequireRole allowedRoles={["admin"]}>
+                <Backup />
+              </RequireRole>
+            }
+          />
         </Route>
 
         <Route path="/login" element={<Login />} />

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react"
 import { updateMemberById } from "@/lib/api/members"
+import { jwtDecode } from "jwt-decode"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import {
@@ -8,14 +9,21 @@ import {
   SheetHeader,
   SheetTitle
 } from "@/components/ui/sheet"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger
+} from "@/components/ui/tooltip"
+
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { format } from "date-fns"
 import { CalendarIcon } from "lucide-react"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
 import { cn } from "@/lib/utils"
 import { validateField, validateEditMemberForm } from "@/lib/helper/validate"
+import { DateTime } from "luxon"
 
 const EditMember = ({ member, isSheetOpen, onClose, refreshMember }) => {
   const [form, setForm] = useState({
@@ -25,13 +33,15 @@ const EditMember = ({ member, isSheetOpen, onClose, refreshMember }) => {
     contact_number: "",
     address: "",
     recent_join_date: null,
-    expiration_date: null,
-    status_id: 1
+    expiration_date: null
   })
 
   const [errors, setErrors] = useState({})
   const [touched, setTouched] = useState({})
   const [submitting, setSubmitting] = useState(false)
+  const token = localStorage.getItem("token")
+  const role = token ? jwtDecode(token)?.role : null
+  const isAdmin = role === "admin"
 
   useEffect(() => {
     if (member) {
@@ -41,9 +51,12 @@ const EditMember = ({ member, isSheetOpen, onClose, refreshMember }) => {
         email: member.email || "",
         contact_number: member.contact_number || "",
         address: member.address || "",
-        recent_join_date: member.recent_join_date ? new Date(member.recent_join_date) : null,
-        expiration_date: member.expiration_date ? new Date(member.expiration_date) : null,
-        status_id: member.status_id || 1
+        recent_join_date: member.recent_join_date
+          ? new Date(member.recent_join_date)
+          : null,
+        expiration_date: member.expiration_date
+          ? new Date(member.expiration_date)
+          : null
       })
       setErrors({})
       setTouched({})
@@ -63,7 +76,7 @@ const EditMember = ({ member, isSheetOpen, onClose, refreshMember }) => {
 
   const handleSubmit = async e => {
     e.preventDefault()
-  
+
     const { errors: newErrors, isValid } = validateEditMemberForm(form, member.original_join_date)
     setErrors(newErrors)
     setTouched({
@@ -73,35 +86,22 @@ const EditMember = ({ member, isSheetOpen, onClose, refreshMember }) => {
       contact_number: true,
       address: true
     })
-  
+
     if (!isValid) {
       console.log("Form is not valid", newErrors)
       return
     }
-  
-    const now = new Date()
-    now.setHours(0, 0, 0, 0)
-  
-    let updatedStatusId = parseInt(form.status_id)
-  
-    if (form.expiration_date) {
-      const expDate = new Date(form.expiration_date)
-      expDate.setHours(0, 0, 0, 0)
-  
-      if (expDate <= now) {
-        updatedStatusId = 2 // Expired
-      } else if (expDate > now) {
-        updatedStatusId = 1 // Active
-      }
-    }
-  
+
     const payload = {
       ...form,
-      recent_join_date: form.recent_join_date ? format(form.recent_join_date, "yyyy-MM-dd") : null,
-      expiration_date: form.expiration_date ? format(form.expiration_date, "yyyy-MM-dd") : null,
-      status_id: updatedStatusId
+      recent_join_date: form.recent_join_date
+        ? DateTime.fromJSDate(form.recent_join_date).setZone("Asia/Manila").toFormat("yyyy-MM-dd")
+        : null,
+      expiration_date: form.expiration_date
+        ? DateTime.fromJSDate(form.expiration_date).setZone("Asia/Manila").toFormat("yyyy-MM-dd")
+        : null
     }
-  
+
     try {
       setSubmitting(true)
       await updateMemberById(member.id, payload)
@@ -114,7 +114,7 @@ const EditMember = ({ member, isSheetOpen, onClose, refreshMember }) => {
     } finally {
       setSubmitting(false)
     }
-  }  
+  }
 
   return (
     <SheetContent className="overflow-y-auto">
@@ -193,63 +193,89 @@ const EditMember = ({ member, isSheetOpen, onClose, refreshMember }) => {
 
               <div>
                 <Label className="pb-0.5">Recent Join Date</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-full justify-start text-left font-normal",
-                        !form.recent_join_date && "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {form.recent_join_date
-                        ? format(form.recent_join_date, "MMMM d, yyyy")
-                        : "Pick a date"}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={form.recent_join_date}
-                      onSelect={date => setForm(prev => ({ ...prev, recent_join_date: date }))}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="w-full">
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              className={cn(
+                                "w-full justify-start text-left font-normal",
+                                !form.recent_join_date && "text-muted-foreground"
+                              )}
+                              disabled={!isAdmin}
+                            >
+                              <CalendarIcon className="mr-2 h-4 w-4" />
+                              {form.recent_join_date
+                                ? DateTime.fromJSDate(form.recent_join_date).toFormat("MMMM d, yyyy")
+                                : "Pick a date"}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                              mode="single"
+                              selected={form.recent_join_date}
+                              onSelect={date =>
+                                isAdmin && setForm(prev => ({ ...prev, recent_join_date: date }))
+                              }
+                              initialFocus
+                            />
+                          </PopoverContent>
+                        </Popover>
+                      </div>
+                    </TooltipTrigger>
+                    {!isAdmin && <TooltipContent side="left" sideOffset={-10}
+                    className="h-9 flex items-center text-sm">Admin only</TooltipContent>}
+                  </Tooltip>
+                </TooltipProvider>
               </div>
 
               <div>
                 <Label className="pb-0.5">Expiration Date</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-full justify-start text-left font-normal",
-                        !form.expiration_date && "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {form.expiration_date
-                        ? format(form.expiration_date, "MMMM d, yyyy")
-                        : "Pick a date"}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={form.expiration_date}
-                      onSelect={date => setForm(prev => ({ ...prev, expiration_date: date }))}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-                {errors.expiration_date && (
-                  <p className="text-red-500 text-sm mt-1">{errors.expiration_date}</p>
-                )}
-                                {errors.recent_join_date && (
-                  <p className="text-red-500 text-sm mt-1">{errors.recent_join_date}</p>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="w-full">
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              className={cn(
+                                "w-full justify-start text-left font-normal",
+                                !form.expiration_date && "text-muted-foreground"
+                              )}
+                              disabled={!isAdmin}
+                            >
+                              <CalendarIcon className="mr-2 h-4 w-4" />
+                              {form.expiration_date
+                                ? DateTime.fromJSDate(form.expiration_date).toFormat("MMMM d, yyyy")
+                                : "Pick a date"}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                              mode="single"
+                              selected={form.expiration_date}
+                              onSelect={date =>
+                                isAdmin && setForm(prev => ({ ...prev, expiration_date: date }))
+                              }
+                              initialFocus
+                            />
+                          </PopoverContent>
+                        </Popover>
+                      </div>
+                    </TooltipTrigger>
+                    {!isAdmin && <TooltipContent side="left" sideOffset={-10}
+                    className="h-9 flex items-center text-sm">Admin only</TooltipContent>}
+                  </Tooltip>
+                </TooltipProvider>
+
+                {errors.expirationValidation && (
+                  <p className="text-red-500 text-sm mt-1 whitespace-pre-line">
+                    {errors.expirationValidation}
+                  </p>
                 )}
               </div>
 

@@ -1,4 +1,4 @@
-import { authenticateUser, getUserById } from "../services/authService.js"
+import { authenticateUser, getUserById } from "../services/authorizeService.js"
 import { generateToken } from "../utils/jwt.js"
 
 export const loginUser = async (req, res, next) => {
@@ -29,7 +29,7 @@ export const getHome = async (req, res, next) => {
       throw error
     }
 
-    res.status(200).json({ user: req.user })
+    res.status(200).json({ user: { id: user.account_id, username: user.username, role: req.user.role } })
   } catch (err) {
     next(err)
   }

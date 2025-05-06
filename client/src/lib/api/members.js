@@ -1,6 +1,4 @@
 import { MEMBERS_API, DURATIONS_API } from "."
-
-// Helper to handle API response with error message fallback
 const handleResponse = async res => {
   if (!res.ok) {
     const error = await res.json().catch(() => ({}))
@@ -9,17 +7,17 @@ const handleResponse = async res => {
   return await res.json()
 }
 
-export async function fetchDurations() {
+export const getDurations = async () => {
   const res = await fetch(DURATIONS_API)
   return await handleResponse(res)
 }
 
-export async function fetchMembers() {
+export const getAllMembers = async () => {
   const res = await fetch(MEMBERS_API)
   return await handleResponse(res)
 }
 
-export async function addMember(payload) {
+export const addMember = async payload => {
   const res = await fetch(MEMBERS_API, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -28,7 +26,7 @@ export async function addMember(payload) {
   return await handleResponse(res)
 }
 
-export const fetchMemberById = async memberId => {
+export const getMemberById = async memberId => {
   const res = await fetch(`${MEMBERS_API}/${memberId}`)
   return await handleResponse(res)
 }
@@ -42,11 +40,11 @@ export const updateMemberById = async (memberId, payload) => {
   return await handleResponse(res)
 }
 
-export const extendMember = async (id, expiration_date, status) => {
+export const extendMember = async (id, extend_date_id) => {
   const res = await fetch(`${MEMBERS_API}/${id}/extend`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ expiration_date, status })
+    body: JSON.stringify({ extend_date_id })
   })
   return await handleResponse(res)
 }
@@ -60,7 +58,7 @@ export const cancelMemberById = async (id, cancel_date) => {
   return await handleResponse(res)
 }
 
-export const restoreMember = async (id, expiration_date) => {
+export const restoreMemberById = async (id, expiration_date) => {
   const res = await fetch(`${MEMBERS_API}/${id}/restore`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },

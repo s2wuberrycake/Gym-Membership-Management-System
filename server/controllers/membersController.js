@@ -1,35 +1,35 @@
 import {
-  fetchDurations,
-  fetchMembers,
-  fetchMemberById,
+  getDurations,
+  getMembers,
+  getMemberById,
   insertMember,
-  editMember,
-  updateMemberExpiration,
+  updateMember,
+  extendMember,
   cancelMember
 } from "../services/membersService.js"
 
-export const getDurations = async (req, res, next) => {
+export const getDurationsController = async (req, res, next) => {
   try {
-    const durations = await fetchDurations()
+    const durations = await getDurations()
     res.json(durations)
   } catch (err) {
     next(err)
   }
 }
 
-export const getAllMembers = async (req, res, next) => {
+export const getAllMembersController = async (req, res, next) => {
   try {
-    const members = await fetchMembers()
+    const members = await getMembers()
     res.json(members)
   } catch (err) {
     next(err)
   }
 }
 
-export const getMemberById = async (req, res, next) => {
+export const getMemberByIdController = async (req, res, next) => {
   try {
     const { id } = req.params
-    const member = await fetchMemberById(id)
+    const member = await getMemberById(id)
 
     if (!member) {
       return res.status(404).json({ success: false, message: "Member not found" })
@@ -41,23 +41,21 @@ export const getMemberById = async (req, res, next) => {
   }
 }
 
-export const createMember = async (req, res, next) => {
+export const createMemberController = async (req, res, next) => {
   try {
     console.log("DEBUG >> Incoming member payload:", req.body)
-
     await insertMember(req.body)
 
-    console.log("DEBUG >> Member inserted")
     res.json({ success: true, message: "Member added" })
   } catch (err) {
     next(err)
   }
 }
 
-export const updateMember = async (req, res, next) => {
+export const updateMemberController = async (req, res, next) => {
   try {
     const { id } = req.params
-    await editMember(id, req.body)
+    await updateMember(id, req.body)
 
     res.json({ success: true })
   } catch (err) {
@@ -65,31 +63,31 @@ export const updateMember = async (req, res, next) => {
   }
 }
 
-export const extendMembership = async (req, res, next) => {
+export const extendMembershipController = async (req, res, next) => {
   try {
     const { id } = req.params
-    const { expiration_date, status } = req.body
+    const { extend_date_id } = req.body
 
-    if (!expiration_date || !status) {
+    if (!extend_date_id) {
       return res.status(400).json({
         success: false,
-        message: "Expiration date and status are required"
+        message: "extend_date_id is required to extend membership"
       })
     }
 
-    await updateMemberExpiration(id, expiration_date, status)
+    const result = await extendMember(id, extend_date_id)
 
     res.json({
       success: true,
       message: "Membership extended",
-      data: { expiration_date, status }
+      data: result
     })
   } catch (err) {
     next(err)
   }
 }
 
-export const cancelMemberById = async (req, res, next) => {
+export const cancelMemberController = async (req, res, next) => {
   try {
     const { id } = req.params
 

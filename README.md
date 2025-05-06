@@ -17,8 +17,6 @@ Locally hosted webapp for managing memberships
 
 - Members
   - Table
-    - Edit members info (apply ability to edit join and expiry date but only for admin role)
-    - Cancel members
     - Automatic flagging of expired members
   - Add profile-picture column and storing function
   - Data Culling
@@ -28,12 +26,14 @@ Locally hosted webapp for managing memberships
   - RFID scanning function
   - Visit log
 
-- Accounts
-  - Owner and Staff Authorization levels
+- Accounts (Admin only)
+ - Accounts management (create, delete, edit accounts)
 
-- Backup
+- Account View
+ - Edit own account
+
+- Backup (Admin only)
   - Separate database
   - Restore function
   - Decide on file type (CSV?)
 
-- General changes
