@@ -127,9 +127,10 @@ const AppSidebar = () => {
     } catch {
       console.log("Server logout skipped or failed.")
     }
-
+  
+    localStorage.setItem("logout", Date.now())
     localStorage.removeItem("token")
-    navigate("/login")
+    navigate("/login")    
   }, [navigate])
 
   useEffect(() => {
