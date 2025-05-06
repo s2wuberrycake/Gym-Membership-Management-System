@@ -27,6 +27,7 @@ const Login = () => {
             headers: { Authorization: `Bearer ${token}` },
           })
           if (response.status === 200) {
+              localStorage.setItem("login", Date.now())  // <--- add this line
             navigate("/")
           }
         } catch (err) {

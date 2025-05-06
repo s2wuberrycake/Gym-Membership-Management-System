@@ -39,23 +39,28 @@ function App() {
   const navigate = useNavigate()
 
   useEffect(() => {
-    const handleStorage = (e) => {
-      if (e.key === "logout") {
-        localStorage.removeItem("token")
-        navigate("/login")
-      }
-
-      if (e.key === "login") {
+    const handleStorageChange = (event) => {
+      if (event.key === "token") {
+        // Optionally trigger a reload or redirect
         window.location.reload()
       }
     }
 
+    const handleStorage = (e) => {
+      if (e.key === "logout") {
+        navigate("/login")
+      }
+    }
+    
     window.addEventListener("storage", handleStorage)
-
+    window.addEventListener("storage", handleStorageChange)
+  
     return () => {
       window.removeEventListener("storage", handleStorage)
+      window.removeEventListener("storage", handleStorageChange)
     }
   }, [navigate])
+  
 
   return (
     <Routes>
