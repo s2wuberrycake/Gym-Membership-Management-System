@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom"
 import axios from "axios"
 import { Toaster, toast } from "sonner"
 
-import bgImage from "../assets/bgtest.jpg"
+import bgLogin from "../assets/bglogin.png"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import {
@@ -27,7 +27,7 @@ const Login = () => {
             headers: { Authorization: `Bearer ${token}` },
           })
           if (response.status === 200) {
-              localStorage.setItem("login", Date.now())  // <--- add this line
+              localStorage.setItem("login", Date.now())
             navigate("/")
           }
         } catch (err) {
@@ -70,7 +70,7 @@ const Login = () => {
 
   return (
     <div
-      className="min-h-screen bg-cover bg-center bg-no-repeat relative" style={{ backgroundImage: `url(${bgImage})` }}>
+      className="min-h-screen bg-cover bg-center bg-no-repeat relative" style={{ backgroundImage: `url(${bgLogin})` }}>
       <div className=""></div>
       <Toaster />
       <div className="relative z-10 flex items-center justify-center min-h-screen">

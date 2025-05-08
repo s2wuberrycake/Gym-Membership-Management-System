@@ -4,6 +4,7 @@ import dotenv from "dotenv"
 import authRouter from "./routes/authorizeRoutes.js"
 import membersRouter from "./routes/membersRoutes.js"
 import archiveRouter from "./routes/archiveRoutes.js"
+import accountsRouter from "./routes/accountsRoutes.js"
 import { errorHandler } from "./middleware/errorMiddleware.js"
 
 dotenv.config()
@@ -15,6 +16,7 @@ app.use(express.json())
 app.use("/auth", authRouter)
 app.use("/api/members", membersRouter)
 app.use("/api/archive", archiveRouter)
+app.use("/api/accounts", accountsRouter)
 
 app.use(errorHandler)
 

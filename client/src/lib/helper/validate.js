@@ -76,6 +76,22 @@ export function validateEditMemberForm(form, originalJoinDate) {
   return { errors, isValid }
 }
 
+export function validateAccountForm(form) {
+  const errors = {}
+  let isValid = true
+
+  const fieldNames = ["username", "password", "roleId"]
+  for (const field of fieldNames) {
+    const error = validateField(field, form[field])
+    if (error) {
+      errors[field] = error
+      isValid = false
+    }
+  }
+
+  return { errors, isValid }
+}
+
 export function validateField(name, value) {
   switch (name) {
     case "first_name":
@@ -102,9 +118,34 @@ export function validateField(name, value) {
       if (!value) return "Please select a membership duration"
       break
 
+    case "username":
+      if (!value.trim()) return "Username is required"
+      if (value.length < 8) return "Username must be at least 8 characters"
+      break
+
+    case "password":
+      if (!value.trim()) return "Password is required"
+      if (value.length < 8) return "Password must be at least 8 characters"
+      break
+
+    case "roleId":
+      if (!value) return "Please select a role"
+      break
+
     default:
       return null
   }
 
   return null
+}
+
+export async function checkUsernameExists(username) {
+  try {
+    const response = await fetch(`/api/accounts/check-username?username=${encodeURIComponent(username)}`)
+    const data = await response.json()
+    return data.exists
+  } catch (error) {
+    console.error("Failed to check username:", error)
+    return false
+  }
 }

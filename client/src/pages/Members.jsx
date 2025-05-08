@@ -172,7 +172,11 @@ export default function Members() {
           <SheetTrigger asChild>
             <Button className="ml-auto">Add Member</Button>
           </SheetTrigger>
-          <AddMember refreshMembers={fetchMembers} isSheetOpen={isAddOpen} />
+          <AddMember
+            refreshMembers={fetchMembers}
+            isSheetOpen={isAddOpen}
+            onClose={() => setIsAddOpen(false)}
+          />
         </Sheet>
       </div>
 

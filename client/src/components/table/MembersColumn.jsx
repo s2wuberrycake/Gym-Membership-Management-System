@@ -7,7 +7,7 @@ import { FolderOpen } from "lucide-react"
 const columnHelper = createColumnHelper()
 
 const truncate = (text, maxLength = 25) => {
-  if (!text) return "" // handles null, undefined, empty string
+  if (!text) return ""
   return text.length > maxLength ? text.slice(0, maxLength) + "..." : text
 }
 
@@ -89,5 +89,5 @@ export const membersColumns = (navigate, visibleColumns = {}) => {
     })
   ]
 
-  return columns.filter(Boolean) // Remove false values
+  return columns.filter(Boolean)
 }

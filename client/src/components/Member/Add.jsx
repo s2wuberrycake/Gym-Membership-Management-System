@@ -19,7 +19,7 @@ import { toast } from "sonner"
 import { getDurations, addMember } from "@/lib/api/members"
 import { validateMemberForm, validateField } from "@/lib/helper/validate"
 
-const AddMember = ({ refreshMembers, isSheetOpen }) => {
+const AddMember = ({ refreshMembers, isSheetOpen, onClose }) => {
   const [form, setForm] = useState({
     first_name: "",
     last_name: "",
@@ -33,6 +33,7 @@ const AddMember = ({ refreshMembers, isSheetOpen }) => {
   const [touched, setTouched] = useState({})
   const [durations, setDurations] = useState([])
   const [submitting, setSubmitting] = useState(false)
+  
 
   useEffect(() => {
     getDurations()
@@ -105,6 +106,8 @@ const AddMember = ({ refreshMembers, isSheetOpen }) => {
       toast.success("Member added!")
       if (refreshMembers) refreshMembers()
 
+        onClose()
+      
       setForm({
         first_name: "",
         last_name: "",

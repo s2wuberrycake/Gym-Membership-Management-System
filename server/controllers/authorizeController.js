@@ -1,10 +1,10 @@
-import { authenticateUser, getUserById } from "../services/authorizeService.js"
+import { authenticateAccount, getUserById } from "../services/authorizeService.js"
 import { generateToken } from "../utils/jwt.js"
 
-export const loginUser = async (req, res, next) => {
+export const loginUserController = async (req, res, next) => {
   try {
     const { username, password } = req.body
-    const user = await authenticateUser(username, password)
+    const user = await authenticateAccount(username, password)
 
     if (!user) {
       const error = new Error("Invalid credentials")
@@ -19,7 +19,7 @@ export const loginUser = async (req, res, next) => {
   }
 }
 
-export const getHome = async (req, res, next) => {
+export const getHomeController = async (req, res, next) => {
   try {
     const user = await getUserById(req.user.id)
 

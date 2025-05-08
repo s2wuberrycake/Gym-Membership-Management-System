@@ -155,6 +155,7 @@ export const updateMember = async (id, data) => {
   )
 }
 
+// cancel and move a member to cancelled members table
 export const cancelMember = async (id) => {
   const connection = await defaultDb.getConnection()
   try {
@@ -215,6 +216,7 @@ export const getMembers = async () => {
       st.status_label AS status
     FROM members m
     LEFT JOIN status_types st ON m.status_id = st.status_id
+    ORDER BY m.recent_join_date DESC, m.last_name ASC
   `)
   return rows
 }
@@ -257,6 +259,7 @@ export const getCancelledMembers = async () => {
       st.status_label AS status
     FROM cancelled_members cm
     LEFT JOIN status_types st ON cm.status_id = st.status_id
+    ORDER BY cm.cancel_date DESC, cm.last_name ASC
   `)
   return rows
 }
