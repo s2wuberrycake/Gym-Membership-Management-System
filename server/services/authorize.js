@@ -1,4 +1,4 @@
-import { defaultDb } from "../config/dbConfig.js"
+import { defaultDb } from "../config/db.js"
 import bcrypt from "bcrypt"
 
 // Authenticate account by username and password

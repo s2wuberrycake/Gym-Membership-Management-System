@@ -1,4 +1,4 @@
-import { authenticateAccount, getUserById } from "../services/authorizeService.js"
+import { authenticateAccount, getUserById } from "../services/authorize.js"
 import { generateToken } from "../utils/jwt.js"
 
 export const loginUserController = async (req, res, next) => {

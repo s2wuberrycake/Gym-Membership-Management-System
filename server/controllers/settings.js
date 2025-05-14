@@ -6,7 +6,7 @@ import {
   removeAccount,
   checkUsernameExists,
   getRoles
-} from "../services/authorizeService.js"
+} from "../services/authorize.js"
 
 export const getAllAccountsController = async (req, res, next) => {
   try {

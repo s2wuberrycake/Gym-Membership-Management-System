@@ -7,7 +7,7 @@ import {
   getMemberByIdController,
   extendMembershipController,
   cancelMemberController
-} from "../controllers/membersController.js"
+} from "../controllers/members.js"
 
 const router = express.Router()
 

@@ -3,7 +3,7 @@ import {
   getCancelledMembersController,
   restoreCancelledMemberController,
   getCancelledMemberByIdController
-} from "../controllers/archiveController.js"
+} from "../controllers/archive.js"
 
 const router = express.Router()
 

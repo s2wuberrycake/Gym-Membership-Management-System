@@ -1,4 +1,4 @@
-import { defaultDb } from "../config/dbConfig.js"
+import { defaultDb } from "../config/db.js"
 import { DateTime } from "luxon"
 
 const TIMEZONE = "Asia/Manila"
@@ -12,6 +12,7 @@ const getDaysToAdd = async (extend_date_id) => {
   return rows[0].days
 }
 
+// Insert new member
 export const insertMember = async (data) => {
   const {
     first_name,
@@ -48,6 +49,7 @@ export const insertMember = async (data) => {
   return result.insertId
 }
 
+// Move member from cancelled members to active members
 export const restoreMember = async (id, extend_date_id) => {
   const connection = await defaultDb.getConnection()
   try {
@@ -90,6 +92,8 @@ export const restoreMember = async (id, extend_date_id) => {
   }
 }
 
+
+// Extend membership duration
 export const extendMember = async (id, extend_date_id) => {
   const [rows] = await defaultDb.query("SELECT expiration_date FROM members WHERE member_id = ?", [id])
   if (!rows.length) throw new Error("Member not found")
@@ -124,6 +128,7 @@ export const extendMember = async (id, extend_date_id) => {
   return result
 }
 
+// Update existing member info
 export const updateMember = async (id, data) => {
   const {
     first_name,

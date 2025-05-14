@@ -84,7 +84,7 @@ const DataTable = ({
               {headerGroup.headers.map(header => (
                 <th
                   key={header.id}
-                  className="px-4 py-2 text-left cursor-pointer select-none"
+                  className="px-4 py-2 text-left cursor-pointer select-none font-bold"
                   onClick={header.column.getToggleSortingHandler()}
                 >
                   <div className="flex items-center gap-2">
@@ -105,7 +105,7 @@ const DataTable = ({
           {table.getRowModel().rows.map(row => (
             <tr key={row.id} className="hover:bg-secondary">
               {row.getVisibleCells().map(cell => (
-                <td key={cell.id} className="px-4 py-2 border-t">
+                <td key={cell.id} className="px-4 py-2 border-t font-medium">
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </td>
               ))}

@@ -1,21 +1,26 @@
 import React, { useEffect, useState } from "react"
 import { getAllCancelledMembers } from "@/lib/api/archive"
 
-import { ListRestart } from "lucide-react"
+import { ListRestart, CalendarX, CalendarCheck, X } from "lucide-react"
 
 import DataTable from "@/components/ui/data-table"
 import { archiveColumns } from "@/components/table/ArchiveColumn"
 import TableSearch from "@/components/ui/table-search"
 import { Button } from "@/components/ui/button"
-import { toast } from "sonner"
 import { Sheet } from "@/components/ui/sheet"
 import RestoreMember from "@/components/Member/Restore"
+import {
+  Container,
+  ContainerHeader,
+  ContainerContent
+} from "@/components/ui/container"
 
 export default function Archive() {
   const [data, setData] = useState([])
   const [globalFilter, setGlobalFilter] = useState(() => {
     return localStorage.getItem("archiveGlobalFilter") || ""
   })
+
   const [visibleColumns, setVisibleColumns] = useState(() => {
     const saved = localStorage.getItem("archiveVisibleColumns")
     return saved
@@ -23,9 +28,7 @@ export default function Archive() {
       : { contactNumber: true, cancelDate: true }
   })
 
-  const [tableRef, setTableRef] = useState(null)
   const [isRestoreOpen, setIsRestoreOpen] = useState(false)
-  const [selectedMemberId, setSelectedMemberId] = useState(null)
 
   useEffect(() => {
     localStorage.setItem("archiveGlobalFilter", globalFilter)
@@ -37,11 +40,10 @@ export default function Archive() {
 
   const fetchData = async () => {
     try {
-      const cancelledMembers = await getAllCancelledMembers()
-      setData(cancelledMembers)
+      const cancelled = await getAllCancelledMembers()
+      setData(cancelled)
     } catch (err) {
-      console.error("Error loading cancelled members:", err)
-      toast.error(err.message || "Failed to load cancelled members")
+      console.error("Failed to fetch cancelled members", err)
     }
   }
 
@@ -68,82 +70,102 @@ export default function Archive() {
 
   const globalFilterFn = (row, columnId, filterValue) => {
     const fields = ["id", "first_name", "last_name"]
-
     if (visibleColumns.contactNumber) fields.push("contact_number")
     if (visibleColumns.cancelDate) fields.push("cancel_date")
 
     return fields.some(field => {
       const value = row.original[field]
+      const date = field === "cancel_date" ? new Date(value) : null
+      const formatted = date
+        ? date.toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "short",
+            day: "2-digit"
+          })
+        : ""
 
-      if (field === "cancel_date") {
-        const date = value ? new Date(value) : null
-        const formatted = date
-          ? date.toLocaleDateString("en-US", {
-              year: "numeric",
-              month: "short",
-              day: "2-digit"
-            })
-          : ""
-        return formatted.toLowerCase().includes(filterValue.toLowerCase())
-      }
-
-      return String(value ?? "").toLowerCase().includes(filterValue.toLowerCase())
+      return (
+        (formatted || String(value ?? "")).toLowerCase().includes(filterValue.toLowerCase())
+      )
     })
   }
 
-  const handleOpenRestore = id => {
-    setSelectedMemberId(id)
-    setIsRestoreOpen(true)
-  }
+  const hasActiveFilters =
+    globalFilter || Object.values(visibleColumns).some(v => !v)
 
   return (
-    <div className="space-y-4 mb-4 overflow-y-auto custom-scrollbar">
-      <div className="flex items-center justify-between flex-wrap gap-4">
-        <div className="flex items-center gap-4 flex-wrap">
-          <h2 className="text-2xl font-bold">Cancelled Members</h2>
-          <TableSearch
-            value={globalFilter}
-            onChange={setGlobalFilter}
-            placeholder="Search cancelled members..."
-          />
-          <Button
-            variant={visibleColumns.contactNumber ? "outline" : "ghost"}
-            onClick={() => toggleColumn("contactNumber")}
-          >
-            Contact #
-          </Button>
-          <Button
-            variant={visibleColumns.cancelDate ? "outline" : "ghost"}
-            onClick={() => toggleColumn("cancelDate")}
-          >
-            Cancel Date
-          </Button>
-          <Button variant="ghost" onClick={resetFilters} className="p-2">
-            <ListRestart className="w-4 h-4" />
-          </Button>
-        </div>
+    <div className="grid grid-cols-20 grid-rows-[auto_1fr] gap-4 h-full">
+      <div className="col-span-20 flex justify-between items-center">
+        <TableSearch
+          value={globalFilter}
+          onChange={setGlobalFilter}
+          placeholder="Search cancelled members..."
+        />
       </div>
 
-      <DataTable
-        columns={archiveColumns(visibleColumns, {
-          openRestore: handleOpenRestore
-        })}
-        data={data}
-        globalFilter={globalFilter}
-        onGlobalFilterChange={setGlobalFilter}
-        setTableRef={setTableRef}
-        globalFilterFn={globalFilterFn}
-      />
+      <Container className="col-span-20 flex flex-col gap-4 h-full">
+        <ContainerHeader>
+          <div className="flex items-center justify-between flex-wrap gap-4 mt-18 -mb-6">
+            <div className="flex items-center gap-1 flex-wrap">
+              <Button
+                variant={visibleColumns.contactNumber ? "default" : "outline"}
+                onClick={() => toggleColumn("contactNumber")}
+                size="sm"
+                className="h-8 text-sm flex items-center gap-1"
+              >
+                <span>Contact Number</span>
+                {visibleColumns.contactNumber && <X className="w-3 h-3" />}
+              </Button>
+
+              <Button
+                variant={visibleColumns.cancelDate ? "default" : "outline"}
+                onClick={() => toggleColumn("cancelDate")}
+                size="sm"
+                className="h-8 text-sm flex items-center gap-1"
+              >
+                <span>Cancel Date</span>
+                {visibleColumns.cancelDate && <X className="w-3 h-3" />}
+              </Button>
+
+              {hasActiveFilters ? (
+                <Button
+                  variant="default"
+                  size="sm"
+                  onClick={resetFilters}
+                  className="h-8 text-sm"
+                >
+                  Reset Filters
+                </Button>
+              ) : (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={resetFilters}
+                  className="h-8 text-sm"
+                >
+                  <ListRestart className="w-4 h-4" />
+                </Button>
+              )}
+            </div>
+          </div>
+        </ContainerHeader>
+
+        <ContainerContent className="pt-2 flex-1 flex flex-col">
+          <DataTable
+            columns={archiveColumns(fetchData)}
+            data={data}
+            globalFilter={globalFilter}
+            onGlobalFilterChange={setGlobalFilter}
+            globalFilterFn={globalFilterFn}
+          />
+        </ContainerContent>
+      </Container>
 
       <Sheet open={isRestoreOpen} onOpenChange={setIsRestoreOpen}>
         <RestoreMember
-          memberId={selectedMemberId}
+          refreshMembers={fetchData}
           isSheetOpen={isRestoreOpen}
-          onClose={() => {
-            setIsRestoreOpen(false)
-            setSelectedMemberId(null)
-          }}
-          refreshMember={fetchData}
+          onClose={() => setIsRestoreOpen(false)}
         />
       </Sheet>
     </div>

@@ -2,7 +2,7 @@ import {
   getCancelledMembers,
   getCancelledMemberById,
   restoreMember
-} from "../services/membersService.js"
+} from "../services/members.js"
 
 export const getCancelledMembersController = async (req, res, next) => {
   try {

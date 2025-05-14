@@ -8,4 +8,4 @@ export const AUTH_API = `${API_BASE}/auth`
 export const LOGOUT_API = `${AUTH_API}/logout`
 export const AUTH_HOME_API = `${AUTH_API}/home`
 
-export const ACCOUNTS_API = `${API_BASE}/api/accounts`
+export const SETTINGS_API = `${API_BASE}/api/settings`

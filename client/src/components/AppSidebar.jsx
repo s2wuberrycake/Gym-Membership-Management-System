@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react"
-import { Link, useNavigate } from "react-router-dom"
+import { Link, useLocation, useNavigate } from "react-router-dom"
 import { jwtDecode } from "jwt-decode"
 import axios from "axios"
 import { LOGOUT_API } from "@/lib/api"
@@ -15,7 +15,6 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarSeparator
 } from "@/components/ui/sidebar"
 
 import {
@@ -37,7 +36,6 @@ import {
   BookX,
   CalendarClock,
   ChevronUp,
-  DatabaseBackup,
   Home,
   User2,
   UserLock
@@ -49,38 +47,46 @@ const menuSections = [
     items: [{ title: "Home", url: "/", icon: Home }]
   },
   {
-    label: "Members",
+    label: "Memberships",
     items: [
-      { title: "Memberships", url: "/members", icon: BookUser },
-      { title: "Cancelled Memberships", url: "/archive", icon: BookX },
+      { title: "Management", url: "/members", icon: BookUser },
+      { title: "Cancelled", url: "/archive", icon: BookX },
       { title: "Visit Log", url: "/visits", icon: CalendarClock }
     ]
   },
   {
-    label: "Settings",
+    label: "Config",
     items: [
-      { title: "Accounts Manager", url: "/accounts", icon: UserLock, roles: ["admin"] },
-      { title: "Backups and Restore", url: "/backup", icon: DatabaseBackup, roles: ["admin"] }
+      { title: "Settings ", url: "/settings", icon: UserLock, roles: ["admin"] }
     ]
   }
 ]
 
-const RenderMenuGroup = ({ label, items, role }) => (
+const RenderMenuGroup = ({ label, items, role, currentPath }) => (
   <SidebarGroup>
-    <SidebarGroupLabel>{label}</SidebarGroupLabel>
+    <SidebarGroupLabel className="font-bold">{label}</SidebarGroupLabel>
     <SidebarGroupContent>
       <SidebarMenu>
         {items.map(item => {
           const isRestricted = item.roles && !item.roles.includes(role)
+          const isActive = currentPath === item.url
 
           const menuButton = (
             <SidebarMenuButton
               asChild
-              className={isRestricted ? "pointer-events-none opacity-50" : ""}
+              className={`transition-colors font-medium w-full ${
+                isRestricted ? "pointer-events-none opacity-50" : ""
+              }`}
             >
-              <Link to={item.url}>
-                <item.icon />
-                <span>{item.title}</span>
+              <Link
+                to={item.url}
+                className="flex flex-wrap items-center justify-between gap-2 pl-6 pr-3 py-2 w-full rounded-xl hover:bg-accent transition-all"
+              >
+                <div className="flex flex-wrap items-center gap-2 min-w-0">
+                  <item.icon className="w-4 h-4 flex-shrink-0" />
+                  <span className="break-words text-left">{item.title}</span>
+                </div>
+                {isActive && <div className="w-2 h-2 rounded-full bg-primary flex-shrink-0" />}
               </Link>
             </SidebarMenuButton>
           )
@@ -113,6 +119,8 @@ const AppSidebar = () => {
   const [username, setUsername] = useState("username")
   const [role, setRole] = useState(null)
   const navigate = useNavigate()
+  const location = useLocation()
+  const currentPath = location.pathname
 
   const handleLogout = useCallback(async () => {
     const token = localStorage.getItem("token")
@@ -127,10 +135,10 @@ const AppSidebar = () => {
     } catch {
       console.log("Server logout skipped or failed.")
     }
-  
+
     localStorage.setItem("logout", Date.now())
     localStorage.removeItem("token")
-    navigate("/login")    
+    navigate("/login")
   }, [navigate])
 
   useEffect(() => {
@@ -147,13 +155,13 @@ const AppSidebar = () => {
   }, [])
 
   return (
-    <Sidebar collapsible="icon">
-      <SidebarHeader className="py-4">
+    <Sidebar collapsible="icon" className="border-none">
+      <SidebarHeader className="py-4 border-none">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild className="hover:bg-transparent active:bg-transparent focus:outline-none">
-              <Link to="/">
-                <img src="./src/assets/logo.png" alt="logo" width={20} height={20} />
+              <Link to="/" className="flex items-center font-medium">
+                <img src="./src/assets/logo.png" alt="logo" width={30} height={30} />
                 <p className="pl-2">Membership Management System</p>
               </Link>
             </SidebarMenuButton>
@@ -161,24 +169,26 @@ const AppSidebar = () => {
         </SidebarMenu>
       </SidebarHeader>
 
-      <SidebarSeparator className="w-full mx-auto" />
-
       <SidebarContent>
         {menuSections.map(section => (
-          <RenderMenuGroup key={section.label} label={section.label} items={section.items} role={role} />
+          <RenderMenuGroup
+            key={section.label}
+            label={section.label}
+            items={section.items}
+            role={role}
+            currentPath={currentPath}
+          />
         ))}
       </SidebarContent>
 
-      <SidebarFooter>
+      <SidebarFooter className="border-none">
         <SidebarMenu>
           <SidebarMenuItem>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <SidebarMenuButton>
+                <SidebarMenuButton className="rounded-full px-3 py-2 hover:bg-accent transition-colors flex items-center">
                   <User2 />
-                  <div className="px-2">
-                    {username}
-                  </div>
+                  <div className="px-2 font-medium">{username}</div>
                   <ChevronUp className="ml-auto" />
                 </SidebarMenuButton>
               </DropdownMenuTrigger>

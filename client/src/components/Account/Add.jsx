@@ -23,8 +23,9 @@ const AddAccount = ({ refreshAccounts, isSheetOpen, onClose }) => {
   const [form, setForm] = useState({
     username: "",
     password: "",
+    repeatPassword: "",
     roleId: ""
-  })
+  })  
 
   const [roles, setRoles] = useState([])
   const [errors, setErrors] = useState({})
@@ -42,7 +43,7 @@ const AddAccount = ({ refreshAccounts, isSheetOpen, onClose }) => {
 
   useEffect(() => {
     if (!isSheetOpen) {
-      setForm({ username: "", password: "", roleId: "" })
+      setForm({ username: "", password: "", repeatPassword: "", roleId: "" })
       setErrors({})
       setTouched({})
     }
@@ -94,12 +95,13 @@ const AddAccount = ({ refreshAccounts, isSheetOpen, onClose }) => {
     const newErrors = {
       username: validateField("username", username),
       password: validateField("password", password),
+      repeatPassword: validateField("repeatPassword", form.repeatPassword, password),
       roleId: validateField("roleId", roleId)
-    }
+    }    
 
     const hasErrors = Object.values(newErrors).some(error => !!error)
     setErrors(newErrors)
-    setTouched({ username: true, password: true, roleId: true })
+    setTouched({ username: true, password: true, repeatPassword: true, roleId: true })
 
     if (hasErrors) return
 
@@ -115,7 +117,7 @@ const AddAccount = ({ refreshAccounts, isSheetOpen, onClose }) => {
       toast.success("Account created!")
       if (refreshAccounts) refreshAccounts()
       onClose()
-      setForm({ username: "", password: "", roleId: "" })
+      setForm({ username: "", password: "", repeatPassword: "", roleId: "" })
       setErrors({})
       setTouched({})
     } catch (err) {
@@ -162,6 +164,19 @@ const AddAccount = ({ refreshAccounts, isSheetOpen, onClose }) => {
                 />
                 {touched.password && errors.password && (
                   <p className="text-red-500 text-sm mt-1">{errors.password}</p>
+                )}
+              </div>
+
+              <div>
+                <Label className="pb-0.5">Repeat Password</Label>
+                <Input
+                  name="repeatPassword"
+                  type="password"
+                  value={form.repeatPassword}
+                  onChange={handleChange}
+                />
+                {touched.repeatPassword && errors.repeatPassword && (
+                  <p className="text-red-500 text-sm mt-1">{errors.repeatPassword}</p>
                 )}
               </div>
 

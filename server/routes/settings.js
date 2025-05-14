@@ -7,7 +7,7 @@ import {
   deleteAccountController,
   checkUsernameExistsController,
   getRolesController
-} from "../controllers/accountsController.js"
+} from "../controllers/settings.js"
 
 const router = express.Router()
 

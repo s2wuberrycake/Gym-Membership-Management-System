@@ -6,7 +6,7 @@ import {
   updateMember,
   extendMember,
   cancelMember
-} from "../services/membersService.js"
+} from "../services/members.js"
 
 export const getDurationsController = async (req, res, next) => {
   try {

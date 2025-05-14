@@ -1,11 +1,11 @@
 import express from "express"
 import cors from "cors"
 import dotenv from "dotenv"
-import authRouter from "./routes/authorizeRoutes.js"
-import membersRouter from "./routes/membersRoutes.js"
-import archiveRouter from "./routes/archiveRoutes.js"
-import accountsRouter from "./routes/accountsRoutes.js"
-import { errorHandler } from "./middleware/errorMiddleware.js"
+import authRouter from "./routes/authorize.js"
+import membersRouter from "./routes/members.js"
+import archiveRouter from "./routes/archive.js"
+import settingsRouter from "./routes/settings.js"
+import { errorHandler } from "./middleware/error.js"
 
 dotenv.config()
 const app = express()
@@ -16,7 +16,7 @@ app.use(express.json())
 app.use("/auth", authRouter)
 app.use("/api/members", membersRouter)
 app.use("/api/archive", archiveRouter)
-app.use("/api/accounts", accountsRouter)
+app.use("/api/settings", settingsRouter)
 
 app.use(errorHandler)
 

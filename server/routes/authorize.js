@@ -1,7 +1,7 @@
 import express from "express"
-import { loginUserController, getHomeController } from "../controllers/authorizeController.js"
-import { verifyToken } from "../middleware/authMiddleware.js"
-import { requireRole } from "../middleware/roleMiddleware.js"
+import { loginUserController, getHomeController } from "../controllers/authorize.js"
+import { verifyToken } from "../middleware/auth.js"
+import { requireRole } from "../middleware/role.js"
 
 const router = express.Router()
 

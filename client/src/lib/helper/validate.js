@@ -92,7 +92,7 @@ export function validateAccountForm(form) {
   return { errors, isValid }
 }
 
-export function validateField(name, value) {
+export function validateField(name, value, compareValue = null) {
   switch (name) {
     case "first_name":
     case "last_name":
@@ -128,6 +128,11 @@ export function validateField(name, value) {
       if (value.length < 8) return "Password must be at least 8 characters"
       break
 
+    case "repeatPassword":
+      if (!value.trim()) return "Please repeat your password"
+      if (compareValue && value !== compareValue) return "Passwords do not match"
+      break
+  
     case "roleId":
       if (!value) return "Please select a role"
       break

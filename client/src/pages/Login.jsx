@@ -85,7 +85,7 @@ const Login = () => {
                 <Input
                   type="text"
                   name="username"
-                  placeholder="admin"
+                  placeholder="superadmin"
                   value={values.username}
                   onChange={handleChanges}
                   required
@@ -96,7 +96,7 @@ const Login = () => {
                 <Input
                   type="password"
                   name="password"
-                  placeholder="*****"
+                  placeholder="**********"
                   value={values.password}
                   onChange={handleChanges}
                   required

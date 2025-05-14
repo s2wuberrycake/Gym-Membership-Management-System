@@ -7,18 +7,18 @@ const Navbar = () => {
 
   return (
     <nav className="p-4 flex items-center justify-between">
-      <SidebarTrigger className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md
+      <SidebarTrigger className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full
           text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1
           focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none
-          [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground py-2 group/toggle h-8 w-8 px-0"/>
+          [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-secondary hover:text-secondary-foreground py-2 group/toggle h-9 w-9 px-0"/>
 
       <div className="flex items-center gap-4">
         <button
           onClick={toggleTheme}
-          className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md
+          className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full
           text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1
           focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none
-          [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground py-2 group/toggle h-8 w-8 px-0"
+          [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-secondary hover:text-secondary-foreground py-2 group/toggle h-9 w-9 px-0"
         >
           {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
         </button>

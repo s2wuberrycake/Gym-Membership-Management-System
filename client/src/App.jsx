@@ -10,8 +10,7 @@ import Home from "./pages/Home"
 import Members from "./pages/Members"
 import Archive from "./pages/Archive"
 import Visits from "./pages/Visits"
-import Accounts from "./pages/Accounts"
-import Backup from "./pages/Backup"
+import Settings from "./pages/Settings"
 import Login from "./pages/Login"
 import Member from "./pages/Member"
 import RequireRole from "./auth/RequireRole"
@@ -66,22 +65,7 @@ function App() {
         </Route>
         <Route path="archive" element={<Archive />} />
         <Route path="visits" element={<Visits />} />
-        <Route
-          path="accounts"
-          element={
-            <RequireRole allowedRoles={["admin"]}>
-              <Accounts />
-            </RequireRole>
-          }
-        />
-        <Route
-          path="backup"
-          element={
-            <RequireRole allowedRoles={["admin"]}>
-              <Backup />
-            </RequireRole>
-          }
-        />
+        <Route path="settings" element={<Settings />}/>
       </Route>
 
       <Route path="/login" element={<Login />} />
