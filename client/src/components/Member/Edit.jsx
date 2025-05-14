@@ -126,7 +126,7 @@ const EditMember = ({ member, isSheetOpen, onClose, refreshMember }) => {
               <h2 className="pb-0.5 text-xl font-bold">Edit Member Info</h2>
               <p>
                 Only edit member info when necessary (e.g: member requests for
-                updating of old info, incorrectly saved details, mismatched dates)
+                updating of old info, incorrectly saved details, mismatched dates).
               </p>
             </div>
 
@@ -279,7 +279,7 @@ const EditMember = ({ member, isSheetOpen, onClose, refreshMember }) => {
                 )}
               </div>
 
-              <Button type="submit" disabled={submitting} className="w-full">
+              <Button type="submit" disabled={submitting} size="sm" className="w-full">
                 {submitting ? "Saving..." : "Save Changes"}
               </Button>
             </div>

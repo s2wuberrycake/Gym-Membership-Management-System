@@ -290,3 +290,17 @@ export const getCancelledMemberById = async (id) => {
 
   return rows[0] || null
 }
+
+// Automatically checks for expired members
+export async function expireMembers() {
+  const [result] = await defaultDb.query(
+    `UPDATE members
+     SET status_id = 2
+     WHERE status_id = 1
+       AND expiration_date <= CURDATE()`
+  )
+
+  console.log(
+    `DEBUG >> ${result.affectedRows} row(s) updated to "expired"`
+  )
+}

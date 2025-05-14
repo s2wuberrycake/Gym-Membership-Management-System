@@ -13,6 +13,7 @@ import Visits from "./pages/Visits"
 import Settings from "./pages/Settings"
 import Login from "./pages/Login"
 import Member from "./pages/Member"
+import Account from "./pages/Account"
 import RequireRole from "./auth/RequireRole"
 
 function Layout() {
@@ -63,9 +64,10 @@ function App() {
           <Route index element={<Members />} />
           <Route path=":id" element={<Member />} />
         </Route>
+        <Route path="accounts/:id" element={<Account />} /> {/* ✅ NEW */}
         <Route path="archive" element={<Archive />} />
         <Route path="visits" element={<Visits />} />
-        <Route path="settings" element={<Settings />}/>
+        <Route path="settings" element={<Settings />} />
       </Route>
 
       <Route path="/login" element={<Login />} />

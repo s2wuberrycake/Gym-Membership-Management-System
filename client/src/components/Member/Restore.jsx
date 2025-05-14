@@ -13,6 +13,7 @@ import {
   SelectContent,
   SelectItem
 } from "@/components/ui/select"
+import { Label } from "@/components/ui/label"
 import { toast } from "sonner"
 import { getDurations } from "@/lib/api/members"
 import {
@@ -21,7 +22,12 @@ import {
 } from "@/lib/api/archive"
 import { validateField } from "@/lib/helper/validate"
 
-const RestoreMember = ({ memberId, isSheetOpen, onClose, refreshMember }) => {
+const RestoreMember = ({
+  memberId,
+  isSheetOpen,
+  onClose,
+  refreshMember
+}) => {
   const [member, setMember] = useState(null)
   const [durationId, setDurationId] = useState("")
   const [touched, setTouched] = useState(false)
@@ -51,30 +57,25 @@ const RestoreMember = ({ memberId, isSheetOpen, onClose, refreshMember }) => {
     }
   }, [isSheetOpen])
 
-  const handleSelect = value => {
+  const handleSelect = (value) => {
     setDurationId(value)
     setTouched(true)
-    const err = validateField("durationId", value)
-    setError(err)
+    setError(validateField("durationId", value))
   }
 
-  const handleSubmit = async e => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-
     if (!durationId) {
       setTouched(true)
       setError("Please select a duration")
       return
     }
-
     try {
       setSubmitting(true)
-
       await restoreCancelledMemberById(memberId, durationId)
-
       toast.success("Member restored successfully")
       onClose()
-      if (refreshMember) refreshMember()
+      refreshMember?.()
     } catch (err) {
       console.error("Restore error", err)
       toast.error("Failed to restore member")
@@ -89,17 +90,25 @@ const RestoreMember = ({ memberId, isSheetOpen, onClose, refreshMember }) => {
         <SheetTitle className="mb-4">Restore Member</SheetTitle>
         <SheetDescription asChild>
           <form onSubmit={handleSubmit}>
+            {/* Header block */}
             <div className="p-6 pb-2 max-w-md">
-              <h2 className="pb-0.5 text-xl font-bold">Restore Cancelled Membership</h2>
+              <h2 className="text-xl font-bold">
+                Restore Cancelled Membership
+              </h2>
               <p className="text-sm text-muted-foreground">
                 Select a membership duration to restore this member. The member's status will be set back to active.
               </p>
             </div>
 
+            {/* Form block */}
             <div className="p-6 pt-2 space-y-4 max-w-md">
               <div>
-                <Select value={durationId} onValueChange={handleSelect}>
-                  <SelectTrigger>
+                <Label>Duration</Label>
+                <Select
+                  value={durationId}
+                  onValueChange={handleSelect}
+                >
+                  <SelectTrigger className="w-full">
                     <SelectValue placeholder="Select Duration" />
                   </SelectTrigger>
                   <SelectContent>
@@ -120,7 +129,12 @@ const RestoreMember = ({ memberId, isSheetOpen, onClose, refreshMember }) => {
                 )}
               </div>
 
-              <Button type="submit" disabled={submitting} className="w-full">
+              <Button
+                type="submit"
+                size="sm"
+                className="w-full"
+                disabled={submitting}
+              >
                 {submitting ? "Restoring..." : "Restore Member"}
               </Button>
             </div>

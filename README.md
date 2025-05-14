@@ -16,24 +16,18 @@ Locally hosted webapp for managing memberships
   - Generate reports
 
 - Members
-  - Table
-    - Automatic flagging of expired members
   - Add profile-picture column and storing function
   - Data Culling
 
 - Visits
-  - ACR122U (RFID scanner)
-  - RFID scanning function
+  - ACR122U (RFID scanner, use UUID as ID)
+  - RFID scanning  (For now, input UUID and logs as visit)
   - Visit log
-
-- Accounts (Admin only)
- - Accounts management (create, delete, edit accounts)
-
-- Account View
- - Edit own account
 
 - Backup (Admin only)
   - Separate database
   - Restore function
   - Decide on file type (CSV?)
 
+- Settings (Admin only)
+  - Optional customization of date extension table

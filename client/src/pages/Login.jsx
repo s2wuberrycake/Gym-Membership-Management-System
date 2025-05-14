@@ -7,11 +7,11 @@ import bgLogin from "../assets/bglogin.png"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-} from "@/components/ui/card"
+  Container,
+  ContainerHeader,
+  ContainerTitle,
+  ContainerContent
+} from "@/components/ui/container"
 
 const Login = () => {
   const [values, setValues] = useState({ username: "", password: "" })
@@ -23,20 +23,16 @@ const Login = () => {
       const token = localStorage.getItem("token")
       if (token) {
         try {
-          const response = await axios.get("http://localhost:3000/auth/home", {
+          await axios.get("http://localhost:3000/auth/home", {
             headers: { Authorization: `Bearer ${token}` },
           })
-          if (response.status === 200) {
-              localStorage.setItem("login", Date.now())
-            navigate("/")
-          }
-        } catch (err) {
-          console.log("Token check failed:", err)
+          localStorage.setItem("login", Date.now())
+          navigate("/")
+        } catch {
         }
       }
       setLoading(false)
     }
-
     checkAuth()
   }, [navigate])
 
@@ -49,11 +45,9 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault()
     try {
-      const response = await axios.post("http://localhost:3000/auth/login", values)
-      if (response.status === 200) {
-        localStorage.setItem("token", response.data.token)
-        navigate("/")
-      }
+      const { data } = await axios.post("http://localhost:3000/auth/login", values)
+      localStorage.setItem("token", data.token)
+      navigate("/")
     } catch (err) {
       if (err.response) {
         if (err.response.status === 404) {
@@ -62,7 +56,6 @@ const Login = () => {
           toast.error("Password is incorrect")
         }
       } else {
-        console.error("Error:", err)
         toast.error("An unexpected error occurred")
       }
     }
@@ -70,45 +63,52 @@ const Login = () => {
 
   return (
     <div
-      className="min-h-screen bg-cover bg-center bg-no-repeat relative" style={{ backgroundImage: `url(${bgLogin})` }}>
-      <div className=""></div>
+      className="min-h-screen bg-cover bg-center bg-no-repeat"
+      style={{ backgroundImage: `url(${bgLogin})` }}
+    >
       <Toaster />
       <div className="relative z-10 flex items-center justify-center min-h-screen">
-        <Card className="w-full max-w-md p-6">
-          <CardHeader>
-            <CardTitle className="text-center text-2xl">Login</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">Username</label>
-                <Input
-                  type="text"
-                  name="username"
-                  placeholder="superadmin"
-                  value={values.username}
-                  onChange={handleChanges}
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Password</label>
-                <Input
-                  type="password"
-                  name="password"
-                  placeholder="**********"
-                  value={values.password}
-                  onChange={handleChanges}
-                  required
-                />
-              </div>
-              <Button type="submit" className="w-full">Login</Button>
-            </form>
-            <p className="pt-5 text-center text-xs text-muted-foreground">
-              会員管理システム
-            </p>
-          </CardContent>
-        </Card>
+        <div className="w-full max-w-md px-6">
+          <Container>
+            <ContainerHeader>
+              <ContainerTitle className="text-center text-2xl font-sans">
+                Login
+              </ContainerTitle>
+            </ContainerHeader>
+            <ContainerContent>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Username</label>
+                  <Input
+                    type="text"
+                    name="username"
+                    placeholder="superadmin"
+                    value={values.username}
+                    onChange={handleChanges}
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Password</label>
+                  <Input
+                    type="password"
+                    name="password"
+                    placeholder="**********"
+                    value={values.password}
+                    onChange={handleChanges}
+                    required
+                  />
+                </div>
+                <Button type="submit" size="sm" className="w-full">
+                  Login
+                </Button>
+              </form>
+              <p className="pt-5 text-center text-xs text-muted-foreground">
+                会員管理システム
+              </p>
+            </ContainerContent>
+          </Container>
+        </div>
       </div>
     </div>
   )

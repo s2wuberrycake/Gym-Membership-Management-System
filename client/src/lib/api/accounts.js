@@ -6,6 +6,16 @@ export const getAllAccounts = async () => {
   return res.data
 }
 
+export const getAccountById = async (id) => {
+  const token = localStorage.getItem("token")
+  const res = await axios.get(`${SETTINGS_API}/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  })
+  return res.data
+}
+
 export const addAccount = async formData => {
   const res = await axios.post(SETTINGS_API, formData)
   return res.data

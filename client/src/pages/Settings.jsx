@@ -16,6 +16,17 @@ import {
   ContainerTitle,
   ContainerContent
 } from "@/components/ui/container"
+import { Separator } from "@/components/ui/separator"
+
+// Helper to decode the payload of a JWT
+const decodeJwt = (token) => {
+  try {
+    const payload = token.split(".")[1]
+    return JSON.parse(atob(payload))
+  } catch {
+    return {}
+  }
+}
 
 const roleLabel = {
   all: "All Roles",
@@ -29,20 +40,22 @@ const nextRole = {
   staff: "all"
 }
 
-const Settings = () => {
+export default function Settings() {
   const navigate = useNavigate()
   const [data, setData] = useState([])
   const [tableRef, setTableRef] = useState(null)
 
-  const [globalFilter, setGlobalFilter] = useState(() => {
-    return localStorage.getItem("accountsGlobalFilter") || ""
-  })
-
-  const [roleFilter, setRoleFilter] = useState(() => {
-    return localStorage.getItem("accountsRoleFilter") || "all"
-  })
-
+  const [globalFilter, setGlobalFilter] = useState(
+    () => localStorage.getItem("accountsGlobalFilter") || ""
+  )
+  const [roleFilter, setRoleFilter] = useState(
+    () => localStorage.getItem("accountsRoleFilter") || "all"
+  )
   const [isAddOpen, setIsAddOpen] = useState(false)
+
+  // decode once
+  const { role: userRole } = decodeJwt(localStorage.getItem("token") || "")
+  const isAdmin = userRole === "admin"
 
   useEffect(() => {
     localStorage.setItem("accountsGlobalFilter", globalFilter)
@@ -67,7 +80,7 @@ const Settings = () => {
   }, [])
 
   const cycleRoleFilter = () => {
-    setRoleFilter(prev => nextRole[prev])
+    setRoleFilter((prev) => nextRole[prev])
   }
 
   const resetFilters = () => {
@@ -80,21 +93,32 @@ const Settings = () => {
   const filteredData =
     roleFilter === "all"
       ? data
-      : data.filter(account => account.role?.toLowerCase() === roleFilter)
+      : data.filter(
+          (account) => account.role?.toLowerCase() === roleFilter
+        )
+
+  // only show rows to admins
+  const displayedData = isAdmin ? filteredData : []
 
   const globalFilterFn = (row, columnId, filterValue) => {
     const fields = ["account_id", "username", "role"]
-    return fields.some(field => {
+    return fields.some((field) => {
       const value = row.original[field]
-      return String(value ?? "").toLowerCase().includes(filterValue.toLowerCase())
+      return String(value ?? "")
+        .toLowerCase()
+        .includes(filterValue.toLowerCase())
     })
   }
 
-  const hasActiveFilters =
-    globalFilter || roleFilter !== "all"
+  const hasActiveFilters = globalFilter || roleFilter !== "all"
 
   return (
-    <div className="grid grid-cols-20 grid-rows-[auto_1fr] gap-4 h-full">
+    // If not admin, grey out and disable all interaction
+    <div
+      className={`grid grid-cols-20 grid-rows-[auto_1fr] gap-4 h-full ${
+        !isAdmin ? "pointer-events-none opacity-50" : ""
+      }`}
+    >
       <div className="col-span-20 flex justify-between items-center">
         <TableSearch
           value={globalFilter}
@@ -105,12 +129,22 @@ const Settings = () => {
 
       <Container className="col-span-20 flex flex-col gap-4 h-full">
         <ContainerHeader>
-          <div className="flex items-center justify-between flex-wrap gap-4 mt-18 -mb-6">
-            <div className="flex items-center gap-1 flex-wrap">
+          <ContainerTitle>Accounts</ContainerTitle>
+          <p className="text-sm text-muted-foreground">
+            Requires "Admin" role to access. Create, delete, and update accounts
+            for your staff.
+          </p>
+        </ContainerHeader>
+
+        <Separator />
+
+        <ContainerContent className="flex-1 flex flex-col">
+          <div className="flex items-center justify-between flex-wrap gap-4 mb-4">
+            <div className="flex items-center gap-2 flex-wrap">
               <Button
                 variant={roleFilter === "all" ? "default" : "outline"}
-                onClick={cycleRoleFilter}
                 size="sm"
+                onClick={cycleRoleFilter}
                 className="h-8 text-sm"
               >
                 {roleLabel[roleFilter]}
@@ -139,7 +173,9 @@ const Settings = () => {
 
             <Sheet open={isAddOpen} onOpenChange={setIsAddOpen}>
               <SheetTrigger asChild>
-                <Button size="sm" className="h-8 text-sm">Add Account</Button>
+                <Button size="sm" className="h-8 text-sm">
+                  Add Account
+                </Button>
               </SheetTrigger>
               <AddAccount
                 refreshAccounts={fetchAccounts}
@@ -148,12 +184,10 @@ const Settings = () => {
               />
             </Sheet>
           </div>
-        </ContainerHeader>
 
-        <ContainerContent className="pt-2 flex-1 flex flex-col">
           <DataTable
             columns={accountsColumns(navigate)}
-            data={filteredData}
+            data={displayedData}
             globalFilter={globalFilter}
             onGlobalFilterChange={setGlobalFilter}
             setTableRef={setTableRef}
@@ -164,5 +198,3 @@ const Settings = () => {
     </div>
   )
 }
-
-export default Settings

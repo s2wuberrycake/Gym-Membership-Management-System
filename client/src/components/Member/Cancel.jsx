@@ -39,7 +39,7 @@ const CancelMember = ({ member, isSheetOpen, onClose, refreshMember }) => {
               <p>
                 Cancelling a membership will update their status to <strong>Cancelled</strong> and will promptly be
                 moved to the <strong>Archive</strong> table <br /><br />NOTE: remaining membership duration will be cancelled. 
-                Proceed with caution
+                Proceed with caution.
               </p>
             </div>
 
@@ -47,6 +47,7 @@ const CancelMember = ({ member, isSheetOpen, onClose, refreshMember }) => {
               <Button
                 type="submit"
                 disabled={submitting}
+                size="sm"
                 className="w-full"
                 variant="destructive"
               >

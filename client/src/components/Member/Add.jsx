@@ -182,7 +182,7 @@ const AddMember = ({ refreshMembers, isSheetOpen, onClose }) => {
                 <p className="text-red-500 text-sm text-center">{errors.submit}</p>
               )}
 
-              <Button type="submit" disabled={submitting} className="w-full">
+              <Button type="submit" disabled={submitting} size="sm" className="w-full">
                 {submitting ? "Adding..." : "Add Member"}
               </Button>
             </div>

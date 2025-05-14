@@ -25,13 +25,6 @@ import {
 } from "./ui/dropdown-menu"
 
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger
-} from "@/components/ui/tooltip"
-
-import {
   BookUser,
   BookX,
   CalendarClock,
@@ -57,56 +50,36 @@ const menuSections = [
   {
     label: "Config",
     items: [
-      { title: "Settings ", url: "/settings", icon: UserLock, roles: ["admin"] }
+      { title: "Settings", url: "/settings", icon: UserLock }
     ]
   }
 ]
 
-const RenderMenuGroup = ({ label, items, role, currentPath }) => (
+const RenderMenuGroup = ({ label, items, currentPath }) => (
   <SidebarGroup>
     <SidebarGroupLabel className="font-bold">{label}</SidebarGroupLabel>
     <SidebarGroupContent>
       <SidebarMenu>
         {items.map(item => {
-          const isRestricted = item.roles && !item.roles.includes(role)
           const isActive = currentPath === item.url
-
-          const menuButton = (
-            <SidebarMenuButton
-              asChild
-              className={`transition-colors font-medium w-full ${
-                isRestricted ? "pointer-events-none opacity-50" : ""
-              }`}
-            >
-              <Link
-                to={item.url}
-                className="flex flex-wrap items-center justify-between gap-2 pl-6 pr-3 py-2 w-full rounded-xl hover:bg-accent transition-all"
-              >
-                <div className="flex flex-wrap items-center gap-2 min-w-0">
-                  <item.icon className="w-4 h-4 flex-shrink-0" />
-                  <span className="break-words text-left">{item.title}</span>
-                </div>
-                {isActive && <div className="w-2 h-2 rounded-full bg-primary flex-shrink-0" />}
-              </Link>
-            </SidebarMenuButton>
-          )
 
           return (
             <SidebarMenuItem key={item.title}>
-              {isRestricted ? (
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <div>{menuButton}</div>
-                    </TooltipTrigger>
-                    <TooltipContent side="right" className="h-9 flex items-center text-sm">
-                      Admin only
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              ) : (
-                menuButton
-              )}
+              <SidebarMenuButton
+                asChild
+                className="transition-colors font-medium w-full"
+              >
+                <Link
+                  to={item.url}
+                  className="flex flex-wrap items-center justify-between gap-2 pl-6 pr-3 py-2 w-full rounded-xl hover:bg-accent transition-all"
+                >
+                  <div className="flex flex-wrap items-center gap-2 min-w-0">
+                    <item.icon className="w-4 h-4 flex-shrink-0" />
+                    <span className="break-words text-left">{item.title}</span>
+                  </div>
+                  {isActive && <div className="w-2 h-2 rounded-full bg-primary flex-shrink-0" />}
+                </Link>
+              </SidebarMenuButton>
             </SidebarMenuItem>
           )
         })}
@@ -117,7 +90,8 @@ const RenderMenuGroup = ({ label, items, role, currentPath }) => (
 
 const AppSidebar = () => {
   const [username, setUsername] = useState("username")
-  const [role, setRole] = useState(null)
+  const [accountId, setAccountId] = useState(null)
+
   const navigate = useNavigate()
   const location = useLocation()
   const currentPath = location.pathname
@@ -147,7 +121,7 @@ const AppSidebar = () => {
       try {
         const decoded = jwtDecode(token)
         setUsername(decoded.username || decoded.name || "user")
-        setRole(decoded.role || null)
+        setAccountId(decoded.id || decoded.account_id || null)
       } catch (err) {
         console.error("Invalid token:", err)
       }
@@ -175,7 +149,6 @@ const AppSidebar = () => {
             key={section.label}
             label={section.label}
             items={section.items}
-            role={role}
             currentPath={currentPath}
           />
         ))}
@@ -193,7 +166,9 @@ const AppSidebar = () => {
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" sideOffset={10}>
-                <DropdownMenuItem>Account</DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => navigate(`/accounts/${accountId}`)}>
+                  Account
+                </DropdownMenuItem>
                 <DropdownMenuItem variant="destructive" onSelect={handleLogout}>
                   Log Out
                 </DropdownMenuItem>
