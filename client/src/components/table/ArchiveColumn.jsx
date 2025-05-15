@@ -7,7 +7,7 @@ import { Undo2 } from "lucide-react"
 const columnHelper = createColumnHelper()
 
 const truncate = (text, max = 16) =>
-  text.length > max ? text.slice(0, max) + "..." : text
+  text && text.length > max ? text.slice(0, max) + "..." : text || ""
 
 const formatDate = value =>
   value ? format(new Date(value), "MMM dd, yyyy") : "-"
@@ -18,20 +18,21 @@ const statusStyles = {
 
 export const archiveColumns = (visibleColumns = {}, actions = {}) => {
   const columns = [
+    // UUID
     columnHelper.accessor("id", {
       header: "UUID",
       cell: info => info.getValue()
     }),
 
-    columnHelper.accessor("first_name", {
-      header: "First Name",
-      cell: info => truncate(info.getValue())
-    }),
-
-    columnHelper.accessor("last_name", {
-      header: "Last Name",
-      cell: info => truncate(info.getValue())
-    })
+    // Combined Name column
+    columnHelper.accessor(
+      row => `${row.first_name || ""} ${row.last_name || ""}`.trim(),
+      {
+        id: "name",
+        header: "Name",
+        cell: info => truncate(info.getValue())
+      }
+    )
   ]
 
   if (visibleColumns.contactNumber) {
@@ -52,6 +53,7 @@ export const archiveColumns = (visibleColumns = {}, actions = {}) => {
     )
   }
 
+  // Status badge
   columns.push(
     columnHelper.accessor("status", {
       header: "Status",
@@ -67,6 +69,7 @@ export const archiveColumns = (visibleColumns = {}, actions = {}) => {
     })
   )
 
+  // Restore action
   columns.push(
     columnHelper.display({
       id: "actions",
@@ -83,10 +86,11 @@ export const archiveColumns = (visibleColumns = {}, actions = {}) => {
         return (
           <Button
             variant="ghost"
-            className="h-8 w-8 p-0"
+            className="h-0.5 p-0"
             onClick={handleRestore}
           >
-            <Undo2 className="h-4 w-4" />
+            <span className="sr-only">Restore</span>
+            <Undo2 className="" />
           </Button>
         )
       }

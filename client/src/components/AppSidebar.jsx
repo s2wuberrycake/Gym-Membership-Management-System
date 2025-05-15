@@ -6,16 +6,24 @@ import { LOGOUT_API } from "@/lib/api"
 
 import {
   Sidebar,
+  SidebarHeader,
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
-  SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from "@/components/ui/sidebar"
+
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger
+} from "@/components/ui/tooltip"
 
 import {
   DropdownMenu,
@@ -49,67 +57,73 @@ const menuSections = [
   },
   {
     label: "Config",
-    items: [
-      { title: "Settings", url: "/settings", icon: UserLock }
-    ]
+    items: [{ title: "Settings", url: "/settings", icon: UserLock }]
   }
 ]
 
-const RenderMenuGroup = ({ label, items, currentPath }) => (
-  <SidebarGroup>
-    <SidebarGroupLabel className="font-bold">{label}</SidebarGroupLabel>
-    <SidebarGroupContent>
-      <SidebarMenu>
-        {items.map(item => {
-          const isActive = currentPath === item.url
+function RenderMenuGroup({ label, items, currentPath }) {
+  const { open } = useSidebar()
 
-          return (
-            <SidebarMenuItem key={item.title}>
-              <SidebarMenuButton
-                asChild
-                className="transition-colors font-medium w-full"
-              >
-                <Link
-                  to={item.url}
-                  className="flex flex-wrap items-center justify-between gap-2 pl-6 pr-3 py-2 w-full rounded-xl hover:bg-accent transition-all"
+  return (
+    <SidebarGroup>
+      <SidebarGroupLabel className="font-bold">{label}</SidebarGroupLabel>
+      <SidebarGroupContent>
+        <SidebarMenu>
+          {items.map(item => {
+            const isActive = currentPath === item.url
+            return (
+              <SidebarMenuItem key={item.title}>
+                <SidebarMenuButton
+                  asChild
+                  className="transition-colors font-medium w-full rounded-md"
                 >
-                  <div className="flex flex-wrap items-center gap-2 min-w-0">
-                    <item.icon className="w-4 h-4 flex-shrink-0" />
-                    <span className="break-words text-left">{item.title}</span>
-                  </div>
-                  {isActive && <div className="w-2 h-2 rounded-full bg-primary flex-shrink-0" />}
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          )
-        })}
-      </SidebarMenu>
-    </SidebarGroupContent>
-  </SidebarGroup>
-)
+                  <Link
+                    to={item.url}
+                    className="flex items-center justify-between gap-2
+                               pl-6 pr-3 py-2 w-full
+                               rounded-md
+                               hover:bg-accent/10
+                               transition-all"
+                  >
+                    <div className="flex items-center gap-2 min-w-0">
+                      <item.icon className="w-4 h-4 flex-shrink-0" />
+                      <span className="break-words text-left">{item.title}</span>
+                    </div>
+                    {open && isActive && (
+                      <div className="w-2 h-2 rounded-full bg-primary flex-shrink-0" />
+                    )}
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            )
+          })}
+        </SidebarMenu>
+      </SidebarGroupContent>
+    </SidebarGroup>
+  )
+}
 
-const AppSidebar = () => {
-  const [username, setUsername] = useState("username")
-  const [accountId, setAccountId] = useState(null)
-
+export default function AppSidebar() {
   const navigate = useNavigate()
   const location = useLocation()
   const currentPath = location.pathname
+  const { open } = useSidebar()
+
+  const [username, setUsername] = useState("username")
+  const [accountId, setAccountId] = useState(null)
+  const [userRole, setUserRole] = useState(null)
 
   const handleLogout = useCallback(async () => {
     const token = localStorage.getItem("token")
-    try {
-      if (token) {
+    if (token) {
+      try {
         await axios.post(LOGOUT_API, {}, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
+          headers: { Authorization: `Bearer ${token}` }
         })
+      } catch {
+        console.log("Logout failed, continuing.")
       }
-    } catch {
-      console.log("Server logout skipped or failed.")
     }
-
     localStorage.setItem("logout", Date.now())
     localStorage.removeItem("token")
     navigate("/login")
@@ -120,20 +134,26 @@ const AppSidebar = () => {
     if (token) {
       try {
         const decoded = jwtDecode(token)
-        setUsername(decoded.username || decoded.name || "user")
-        setAccountId(decoded.id || decoded.account_id || null)
-      } catch (err) {
-        console.error("Invalid token:", err)
+        setUsername(decoded.username || decoded.name)
+        setAccountId(decoded.id || decoded.account_id)
+        setUserRole(decoded.role)
+      } catch {
+        console.error("Invalid JWT")
       }
     }
   }, [])
+
+  const isAdmin = userRole === "admin"
 
   return (
     <Sidebar collapsible="icon" className="border-none">
       <SidebarHeader className="py-4 border-none">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild className="hover:bg-transparent active:bg-transparent focus:outline-none">
+            <SidebarMenuButton
+              asChild
+              className="hover:bg-transparent active:bg-transparent focus:outline-none"
+            >
               <Link to="/" className="flex items-center font-medium">
                 <img src="./src/assets/logo.png" alt="logo" width={30} height={30} />
                 <p className="pl-2">Membership Management System</p>
@@ -143,7 +163,7 @@ const AppSidebar = () => {
         </SidebarMenu>
       </SidebarHeader>
 
-      <SidebarContent>
+      <SidebarContent className={open ? "ml-4" : ""}>
         {menuSections.map(section => (
           <RenderMenuGroup
             key={section.label}
@@ -158,13 +178,48 @@ const AppSidebar = () => {
         <SidebarMenu>
           <SidebarMenuItem>
             <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <SidebarMenuButton className="rounded-full px-3 py-2 hover:bg-accent transition-colors flex items-center">
-                  <User2 />
-                  <div className="px-2 font-medium">{username}</div>
-                  <ChevronUp className="ml-auto" />
-                </SidebarMenuButton>
-              </DropdownMenuTrigger>
+              {!isAdmin ? (
+                <TooltipProvider>
+                  <Tooltip delayDuration={100}>
+                    <TooltipTrigger asChild>
+                      <DropdownMenuTrigger asChild>
+                        <SidebarMenuButton
+                          className={`flex items-center gap-2 px-3 py-2 rounded-md
+                                      hover:bg-accent/10 transition-colors
+                                      ${open ? "ml-4" : ""}`}
+                        >
+                          <User2 />
+                          <span className="font-medium">{username}</span>
+                          <ChevronUp className="ml-auto" />
+                        </SidebarMenuButton>
+                      </DropdownMenuTrigger>
+                    </TooltipTrigger>
+                    <TooltipContent
+                      side="top"
+                      align="center"
+                      className="rounded-lg p-4 shadow-lg w-60"
+                    >
+                      <p className="text-xs">
+                        Logged in with a Staff account. Limited permission is granted.
+                        Some features and options are disabled. Log in with an Admin
+                        account to access them.
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              ) : (
+                <DropdownMenuTrigger asChild>
+                  <SidebarMenuButton
+                    className={`flex items-center gap-2 px-3 py-2 rounded-md
+                                hover:bg-accent/10 transition-colors
+                                ${open ? "ml-4" : ""}`}
+                  >
+                    <User2 />
+                    <span className="font-medium">{username}</span>
+                    <ChevronUp className="ml-auto" />
+                  </SidebarMenuButton>
+                </DropdownMenuTrigger>
+              )}
               <DropdownMenuContent align="end" sideOffset={10}>
                 <DropdownMenuItem onSelect={() => navigate(`/accounts/${accountId}`)}>
                   Account
@@ -180,5 +235,3 @@ const AppSidebar = () => {
     </Sidebar>
   )
 }
-
-export default AppSidebar

@@ -11,7 +11,6 @@ const truncate = (text, maxLength = 25) => {
   return text.length > maxLength ? text.slice(0, maxLength) + "..." : text
 }
 
-
 const formatDate = value =>
   value ? format(new Date(value), "MMM dd, yyyy") : "-"
 
@@ -23,39 +22,44 @@ const statusStyles = {
 
 export const membersColumns = (navigate, visibleColumns = {}) => {
   const columns = [
+    // UUID column
     columnHelper.accessor("id", {
       header: "UUID",
       cell: info => info.getValue()
     }),
 
-    columnHelper.accessor("first_name", {
-      header: "First Name",
-      cell: info => truncate(info.getValue())
-    }),
+    // Combined Name column
+    columnHelper.accessor(
+      row => `${row.first_name || ""} ${row.last_name || ""}`.trim(),
+      {
+        id: "name",
+        header: "Name",
+        cell: info => truncate(info.getValue())
+      }
+    ),
 
-    columnHelper.accessor("last_name", {
-      header: "Last Name",
-      cell: info => truncate(info.getValue())
-    }),
-
+    // Contact Number (optional)
     visibleColumns.contactNumber &&
       columnHelper.accessor("contact_number", {
         header: "Contact No.",
         cell: info => info.getValue()
       }),
 
+    // Recent Join Date (optional)
     visibleColumns.joinDate &&
       columnHelper.accessor("recent_join_date", {
         header: "Recent Join Date",
         cell: info => formatDate(info.getValue())
       }),
 
+    // Expiration Date (optional)
     visibleColumns.expireDate &&
       columnHelper.accessor("expiration_date", {
         header: "Expiration Date",
         cell: info => formatDate(info.getValue())
       }),
 
+    // Status badge
     columnHelper.accessor("status", {
       header: "Status",
       cell: info => {
@@ -69,6 +73,7 @@ export const membersColumns = (navigate, visibleColumns = {}) => {
       }
     }),
 
+    // Actions
     columnHelper.display({
       id: "actions",
       header: "View",
@@ -78,11 +83,11 @@ export const membersColumns = (navigate, visibleColumns = {}) => {
         return (
           <Button
             variant="ghost"
-            className="h-8 w-8 p-0"
+            className="h-0.5 p-0"
             onClick={() => navigate(`/members/${member.id}`)}
           >
             <span className="sr-only">View</span>
-            <FolderOpen className="h-4 w-4" />
+            <FolderOpen className="" />
           </Button>
         )
       }

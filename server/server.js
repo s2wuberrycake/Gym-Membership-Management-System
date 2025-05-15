@@ -7,6 +7,7 @@ import authRouter from "./routes/authorize.js"
 import membersRouter from "./routes/members.js"
 import archiveRouter from "./routes/archive.js"
 import settingsRouter from "./routes/settings.js"
+import logsRouter from "./routes/logs.js"
 import { errorHandler } from "./middleware/error.js"
 import { expireMembers } from "./services/members.js"
 
@@ -21,12 +22,18 @@ app.use("/api/members", membersRouter)
 app.use("/api/archive", archiveRouter)
 app.use("/api/settings", settingsRouter)
 
+// mount our new update-log (and future analytics) endpoint
+app.use("/api/home", logsRouter)
+
+// global error handler
 app.use(errorHandler)
 
+// run one expiration check on startup
 expireMembers()
   .then(() => console.log("DEBUG >> Initial expiration check complete"))
   .catch(console.error)
 
+// schedule daily expiration check at 00:01 Manila time
 cron.schedule(
   "1 0 * * *",
   () => {

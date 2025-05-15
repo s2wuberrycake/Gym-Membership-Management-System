@@ -115,7 +115,7 @@ export default function Settings() {
   return (
     // If not admin, grey out and disable all interaction
     <div
-      className={`grid grid-cols-20 grid-rows-[auto_1fr] gap-4 h-full ${
+      className={`grid grid-cols-20 grid-rows-[auto_1fr] gap-4 mb-4 h-full ${
         !isAdmin ? "pointer-events-none opacity-50" : ""
       }`}
     >

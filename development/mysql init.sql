@@ -77,16 +77,23 @@ INSERT INTO status_types (status_id, status_label) VALUES
 
 CREATE TABLE action_types (
     action_id INT PRIMARY KEY,
-    action VARCHAR(50) NOT NULL
+    action_label VARCHAR(50) NOT NULL
 );
+
+INSERT INTO action_types (action_id, action_label) VALUES
+(1, 'enrollment'),
+(2, 'member info update'),
+(3, 'membership extension'),
+(4, 'cancellation'),
+(5, 'expiration'),
+(6, 're-enrollment');
 
 CREATE TABLE update_log (
     update_id INT AUTO_INCREMENT PRIMARY KEY,
     member_id CHAR(36),
     action_id INT,
     account_id INT,
-    log_date DATE DEFAULT (CURRENT_DATE),
-    logged_expiration_date DATE,
+    log_date DATETIME,
     FOREIGN KEY (member_id) REFERENCES members(member_id),
     FOREIGN KEY (action_id) REFERENCES action_types(action_id),
     FOREIGN KEY (account_id) REFERENCES accounts(account_id)

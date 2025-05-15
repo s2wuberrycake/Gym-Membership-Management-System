@@ -34,11 +34,11 @@ export const accountsColumns = (navigate) => [
       return (
         <Button
           variant="ghost"
-          className="h-8 w-8 p-0"
+          className="h-0.5 p-0"
           onClick={() => navigate(`/accounts/${account.account_id}`)}
         >
           <span className="sr-only">View</span>
-          <FolderOpen className="h-4 w-4" />
+          <FolderOpen className="" />
         </Button>
       )
     }

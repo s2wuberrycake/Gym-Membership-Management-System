@@ -304,3 +304,6 @@ export async function expireMembers() {
     `DEBUG >> ${result.affectedRows} row(s) updated to "expired"`
   )
 }
+
+// TODO : each Add, Edit, Extend, Cancel, Restore, Expire action in service/members.js will have a SQL entry
+// row on update log

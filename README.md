@@ -8,6 +8,10 @@ Locally hosted webapp for managing memberships
 4. execute "pnpm i"
 5. execute "pnpm dev"
 6. repeat steps 2-5, but for step 3. execute "cd server" instead
+7. open mysql, open "mysql init.sql" and run query
+
+## TROUBLESHOOT
+1. if pnpm is not working, run npm i -g pnpm@latest (installs pnpm globally)
 
 ## TODOs
 - Home

@@ -96,7 +96,7 @@ export default function Archive() {
   }
 
   return (
-    <div className="grid grid-cols-20 grid-rows-[auto_1fr] gap-4 h-full">
+    <div className="grid grid-cols-20 grid-rows-[auto_1fr] gap-4 mb-4 h-full">
       <div className="col-span-20 flex justify-between items-center">
         <TableSearch
           value={globalFilter}
