@@ -1,4 +1,3 @@
-// client/src/lib/api/index.js
 export const API_BASE      = "http://localhost:3000"
 
 export const MEMBERS_API   = `${API_BASE}/api/members`
@@ -11,5 +10,4 @@ export const AUTH_HOME_API = `${AUTH_API}/home`
 
 export const SETTINGS_API  = `${API_BASE}/api/settings`
 
-// Home page: update-log & analytics
 export const HOME_API      = `${API_BASE}/api/home`

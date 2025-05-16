@@ -2,6 +2,9 @@ create schema mmsDefault;
 create schema mmsBackup;
 use mmsdefault;
 
+SET FOREIGN_KEY_CHECKS = 0;
+SET SQL_SAFE_UPDATES = 0;
+
 -- ACCOUNT TABLE
 CREATE TABLE role_types (
     role_id INT PRIMARY KEY,

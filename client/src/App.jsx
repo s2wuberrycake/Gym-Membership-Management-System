@@ -1,6 +1,7 @@
 import { Routes, Route, Outlet, useNavigate } from "react-router-dom"
 import Cookies from "js-cookie"
 import { useEffect } from "react"
+
 import Navbar from "./components/Navbar"
 import AppSidebar from "./components/AppSidebar"
 import { SidebarProvider } from "./components/ui/sidebar"
@@ -14,7 +15,6 @@ import Settings from "./pages/Settings"
 import Login from "./pages/Login"
 import Member from "./pages/Member"
 import Account from "./pages/Account"
-import RequireRole from "./auth/RequireRole"
 
 function Layout() {
   const defaultOpen = Cookies.get("sidebar_state") === "true"
@@ -64,7 +64,7 @@ function App() {
           <Route index element={<Members />} />
           <Route path=":id" element={<Member />} />
         </Route>
-        <Route path="accounts/:id" element={<Account />} /> {/* ✅ NEW */}
+        <Route path="accounts/:id" element={<Account />} />
         <Route path="archive" element={<Archive />} />
         <Route path="visits" element={<Visits />} />
         <Route path="settings" element={<Settings />} />

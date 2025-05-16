@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { getAccountById } from "@/lib/api/accounts"
+
+import { CornerDownLeft } from "lucide-react"
+
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetTrigger } from "@/components/ui/sheet"
-import { CornerDownLeft } from "lucide-react"
 import { toast } from "sonner"
 import EditAccount from "@/components/Account/Edit"
 import DeleteAccount from "@/components/Account/Delete"

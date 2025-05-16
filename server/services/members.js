@@ -1,19 +1,22 @@
 import { defaultDb } from "../config/db.js"
 import { DateTime } from "luxon"
+import { logUpdate } from "./logs.js"
 
 const TIMEZONE = "Asia/Manila"
+const getToday   = () => DateTime.now().setZone(TIMEZONE).startOf("day")
+const formatDate = dt => dt.toFormat("yyyy-MM-dd")
 
-const getToday = () => DateTime.now().setZone(TIMEZONE).startOf("day")
-const formatDate = (dt) => dt.toFormat("yyyy-MM-dd")
-
-const getDaysToAdd = async (extend_date_id) => {
-  const [rows] = await defaultDb.query("SELECT days FROM extend_date WHERE extend_date_id = ?", [extend_date_id])
+const getDaysToAdd = async extend_date_id => {
+  const [rows] = await defaultDb.query(
+    "SELECT days FROM extend_date WHERE extend_date_id = ?",
+    [extend_date_id]
+  )
   if (!rows.length) throw new Error("Invalid extend_date_id")
   return rows[0].days
 }
 
-// Insert new member
-export const insertMember = async (data) => {
+// Add a new member
+export const insertMember = async (data, account_id) => {
   const {
     first_name,
     last_name,
@@ -24,19 +27,32 @@ export const insertMember = async (data) => {
     status_id = 1
   } = data
 
-  const daysToAdd = await getDaysToAdd(extend_date_id)
-  const today = getToday()
+  const [[{ member_id }]] = await defaultDb.query(
+    "SELECT UUID() AS member_id"
+  )
+
+  const daysToAdd  = await getDaysToAdd(extend_date_id)
+  const today      = getToday()
   const expiration = today.plus({ days: daysToAdd })
 
-  const [result] = await defaultDb.query(
+  await defaultDb.query(
     `INSERT INTO members (
-      first_name, last_name, email, contact_number, address,
-      original_join_date, recent_join_date, expiration_date, status_id
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       member_id,
+       first_name,
+       last_name,
+       email,
+       contact_number,
+       address,
+       original_join_date,
+       recent_join_date,
+       expiration_date,
+       status_id
+     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
+      member_id,
       first_name,
       last_name,
-      email || null,
+      email    || null,
       contact_number,
       address,
       formatDate(today),
@@ -46,90 +62,81 @@ export const insertMember = async (data) => {
     ]
   )
 
-  return result.insertId
+  await logUpdate(member_id, 1, account_id)
+  return member_id
 }
 
-// Move member from cancelled members to active members
-export const restoreMember = async (id, extend_date_id) => {
-  const connection = await defaultDb.getConnection()
+// Restore a cancelled member with new expiration
+export const restoreMember = async (id, extend_date_id, account_id) => {
+  const conn = await defaultDb.getConnection()
   try {
-    await connection.beginTransaction()
+    await conn.beginTransaction()
 
-    const [rows] = await connection.query("SELECT * FROM cancelled_members WHERE member_id = ?", [id])
-    if (!rows.length) throw new Error("Cancelled member not found")
+    const days      = await getDaysToAdd(extend_date_id)
+    const today     = getToday()
+    const fmtToday  = formatDate(today)
+    const fmtExpiry = formatDate(today.plus({ days }))
 
-    const cancelledMember = rows[0]
-    const daysToAdd = await getDaysToAdd(extend_date_id)
-    const today = getToday()
-    const expiration = today.plus({ days: daysToAdd })
-
-    await connection.query(
-      `INSERT INTO members (
-        member_id, first_name, last_name, email, contact_number, address,
-        original_join_date, recent_join_date, expiration_date, status_id
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [
-        cancelledMember.member_id,
-        cancelledMember.first_name,
-        cancelledMember.last_name,
-        cancelledMember.email,
-        cancelledMember.contact_number,
-        cancelledMember.address,
-        cancelledMember.original_join_date,
-        formatDate(today),
-        formatDate(expiration),
-        1
-      ]
+    await conn.query(
+      `UPDATE members
+         SET recent_join_date = ?,
+             expiration_date = ?,
+             status_id = 1
+       WHERE member_id = ?`,
+      [fmtToday, fmtExpiry, id]
     )
 
-    await connection.query("DELETE FROM cancelled_members WHERE member_id = ?", [id])
-    await connection.commit()
+    await conn.query(
+      `DELETE FROM cancelled_members
+       WHERE member_id = ?`,
+      [id]
+    )
+
+    await conn.commit()
   } catch (err) {
-    await connection.rollback()
+    await conn.rollback()
     throw err
   } finally {
-    connection.release()
+    conn.release()
   }
-}
 
+  await logUpdate(id, 6, account_id)
+}
 
 // Extend membership duration
-export const extendMember = async (id, extend_date_id) => {
-  const [rows] = await defaultDb.query("SELECT expiration_date FROM members WHERE member_id = ?", [id])
+export const extendMember = async (id, extend_date_id, account_id) => {
+  const [rows] = await defaultDb.query(
+    "SELECT expiration_date FROM members WHERE member_id = ?",
+    [id]
+  )
   if (!rows.length) throw new Error("Member not found")
 
-    const expirationRaw = rows[0].expiration_date
-    if (!expirationRaw) throw new Error("Missing expiration_date from database")
-    
-    const existingExpiration = DateTime.fromJSDate(expirationRaw, { zone: TIMEZONE })
-    if (!existingExpiration.isValid) {
-      throw new Error(`Invalid expiration_date: ${expirationRaw}`)
-    }    
+  const existing = DateTime.fromJSDate(rows[0].expiration_date, { zone: TIMEZONE })
+  const today    = getToday()
+  const base     = existing < today ? today : existing
+  const days     = await getDaysToAdd(extend_date_id)
+  const newExp   = base.plus({ days })
+  const fmtExp   = formatDate(newExp)
 
-  const today = getToday()
-  const baseDate = existingExpiration < today ? today : existingExpiration
-
-  const daysToAdd = await getDaysToAdd(extend_date_id)
-  const newExpiration = baseDate.plus({ days: daysToAdd })
-  const formattedExpiration = formatDate(newExpiration)
-
-  let statusLabel = newExpiration < today ? "expired" : "active"
-
-  const [statusRow] = await defaultDb.query("SELECT status_id FROM status_types WHERE status_label = ?", [statusLabel])
-  if (!statusRow.length) throw new Error(`Status label "${statusLabel}" not found`)
-
-  const status_id = statusRow[0].status_id
-
-  const [result] = await defaultDb.query(
-    "UPDATE members SET expiration_date = ?, status_id = ? WHERE member_id = ?",
-    [formattedExpiration, status_id, id]
+  const labelSql = newExp < today ? "expired" : "active"
+  const [[{ status_id }]] = await defaultDb.query(
+    "SELECT status_id FROM status_types WHERE status_label = ?",
+    [labelSql]
   )
 
-  return result
+  await defaultDb.query(
+    `UPDATE members
+       SET expiration_date = ?,
+           status_id = ?
+     WHERE member_id = ?`,
+    [fmtExp, status_id, id]
+  )
+
+  await logUpdate(id, 3, account_id)
 }
 
-// Update existing member info
-export const updateMember = async (id, data) => {
+// Update member information
+export const updateMember = async (id, data, account_id) => {
   const {
     first_name,
     last_name,
@@ -140,76 +147,121 @@ export const updateMember = async (id, data) => {
     expiration_date
   } = data
 
-  const recentJoin = DateTime.fromISO(recent_join_date, { zone: TIMEZONE })
-  const expiration = DateTime.fromISO(expiration_date, { zone: TIMEZONE })
+  const recent = DateTime.fromISO(recent_join_date, { zone: TIMEZONE })
+  const exp    = DateTime.fromISO(expiration_date,   { zone: TIMEZONE })
 
   await defaultDb.query(
     `UPDATE members
-     SET first_name = ?, last_name = ?, email = ?, contact_number = ?, address = ?, recent_join_date = ?, expiration_date = ?
+       SET first_name = ?,
+           last_name = ?,
+           email = ?,
+           contact_number = ?,
+           address = ?,
+           recent_join_date = ?,
+           expiration_date = ?
      WHERE member_id = ?`,
     [
       first_name,
       last_name,
-      email || null,
+      email    || null,
       contact_number,
       address,
-      formatDate(recentJoin),
-      formatDate(expiration),
+      formatDate(recent),
+      formatDate(exp),
       id
     ]
   )
+
+  await logUpdate(id, 2, account_id)
 }
 
-// cancel and move a member to cancelled members table
-export const cancelMember = async (id) => {
-  const connection = await defaultDb.getConnection()
+// Cancel a member
+export const cancelMember = async (id, account_id) => {
+  const conn = await defaultDb.getConnection()
   try {
-    await connection.beginTransaction()
+    await conn.beginTransaction()
 
-    const [rows] = await connection.query("SELECT * FROM members WHERE member_id = ?", [id])
-    if (!rows.length) throw new Error("Member not found")
-
-    const member = rows[0]
-    const cancelDate = formatDate(getToday())
-
-    await connection.query(
-      `INSERT INTO cancelled_members (
-        member_id, first_name, last_name, email, contact_number, address,
-        original_join_date, cancel_date, status_id
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [
-        member.member_id,
-        member.first_name,
-        member.last_name,
-        member.email,
-        member.contact_number,
-        member.address,
-        member.original_join_date,
-        cancelDate,
-        3
-      ]
+    await conn.query(
+      "UPDATE members SET status_id = 3 WHERE member_id = ?",
+      [id]
     )
 
-    await connection.query("DELETE FROM members WHERE member_id = ?", [id])
-    await connection.commit()
+    await conn.query(
+      `INSERT INTO cancelled_members (
+         member_id,
+         first_name,
+         last_name,
+         email,
+         contact_number,
+         address,
+         original_join_date,
+         cancel_date,
+         status_id
+       )
+       SELECT
+         member_id,
+         first_name,
+         last_name,
+         email,
+         contact_number,
+         address,
+         original_join_date,
+         CURDATE(),
+         status_id
+       FROM members
+       WHERE member_id = ?`,
+      [id]
+    )
+
+    await conn.commit()
   } catch (err) {
-    await connection.rollback()
+    await conn.rollback()
     throw err
   } finally {
-    connection.release()
+    conn.release()
   }
+
+  await logUpdate(id, 4, account_id)
 }
 
-// Get membership durations
+// Expire active members with due expiration dates
+export async function expireMembers(systemAccountId) {
+  const [rows] = await defaultDb.query(
+    `SELECT member_id
+       FROM members
+      WHERE status_id = 1
+        AND expiration_date <= CURDATE()`
+  )
+  const expiredIds = rows.map(r => r.member_id)
+  if (expiredIds.length === 0) {
+    console.log("DEBUG >> No members to expire")
+    return
+  }
+
+  const [result] = await defaultDb.query(
+    `UPDATE members
+       SET status_id = 2
+     WHERE member_id IN (?)`,
+    [expiredIds]
+  )
+  console.log(`DEBUG >> ${result.affectedRows} member(s) marked expired`)
+
+  for (const member_id of expiredIds) {
+    await logUpdate(member_id, 5, systemAccountId)
+  }
+  console.log(`DEBUG >> Logged expiration for ${expiredIds.length} member(s)`)
+}
+
+// Get extension durations
 export const getDurations = async () => {
   const [rows] = await defaultDb.query("SELECT * FROM extend_date")
   return rows
 }
 
-// Get all active members
+// Get all active or expired members
 export const getMembers = async () => {
   const [rows] = await defaultDb.query(`
-    SELECT 
+    SELECT
       m.member_id AS id,
       m.first_name,
       m.last_name,
@@ -220,16 +272,18 @@ export const getMembers = async () => {
       m.expiration_date,
       st.status_label AS status
     FROM members m
-    LEFT JOIN status_types st ON m.status_id = st.status_id
+    LEFT JOIN status_types st
+      ON m.status_id = st.status_id
+    WHERE m.status_id IN (1, 2)
     ORDER BY m.recent_join_date DESC, m.last_name ASC
   `)
   return rows
 }
 
-// Get single member by ID
-export const getMemberById = async (id) => {
+// Get a member by ID
+export const getMemberById = async id => {
   const [rows] = await defaultDb.query(`
-    SELECT 
+    SELECT
       m.member_id AS id,
       m.first_name,
       m.last_name,
@@ -242,17 +296,17 @@ export const getMemberById = async (id) => {
       m.status_id,
       st.status_label AS status
     FROM members m
-    LEFT JOIN status_types st ON m.status_id = st.status_id
+    LEFT JOIN status_types st
+      ON m.status_id = st.status_id
     WHERE m.member_id = ?
   `, [id])
-  
   return rows[0] || null
 }
 
-// Get all cancelled members
+// Get all archived members
 export const getCancelledMembers = async () => {
   const [rows] = await defaultDb.query(`
-    SELECT 
+    SELECT
       cm.member_id AS id,
       cm.first_name,
       cm.last_name,
@@ -263,16 +317,17 @@ export const getCancelledMembers = async () => {
       cm.cancel_date,
       st.status_label AS status
     FROM cancelled_members cm
-    LEFT JOIN status_types st ON cm.status_id = st.status_id
+    LEFT JOIN status_types st
+      ON cm.status_id = st.status_id
     ORDER BY cm.cancel_date DESC, cm.last_name ASC
   `)
   return rows
 }
 
-// Get single cancelled member
-export const getCancelledMemberById = async (id) => {
+// Get an archived member by ID
+export const getCancelledMemberById = async id => {
   const [rows] = await defaultDb.query(`
-    SELECT 
+    SELECT
       cm.member_id AS id,
       cm.first_name,
       cm.last_name,
@@ -284,26 +339,9 @@ export const getCancelledMemberById = async (id) => {
       cm.status_id,
       st.status_label AS status
     FROM cancelled_members cm
-    LEFT JOIN status_types st ON cm.status_id = st.status_id
+    LEFT JOIN status_types st
+      ON cm.status_id = st.status_id
     WHERE cm.member_id = ?
   `, [id])
-
   return rows[0] || null
 }
-
-// Automatically checks for expired members
-export async function expireMembers() {
-  const [result] = await defaultDb.query(
-    `UPDATE members
-     SET status_id = 2
-     WHERE status_id = 1
-       AND expiration_date <= CURDATE()`
-  )
-
-  console.log(
-    `DEBUG >> ${result.affectedRows} row(s) updated to "expired"`
-  )
-}
-
-// TODO : each Add, Edit, Extend, Cancel, Restore, Expire action in service/members.js will have a SQL entry
-// row on update log

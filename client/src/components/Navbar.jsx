@@ -1,5 +1,6 @@
 import { Moon, Sun } from "lucide-react"
 import { useTheme } from "../context/ThemeProvider"
+
 import { SidebarTrigger } from "./ui/sidebar"
 import { Switch } from "@/components/ui/switch"
 

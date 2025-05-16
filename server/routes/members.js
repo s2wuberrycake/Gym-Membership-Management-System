@@ -1,22 +1,25 @@
-import express from "express"
+import express from 'express'
+import { extractUser } from '../middleware/user.js'
 import {
   getDurationsController,
   getAllMembersController,
+  getMemberByIdController,
   createMemberController,
   updateMemberController,
-  getMemberByIdController,
   extendMembershipController,
   cancelMemberController
-} from "../controllers/members.js"
+} from '../controllers/members.js'
 
 const router = express.Router()
 
-router.get("/durations", getDurationsController)
-router.get("/", getAllMembersController)
-router.post("/", createMemberController)
-router.get("/:id", getMemberByIdController)
-router.put("/:id/extend", extendMembershipController)
-router.put("/:id", updateMemberController)
-router.delete("/:id/cancel", cancelMemberController)
+router.use(extractUser)
+
+router.get('/durations',         getDurationsController)
+router.get('/',                  getAllMembersController)
+router.post('/',                 createMemberController)
+router.get('/:id',               getMemberByIdController)
+router.put('/:id/extend',        extendMembershipController)
+router.put('/:id',               updateMemberController)
+router.delete('/:id/cancel',     cancelMemberController)
 
 export default router

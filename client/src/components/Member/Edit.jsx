@@ -1,6 +1,12 @@
 import React, { useEffect, useState } from "react"
 import { updateMemberById } from "@/lib/api/members"
 import { jwtDecode } from "jwt-decode"
+import { cn } from "@/lib/utils"
+import { validateField, validateEditMemberForm } from "@/lib/helper/validate"
+import { DateTime } from "luxon"
+
+import { CalendarIcon } from "lucide-react"
+
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import {
@@ -11,12 +17,8 @@ import {
 } from "@/components/ui/sheet"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { CalendarIcon } from "lucide-react"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
-import { cn } from "@/lib/utils"
-import { validateField, validateEditMemberForm } from "@/lib/helper/validate"
-import { DateTime } from "luxon"
 
 const EditMember = ({ member, isSheetOpen, onClose, refreshMember }) => {
   const [form, setForm] = useState({
@@ -140,7 +142,6 @@ const EditMember = ({ member, isSheetOpen, onClose, refreshMember }) => {
                 </div>
               ))}
 
-              {/* Recent Join Date */}
               <div>
                 <Label className="pb-0.5">Recent Join Date</Label>
                 <div className="w-full">
@@ -177,7 +178,6 @@ const EditMember = ({ member, isSheetOpen, onClose, refreshMember }) => {
                 </div>
               </div>
 
-              {/* Expiration Date */}
               <div>
                 <Label className="pb-0.5">Expiration Date</Label>
                 <div className="w-full">

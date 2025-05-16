@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from "react"
 import { getAllCancelledMembers } from "@/lib/api/archive"
+
 import { ListRestart, X } from "lucide-react"
 
 import DataTable from "@/components/ui/data-table"
-import { archiveColumns } from "@/components/table/ArchiveColumn"
 import TableSearch from "@/components/ui/table-search"
 import { Button } from "@/components/ui/button"
 import { Sheet } from "@/components/ui/sheet"
-import RestoreMember from "@/components/Member/Restore"
 import {
   Container,
   ContainerHeader,
@@ -15,8 +14,10 @@ import {
   ContainerContent
 } from "@/components/ui/container"
 import { Separator } from "@/components/ui/separator"
+import { archiveColumns } from "@/components/table/ArchiveColumn"
+import RestoreMember from "@/components/Member/Restore"
 
-export default function Archive() {
+const Archive = () => {
   const [data, setData] = useState([])
   const [globalFilter, setGlobalFilter] = useState(
     () => localStorage.getItem("archiveGlobalFilter") || ""
@@ -27,7 +28,6 @@ export default function Archive() {
       ? JSON.parse(saved)
       : { contactNumber: true, cancelDate: true }
   })
-
   const [restoreId, setRestoreId] = useState(null)
   const [isRestoreOpen, setIsRestoreOpen] = useState(false)
 
@@ -55,11 +55,12 @@ export default function Archive() {
     fetchData()
   }, [])
 
-  const toggleColumn = (column) =>
-    setVisibleColumns((prev) => ({
+  const toggleColumn = column => {
+    setVisibleColumns(prev => ({
       ...prev,
       [column]: !prev[column]
     }))
+  }
 
   const resetFilters = () => {
     setGlobalFilter("")
@@ -72,25 +73,25 @@ export default function Archive() {
     const fields = ["id", "first_name", "last_name"]
     if (visibleColumns.contactNumber) fields.push("contact_number")
     if (visibleColumns.cancelDate) fields.push("cancel_date")
-    return fields.some((field) => {
+    const lower = filterValue.toLowerCase()
+    return fields.some(field => {
       const value = row.original[field]
-      const date =
+      const text =
         field === "cancel_date" && value
           ? new Date(value).toLocaleDateString("en-US", {
               year: "numeric",
               month: "short",
               day: "2-digit"
             })
-          : ""
-      const text = (date || String(value ?? "")).toLowerCase()
-      return text.includes(filterValue.toLowerCase())
+          : String(value ?? "")
+      return text.toLowerCase().includes(lower)
     })
   }
 
   const hasActiveFilters =
-    globalFilter || Object.values(visibleColumns).some((v) => !v)
+    globalFilter || Object.values(visibleColumns).some(v => !v)
 
-  const openRestore = (memberId) => {
+  const openRestore = memberId => {
     setRestoreId(memberId)
     setIsRestoreOpen(true)
   }
@@ -111,8 +112,7 @@ export default function Archive() {
             Cancelled Members
           </ContainerTitle>
           <p className="text-sm text-muted-foreground">
-            View and restore cancelled members. Toggle column visibility or
-            reset filters below.
+            View and restore cancelled members. Toggle column visibility or reset filters below.
           </p>
         </ContainerHeader>
 
@@ -127,7 +127,7 @@ export default function Archive() {
                 onClick={() => toggleColumn("contactNumber")}
                 className="h-8 text-sm flex items-center gap-1"
               >
-                <span>Contact Number</span>
+                Contact Number
                 {visibleColumns.contactNumber && <X className="w-3 h-3" />}
               </Button>
 
@@ -137,7 +137,7 @@ export default function Archive() {
                 onClick={() => toggleColumn("cancelDate")}
                 className="h-8 text-sm flex items-center gap-1"
               >
-                <span>Cancel Date</span>
+                Cancel Date
                 {visibleColumns.cancelDate && <X className="w-3 h-3" />}
               </Button>
 
@@ -184,3 +184,5 @@ export default function Archive() {
     </div>
   )
 }
+
+export default Archive

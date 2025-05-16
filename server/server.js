@@ -17,31 +17,27 @@ const app = express()
 app.use(cors())
 app.use(express.json())
 
-app.use("/auth", authRouter)
-app.use("/api/members", membersRouter)
-app.use("/api/archive", archiveRouter)
+app.use("/auth",         authRouter)
+app.use("/api/members",  membersRouter)
+app.use("/api/archive",  archiveRouter)
 app.use("/api/settings", settingsRouter)
+app.use("/api/home",     logsRouter)
 
-// mount our new update-log (and future analytics) endpoint
-app.use("/api/home", logsRouter)
+// Auto expiration logic
+const SYSTEM_ACCOUNT_ID = Number(process.env.SYSTEM_ACCOUNT_ID ?? 0)
 
-// global error handler
-app.use(errorHandler)
-
-// run one expiration check on startup
-expireMembers()
+expireMembers(SYSTEM_ACCOUNT_ID)
   .then(() => console.log("DEBUG >> Initial expiration check complete"))
   .catch(console.error)
-
-// schedule daily expiration check at 00:01 Manila time
 cron.schedule(
   "1 0 * * *",
   () => {
     console.log("DEBUG >> Running daily expiration check")
-    expireMembers().catch(console.error)
+    expireMembers(SYSTEM_ACCOUNT_ID).catch(console.error)
   },
   { timezone: "Asia/Manila" }
 )
+app.use(errorHandler)
 
 app.listen(process.env.PORT, () => {
   console.log(`DEBUG >> Server listening on port ${process.env.PORT}`)

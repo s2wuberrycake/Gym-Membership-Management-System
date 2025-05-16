@@ -16,7 +16,6 @@ Locally hosted webapp for managing memberships
 ## TODOs
 - Home
   - Analytics : Bar graphs for statistical data
-  - Update log
   - Generate reports
 
 - Members

@@ -18,13 +18,11 @@ const statusStyles = {
 
 export const archiveColumns = (visibleColumns = {}, actions = {}) => {
   const columns = [
-    // UUID
     columnHelper.accessor("id", {
       header: "UUID",
       cell: info => info.getValue()
     }),
 
-    // Combined Name column
     columnHelper.accessor(
       row => `${row.first_name || ""} ${row.last_name || ""}`.trim(),
       {
@@ -53,7 +51,6 @@ export const archiveColumns = (visibleColumns = {}, actions = {}) => {
     )
   }
 
-  // Status badge
   columns.push(
     columnHelper.accessor("status", {
       header: "Status",
@@ -69,7 +66,6 @@ export const archiveColumns = (visibleColumns = {}, actions = {}) => {
     })
   )
 
-  // Restore action
   columns.push(
     columnHelper.display({
       id: "actions",
@@ -86,11 +82,11 @@ export const archiveColumns = (visibleColumns = {}, actions = {}) => {
         return (
           <Button
             variant="ghost"
-            className="h-0.5 p-0"
+            className="h-full py-1 px-2"
             onClick={handleRestore}
           >
             <span className="sr-only">Restore</span>
-            <Undo2 className="" />
+            <Undo2 />
           </Button>
         )
       }

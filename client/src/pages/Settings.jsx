@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom"
 import { getAllAccounts } from "@/lib/api/accounts"
 
 import { ListRestart } from "lucide-react"
+
 import DataTable from "@/components/ui/data-table"
 import { accountsColumns } from "@/components/table/AccountsColumn"
 import TableSearch from "@/components/ui/table-search"
@@ -18,8 +19,7 @@ import {
 } from "@/components/ui/container"
 import { Separator } from "@/components/ui/separator"
 
-// Helper to decode the payload of a JWT
-const decodeJwt = (token) => {
+const decodeJwt = token => {
   try {
     const payload = token.split(".")[1]
     return JSON.parse(atob(payload))
@@ -40,7 +40,7 @@ const nextRole = {
   staff: "all"
 }
 
-export default function Settings() {
+const Settings = () => {
   const navigate = useNavigate()
   const [data, setData] = useState([])
   const [tableRef, setTableRef] = useState(null)
@@ -53,7 +53,6 @@ export default function Settings() {
   )
   const [isAddOpen, setIsAddOpen] = useState(false)
 
-  // decode once
   const { role: userRole } = decodeJwt(localStorage.getItem("token") || "")
   const isAdmin = userRole === "admin"
 
@@ -80,7 +79,7 @@ export default function Settings() {
   }, [])
 
   const cycleRoleFilter = () => {
-    setRoleFilter((prev) => nextRole[prev])
+    setRoleFilter(prev => nextRole[prev])
   }
 
   const resetFilters = () => {
@@ -93,16 +92,13 @@ export default function Settings() {
   const filteredData =
     roleFilter === "all"
       ? data
-      : data.filter(
-          (account) => account.role?.toLowerCase() === roleFilter
-        )
+      : data.filter(account => account.role?.toLowerCase() === roleFilter)
 
-  // only show rows to admins
   const displayedData = isAdmin ? filteredData : []
 
   const globalFilterFn = (row, columnId, filterValue) => {
     const fields = ["account_id", "username", "role"]
-    return fields.some((field) => {
+    return fields.some(field => {
       const value = row.original[field]
       return String(value ?? "")
         .toLowerCase()
@@ -113,7 +109,6 @@ export default function Settings() {
   const hasActiveFilters = globalFilter || roleFilter !== "all"
 
   return (
-    // If not admin, grey out and disable all interaction
     <div
       className={`grid grid-cols-20 grid-rows-[auto_1fr] gap-4 mb-4 h-full ${
         !isAdmin ? "pointer-events-none opacity-50" : ""
@@ -198,3 +193,5 @@ export default function Settings() {
     </div>
   )
 }
+
+export default Settings

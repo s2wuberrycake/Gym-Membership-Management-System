@@ -1,9 +1,9 @@
-// src/pages/Home.jsx
 import React, { useEffect, useState } from "react"
 import { getAllUpdateLogs } from "@/lib/api/log"
+
 import DataTable from "@/components/ui/data-table"
-import { updateLogColumns } from "@/components/table/UpdateLogColumn"
 import TableSearch from "@/components/ui/table-search"
+import { updateLogColumns } from "@/components/table/UpdateLogColumn"
 import {
   Container,
   ContainerHeader,
@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/container"
 import { Separator } from "@/components/ui/separator"
 
-export default function Home() {
+const Home = () => {
   const [data, setData] = useState([])
   const [globalFilter, setGlobalFilter] = useState(
     () => localStorage.getItem("updateLogGlobalFilter") || ""
@@ -35,7 +35,6 @@ export default function Home() {
     fetchLog()
   }, [])
 
-  // Search across all fields in the update-log row
   const globalFilterFn = (row, columnId, filterValue) => {
     const fields = [
       "update_id",
@@ -45,16 +44,15 @@ export default function Home() {
       "log_date",
       "logged_expiration_date"
     ]
-    return fields.some((field) => {
-      const v = row.original[field]
-      const txt = v != null ? String(v).toLowerCase() : ""
-      return txt.includes(filterValue.toLowerCase())
+    const lower = filterValue.toLowerCase()
+    return fields.some(field => {
+      const value = row.original[field]
+      return String(value ?? "").toLowerCase().includes(lower)
     })
   }
 
   return (
     <div className="grid grid-cols-20 grid-rows-[auto_1fr] gap-4 h-full">
-      {/* top search bar */}
       <div className="col-span-20 flex justify-between items-center">
         <TableSearch
           value={globalFilter}
@@ -86,3 +84,5 @@ export default function Home() {
     </div>
   )
 }
+
+export default Home

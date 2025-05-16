@@ -22,13 +22,11 @@ const statusStyles = {
 
 export const membersColumns = (navigate, visibleColumns = {}) => {
   const columns = [
-    // UUID column
     columnHelper.accessor("id", {
       header: "UUID",
       cell: info => info.getValue()
     }),
 
-    // Combined Name column
     columnHelper.accessor(
       row => `${row.first_name || ""} ${row.last_name || ""}`.trim(),
       {
@@ -38,28 +36,24 @@ export const membersColumns = (navigate, visibleColumns = {}) => {
       }
     ),
 
-    // Contact Number (optional)
     visibleColumns.contactNumber &&
       columnHelper.accessor("contact_number", {
         header: "Contact No.",
         cell: info => info.getValue()
       }),
 
-    // Recent Join Date (optional)
     visibleColumns.joinDate &&
       columnHelper.accessor("recent_join_date", {
         header: "Recent Join Date",
         cell: info => formatDate(info.getValue())
       }),
 
-    // Expiration Date (optional)
     visibleColumns.expireDate &&
       columnHelper.accessor("expiration_date", {
         header: "Expiration Date",
         cell: info => formatDate(info.getValue())
       }),
 
-    // Status badge
     columnHelper.accessor("status", {
       header: "Status",
       cell: info => {
@@ -73,7 +67,6 @@ export const membersColumns = (navigate, visibleColumns = {}) => {
       }
     }),
 
-    // Actions
     columnHelper.display({
       id: "actions",
       header: "View",
@@ -83,11 +76,11 @@ export const membersColumns = (navigate, visibleColumns = {}) => {
         return (
           <Button
             variant="ghost"
-            className="h-0.5 p-0"
+            className="h-full py-1 px-2"
             onClick={() => navigate(`/members/${member.id}`)}
           >
             <span className="sr-only">View</span>
-            <FolderOpen className="" />
+            <FolderOpen />
           </Button>
         )
       }

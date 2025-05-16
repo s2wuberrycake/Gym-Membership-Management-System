@@ -2,13 +2,15 @@ import React, { useEffect, useState } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { getMemberById } from "@/lib/api/members"
 import { format } from "date-fns"
+
+import { CornerDownLeft } from "lucide-react"
+
 import { Button } from "@/components/ui/button"
 import {
   Sheet,
   SheetTrigger
 } from "@/components/ui/sheet"
 import { toast } from "sonner"
-import { CornerDownLeft } from "lucide-react"
 import EditMember from "@/components/Member/Edit"
 import ExtendMember from "@/components/Member/Extend"
 import CancelMember from "@/components/Member/Cancel"

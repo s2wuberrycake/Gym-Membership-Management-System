@@ -3,34 +3,30 @@ import { useNavigate } from "react-router-dom"
 import { getAllMembers } from "@/lib/api/members"
 
 import { ListRestart, Contact, CalendarCheck, X } from "lucide-react"
+
 import DataTable from "@/components/ui/data-table"
-import { membersColumns } from "@/components/table/MembersColumn"
 import TableSearch from "@/components/ui/table-search"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetTrigger } from "@/components/ui/sheet"
-import { toast } from "sonner"
-import AddMember from "@/components/Member/Add"
-import {
-  Container,
-  ContainerHeader,
-  ContainerTitle,
-  ContainerContent
-} from "@/components/ui/container"
+import { Container, ContainerHeader, ContainerTitle, ContainerContent } from "@/components/ui/container"
 import { Separator } from "@/components/ui/separator"
+import { membersColumns } from "@/components/table/MembersColumn"
+import AddMember from "@/components/Member/Add"
+import { toast } from "sonner"
 
 const statusLabel = {
-  all: "All Status",
-  active: "Active Only",
+  all:     "All Status",
+  active:  "Active Only",
   expired: "Expired Only"
 }
 
 const nextStatus = {
-  all: "active",
-  active: "expired",
+  all:     "active",
+  active:  "expired",
   expired: "all"
 }
 
-export default function Members() {
+const Members = () => {
   const navigate = useNavigate()
   const [data, setData] = useState([])
   const [tableRef, setTableRef] = useState(null)
@@ -54,10 +50,7 @@ export default function Members() {
   }, [globalFilter])
 
   useEffect(() => {
-    localStorage.setItem(
-      "membersVisibleColumns",
-      JSON.stringify(visibleColumns)
-    )
+    localStorage.setItem("membersVisibleColumns", JSON.stringify(visibleColumns))
   }, [visibleColumns])
 
   useEffect(() => {
@@ -79,22 +72,16 @@ export default function Members() {
   }, [])
 
   const cycleStatusFilter = () => {
-    setStatusFilter((prev) => nextStatus[prev])
+    setStatusFilter(prev => nextStatus[prev])
   }
 
-  const toggleColumn = (column) =>
-    setVisibleColumns((prev) => ({
-      ...prev,
-      [column]: !prev[column]
-    }))
+  const toggleColumn = column => {
+    setVisibleColumns(prev => ({ ...prev, [column]: !prev[column] }))
+  }
 
   const resetFilters = () => {
     setGlobalFilter("")
-    setVisibleColumns({
-      contactNumber: true,
-      joinDate: true,
-      expireDate: true
-    })
+    setVisibleColumns({ contactNumber: true, joinDate: true, expireDate: true })
     setStatusFilter("all")
     localStorage.removeItem("membersGlobalFilter")
     localStorage.removeItem("membersVisibleColumns")
@@ -104,32 +91,26 @@ export default function Members() {
   const filteredData =
     statusFilter === "all"
       ? data
-      : data.filter(
-          (member) => member.status?.toLowerCase() === statusFilter
-        )
+      : data.filter(member => member.status?.toLowerCase() === statusFilter)
 
   const globalFilterFn = (row, columnId, filterValue) => {
     const fields = ["id", "first_name", "last_name"]
     if (visibleColumns.contactNumber) fields.push("contact_number")
-    if (visibleColumns.joinDate) fields.push("recent_join_date")
-    if (visibleColumns.expireDate) fields.push("expiration_date")
-    return fields.some((field) => {
+    if (visibleColumns.joinDate)     fields.push("recent_join_date")
+    if (visibleColumns.expireDate)   fields.push("expiration_date")
+
+    return fields.some(field => {
       const value = row.original[field]
-      if (
-        field === "recent_join_date" ||
-        field === "expiration_date"
-      ) {
+      if (field === "recent_join_date" || field === "expiration_date") {
         const date = value ? new Date(value) : null
         const formatted = date
           ? date.toLocaleDateString("en-US", {
-              year: "numeric",
+              year:  "numeric",
               month: "short",
-              day: "2-digit"
+              day:   "2-digit"
             })
           : ""
-        return formatted
-          .toLowerCase()
-          .includes(filterValue.toLowerCase())
+        return formatted.toLowerCase().includes(filterValue.toLowerCase())
       }
       return String(value ?? "")
         .toLowerCase()
@@ -140,7 +121,7 @@ export default function Members() {
   const hasActiveFilters =
     globalFilter ||
     statusFilter !== "all" ||
-    Object.values(visibleColumns).some((v) => !v)
+    Object.values(visibleColumns).some(v => !v)
 
   return (
     <div className="grid grid-cols-20 grid-rows-[auto_1fr] gap-4 mb-4 h-full">
@@ -175,17 +156,14 @@ export default function Members() {
               </Button>
 
               <Button
-                variant={
-                  visibleColumns.contactNumber ? "default" : "outline"
-                }
+                variant={visibleColumns.contactNumber ? "default" : "outline"}
                 size="sm"
                 onClick={() => toggleColumn("contactNumber")}
                 className="h-8 text-sm flex items-center gap-1"
               >
-                <span>Contact Number</span>
-                {visibleColumns.contactNumber && (
-                  <X className="w-3 h-3" />
-                )}
+                <Contact className="w-4 h-4" />
+                Contact Number
+                {visibleColumns.contactNumber && <X className="w-3 h-3" />}
               </Button>
 
               <Button
@@ -194,24 +172,20 @@ export default function Members() {
                 onClick={() => toggleColumn("joinDate")}
                 className="h-8 text-sm flex items-center gap-1"
               >
-                <span>Join Date</span>
-                {visibleColumns.joinDate && (
-                  <X className="w-3 h-3" />
-                )}
+                <CalendarCheck className="w-4 h-4" />
+                Join Date
+                {visibleColumns.joinDate && <X className="w-3 h-3" />}
               </Button>
 
               <Button
-                variant={
-                  visibleColumns.expireDate ? "default" : "outline"
-                }
+                variant={visibleColumns.expireDate ? "default" : "outline"}
                 size="sm"
                 onClick={() => toggleColumn("expireDate")}
                 className="h-8 text-sm flex items-center gap-1"
               >
-                <span>Expire Date</span>
-                {visibleColumns.expireDate && (
-                  <X className="w-3 h-3" />
-                )}
+                <CalendarCheck className="w-4 h-4" />
+                Expire Date
+                {visibleColumns.expireDate && <X className="w-3 h-3" />}
               </Button>
 
               {hasActiveFilters ? (
@@ -262,3 +236,5 @@ export default function Members() {
     </div>
   )
 }
+
+export default Members

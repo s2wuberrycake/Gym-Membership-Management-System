@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from "react"
+import { getDurations } from "@/lib/api/members"
+
 import {
   SheetContent,
   SheetHeader,
@@ -15,7 +17,6 @@ import {
 } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
 import { toast } from "sonner"
-import { getDurations } from "@/lib/api/members"
 import {
   getCancelledMemberById,
   restoreCancelledMemberById
@@ -90,7 +91,6 @@ const RestoreMember = ({
         <SheetTitle className="mb-4">Restore Member</SheetTitle>
         <SheetDescription asChild>
           <form onSubmit={handleSubmit}>
-            {/* Header block */}
             <div className="p-6 pb-2 max-w-md">
               <h2 className="text-xl font-bold">
                 Restore Cancelled Membership
@@ -100,7 +100,6 @@ const RestoreMember = ({
               </p>
             </div>
 
-            {/* Form block */}
             <div className="p-6 pt-2 space-y-4 max-w-md">
               <div>
                 <Label>Duration</Label>

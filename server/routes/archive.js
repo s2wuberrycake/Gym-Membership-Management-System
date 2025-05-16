@@ -1,14 +1,17 @@
 import express from "express"
+import { extractUser } from "../middleware/user.js"
 import {
   getCancelledMembersController,
-  restoreCancelledMemberController,
-  getCancelledMemberByIdController
+  getCancelledMemberByIdController,
+  restoreCancelledMemberController
 } from "../controllers/archive.js"
 
 const router = express.Router()
 
-router.get("/", getCancelledMembersController)
+router.use(extractUser)
+
+router.get("/",    getCancelledMembersController)
 router.get("/:id", getCancelledMemberByIdController)
-router.post("/restore/:id", restoreCancelledMemberController)
+router.put("/:id/restore", restoreCancelledMemberController)
 
 export default router
