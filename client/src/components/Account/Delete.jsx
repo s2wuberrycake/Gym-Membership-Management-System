@@ -10,15 +10,10 @@ import {
   SheetDescription
 } from "@/components/ui/sheet"
 
-const DeleteAccount = ({
-  account,
-  isSheetOpen,
-  onClose,
-  onDeleted
-}) => {
+const DeleteAccount = ({ account, isSheetOpen, onClose, onDeleted }) => {
   const [submitting, setSubmitting] = useState(false)
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault()
     try {
       setSubmitting(true)
@@ -34,17 +29,22 @@ const DeleteAccount = ({
     }
   }
 
+  const { username } = account || {}
+
   return (
     <SheetContent className="overflow-y-auto">
       <SheetHeader>
-        <SheetTitle className="mb-4">Delete Account</SheetTitle>
+        <SheetTitle className="mb-4">
+          Delete {username}
+        </SheetTitle>
         <SheetDescription asChild>
           <form onSubmit={handleSubmit}>
             <div className="p-6 pb-2 max-w-md">
-              <h2 className="text-xl font-bold">Confirm Delete</h2>
+              <h2 className="text-xl font-bold">
+                Delete {username}?
+              </h2>
               <p className="text-sm text-muted-foreground">
-                Are you sure you want to delete the account{" "}
-                <strong>{account.username}</strong>? This action cannot be undone.
+                Are you sure you want to delete this account? This action cannot be undone.
               </p>
             </div>
 

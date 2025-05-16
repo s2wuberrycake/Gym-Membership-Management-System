@@ -82,8 +82,20 @@ export const insertAccount = async ({ username, password, role_id }) => {
   return { account_id: result.insertId }
 }
 
-// Update an existing account
+// Update an existing account (cannot modify "admin")
 export const updateAccount = async ({ account_id, username, password, role_id }) => {
+  // fetch existing username
+  const [existingRows] = await defaultDb.query(
+    `SELECT username
+       FROM accounts
+      WHERE account_id = ?`,
+    [account_id]
+  )
+  const existing = existingRows[0]
+  if (existing?.username === "admin") {
+    throw new Error(`The 'admin' account cannot be edited`)
+  }
+
   if (password) {
     const hashedPassword = await bcrypt.hash(password, 10)
     await defaultDb.query(
@@ -105,8 +117,20 @@ export const updateAccount = async ({ account_id, username, password, role_id })
   }
 }
 
-// Remove an account
+// Remove an account (cannot delete "admin")
 export const removeAccount = async id => {
+  // fetch existing username
+  const [existingRows] = await defaultDb.query(
+    `SELECT username
+       FROM accounts
+      WHERE account_id = ?`,
+    [id]
+  )
+  const existing = existingRows[0]
+  if (existing?.username === "admin") {
+    throw new Error(`The 'admin' account cannot be deleted`)
+  }
+
   await defaultDb.query(
     `DELETE FROM accounts
      WHERE account_id = ?`,

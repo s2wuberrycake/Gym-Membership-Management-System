@@ -30,11 +30,11 @@ const RestoreMember = ({
   refreshMember
 }) => {
   const [member, setMember] = useState(null)
+  const [durations, setDurations] = useState([])
   const [durationId, setDurationId] = useState("")
   const [touched, setTouched] = useState(false)
-  const [durations, setDurations] = useState([])
-  const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState("")
+  const [submitting, setSubmitting] = useState(false)
 
   useEffect(() => {
     if (memberId && isSheetOpen) {
@@ -58,13 +58,13 @@ const RestoreMember = ({
     }
   }, [isSheetOpen])
 
-  const handleSelect = (value) => {
+  const handleSelect = value => {
     setDurationId(value)
     setTouched(true)
     setError(validateField("durationId", value))
   }
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault()
     if (!durationId) {
       setTouched(true)
@@ -74,29 +74,36 @@ const RestoreMember = ({
     try {
       setSubmitting(true)
       await restoreCancelledMemberById(memberId, durationId)
-      toast.success("Member restored successfully")
+      toast.success("Member re-enrolled successfully")
       onClose()
       refreshMember?.()
     } catch (err) {
       console.error("Restore error", err)
-      toast.error("Failed to restore member")
+      toast.error("Failed to re-enroll member")
     } finally {
       setSubmitting(false)
     }
   }
 
+  const fullName = member
+    ? `${member.first_name} ${member.last_name}`
+    : ""
+
   return (
     <SheetContent className="overflow-y-auto">
       <SheetHeader>
-        <SheetTitle className="mb-4">Restore Member</SheetTitle>
+        <SheetTitle className="mb-4">
+          Restore Member
+        </SheetTitle>
         <SheetDescription asChild>
           <form onSubmit={handleSubmit}>
             <div className="p-6 pb-2 max-w-md">
               <h2 className="text-xl font-bold">
-                Restore Cancelled Membership
+                Re-enroll {fullName}?
               </h2>
               <p className="text-sm text-muted-foreground">
-                Select a membership duration to restore this member. The member's status will be set back to active.
+                Select a membership duration to re-enroll this member. Their status will
+                be set back to active.
               </p>
             </div>
 
@@ -124,7 +131,9 @@ const RestoreMember = ({
                   </SelectContent>
                 </Select>
                 {touched && error && (
-                  <p className="text-red-500 text-sm mt-1">{error}</p>
+                  <p className="text-red-500 text-sm mt-1">
+                    {error}
+                  </p>
                 )}
               </div>
 
@@ -134,7 +143,9 @@ const RestoreMember = ({
                 className="w-full"
                 disabled={submitting}
               >
-                {submitting ? "Restoring..." : "Restore Member"}
+                {submitting
+                  ? "Re-enrolling..."
+                  : "Re-enroll Member"}
               </Button>
             </div>
           </form>

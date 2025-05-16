@@ -2,6 +2,7 @@ create schema mmsDefault;
 create schema mmsBackup;
 use mmsdefault;
 
+-- Temporarily for development only
 SET FOREIGN_KEY_CHECKS = 0;
 SET SQL_SAFE_UPDATES = 0;
 
@@ -24,8 +25,7 @@ CREATE TABLE accounts (
 );
 
 INSERT INTO accounts (username, password, role_id) VALUES
-('superadmin', '$2b$10$SPs5P4672V/fsqzjrnkAKuuo8UWQN1yery1jYYDXtOkNMoZx4yiKq', '1'),
-('staff', '$2b$10$h8GLDavmj2co2jx2bsn8iOpGBzDD3vbV5.3IMzjnPL.DeVI4r/jaS', 2);
+('admin', '$2b$10$hoMHDmZGwpwwEdhQLbYyWeayxP/1MM6SrG5QG1jyqUvUohuQsdpta', '1');
 
 -- MAIN TABLES
 CREATE TABLE members (

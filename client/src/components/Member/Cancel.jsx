@@ -11,15 +11,19 @@ const CancelMember = ({ member, isSheetOpen, onClose, refreshMember }) => {
   const [submitting, setSubmitting] = useState(false)
   const navigate = useNavigate()
 
+  const fullName = member
+    ? `${member.first_name} ${member.last_name}`
+    : ""
+
   const handleSubmit = async e => {
     e.preventDefault()
-
     try {
       setSubmitting(true)
       const today = format(new Date(), "yyyy-MM-dd")
       await cancelMemberById(member.id, today)
       toast.success("Membership cancelled")
       onClose()
+      refreshMember?.()
       navigate("/members")
     } catch (err) {
       console.error("Cancellation failed:", err)
@@ -32,15 +36,17 @@ const CancelMember = ({ member, isSheetOpen, onClose, refreshMember }) => {
   return (
     <SheetContent className="overflow-y-auto">
       <SheetHeader>
-        <SheetTitle className="mb-4">Cancel Membership</SheetTitle>
+        <SheetTitle className="mb-4">Cancel {fullName}</SheetTitle>
         <SheetDescription asChild>
           <form onSubmit={handleSubmit}>
             <div className="p-6 pb-2 max-w-md">
-              <h2 className="pb-0.5 text-xl font-bold">Cancel member?</h2>
+              <h2 className="pb-0.5 text-xl font-bold">
+                Cancel {fullName}?
+              </h2>
               <p>
                 Cancelling a membership will update their status to <strong>Cancelled</strong> and will promptly be
-                moved to the <strong>Archive</strong> table <br /><br />NOTE: remaining membership duration will be cancelled. 
-                Proceed with caution.
+                moved to the <strong>Archive</strong> table. <br /><br />
+                NOTE: remaining membership duration will be cancelled. Proceed with caution.
               </p>
             </div>
 
@@ -49,8 +55,8 @@ const CancelMember = ({ member, isSheetOpen, onClose, refreshMember }) => {
                 type="submit"
                 disabled={submitting}
                 size="sm"
-                className="w-full"
                 variant="destructive"
+                className="w-full"
               >
                 {submitting ? "Cancelling..." : "Confirm Cancellation"}
               </Button>
