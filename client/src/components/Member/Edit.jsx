@@ -1,6 +1,6 @@
+// src/components/Member/Edit.jsx
 import React, { useEffect, useState } from "react"
-import axios from "axios"
-import { MEMBERS_API } from "@/lib/api"
+import { updateMemberById } from "@/lib/api/members"
 import { jwtDecode } from "jwt-decode"
 import { cn } from "@/lib/utils"
 import { validateField, validateEditMemberForm } from "@/lib/helper/validate"
@@ -21,7 +21,7 @@ import { Label } from "@/components/ui/label"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
 
-const EditMember = ({ member, isSheetOpen, onClose, refreshMember }) => {
+export default function EditMember({ member, isSheetOpen, onClose, refreshMember }) {
   const [form, setForm] = useState({
     first_name: "",
     last_name: "",
@@ -44,10 +44,10 @@ const EditMember = ({ member, isSheetOpen, onClose, refreshMember }) => {
     if (member) {
       setForm({
         first_name: member.first_name || "",
-        last_name: member.last_name || "",
-        email: member.email || "",
+        last_name:  member.last_name  || "",
+        email:      member.email      || "",
         contact_number: member.contact_number || "",
-        address: member.address || "",
+        address:    member.address    || "",
         recent_join_date: member.recent_join_date
           ? new Date(member.recent_join_date)
           : null,
@@ -75,24 +75,26 @@ const EditMember = ({ member, isSheetOpen, onClose, refreshMember }) => {
 
   const handleSubmit = async e => {
     e.preventDefault()
-    const { errors: newErrors, isValid } =
-      validateEditMemberForm(form, member.original_join_date)
+    const { errors: newErrors, isValid } = validateEditMemberForm(
+      form,
+      member.original_join_date
+    )
     setErrors(newErrors)
     setTouched({
       first_name: true,
-      last_name: true,
-      email: true,
+      last_name:  true,
+      email:      true,
       contact_number: true,
-      address: true
+      address:    true
     })
     if (!isValid) return
 
     const fd = new FormData()
     fd.append("first_name", form.first_name)
-    fd.append("last_name", form.last_name)
-    fd.append("email", form.email)
+    fd.append("last_name",  form.last_name)
+    fd.append("email",      form.email)
     fd.append("contact_number", form.contact_number)
-    fd.append("address", form.address)
+    fd.append("address",    form.address)
     if (form.recent_join_date) {
       fd.append(
         "recent_join_date",
@@ -115,9 +117,7 @@ const EditMember = ({ member, isSheetOpen, onClose, refreshMember }) => {
 
     try {
       setSubmitting(true)
-      await axios.put(`${MEMBERS_API}/${member.id}`, fd, {
-        headers: { "Content-Type": "multipart/form-data" }
-      })
+      await updateMemberById(member.id, fd)
       toast.success("Member updated successfully")
       refreshMember?.()
       onClose()
@@ -138,8 +138,7 @@ const EditMember = ({ member, isSheetOpen, onClose, refreshMember }) => {
             <div className="p-6 pb-2 max-w-md">
               <h2 className="pb-0.5 text-xl font-bold">Edit Member Info</h2>
               <p>
-                Only edit member info when necessary (e.g. member requests,
-                corrected details, or date adjustments).
+                Only edit member info when necessary (e.g. corrections or date adjustments).
               </p>
             </div>
 
@@ -147,14 +146,10 @@ const EditMember = ({ member, isSheetOpen, onClose, refreshMember }) => {
               {["first_name","last_name","email","contact_number","address"].map(field => (
                 <div key={field}>
                   <Label className="pb-0.5">
-                    {field === "email"
-                      ? "Email (optional)"
-                      : field === "contact_number"
-                      ? "Contact Number"
-                      : field
-                          .split("_")
-                          .map(w => w[0].toUpperCase() + w.slice(1))
-                          .join(" ")}
+                    {field === "email" ? "Email (optional)"
+                     : field === "contact_number" ? "Contact Number"
+                     : field.replace(/_/g," ").replace(/\b\w/g,c=>c.toUpperCase())
+                    }
                   </Label>
                   <Input
                     name={field}
@@ -167,12 +162,10 @@ const EditMember = ({ member, isSheetOpen, onClose, refreshMember }) => {
                 </div>
               ))}
 
-              {/* Profile picture input */}
               <div className="grid w-full max-w-sm items-center gap-1.5">
                 <Label htmlFor="photo">Profile Picture</Label>
                 <Input
                   id="photo"
-                  name="photo"
                   type="file"
                   accept="image/*"
                   onChange={handleFileChange}
@@ -194,9 +187,7 @@ const EditMember = ({ member, isSheetOpen, onClose, refreshMember }) => {
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
                       {form.recent_join_date
-                        ? DateTime.fromJSDate(form.recent_join_date).toFormat(
-                            "MMMM d, yyyy"
-                          )
+                        ? DateTime.fromJSDate(form.recent_join_date).toFormat("MMMM d, yyyy")
                         : "Pick a date"}
                     </Button>
                   </PopoverTrigger>
@@ -228,9 +219,7 @@ const EditMember = ({ member, isSheetOpen, onClose, refreshMember }) => {
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
                       {form.expiration_date
-                        ? DateTime.fromJSDate(form.expiration_date).toFormat(
-                            "MMMM d, yyyy"
-                          )
+                        ? DateTime.fromJSDate(form.expiration_date).toFormat("MMMM d, yyyy")
                         : "Pick a date"}
                     </Button>
                   </PopoverTrigger>
@@ -267,5 +256,3 @@ const EditMember = ({ member, isSheetOpen, onClose, refreshMember }) => {
     </SheetContent>
   )
 }
-
-export default EditMember

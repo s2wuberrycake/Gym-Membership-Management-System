@@ -1,5 +1,5 @@
 import { defaultDb } from "../config/db.js"
-import bcrypt from "bcrypt"
+import bcrypt from "bcryptjs"
 
 // Authenticate account by username and password
 export const authenticateAccount = async (username, password) => {

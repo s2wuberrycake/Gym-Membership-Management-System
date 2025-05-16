@@ -1,7 +1,6 @@
+// src/components/Member/Add.jsx
 import React, { useEffect, useState } from "react"
-import axios from "axios"
-import { MEMBERS_API } from "@/lib/api"
-import { getDurations } from "@/lib/api/members"
+import { getDurations, addMember } from "@/lib/api/members"
 import { validateMemberForm, validateField } from "@/lib/helper/validate"
 
 import {
@@ -22,7 +21,7 @@ import {
 } from "@/components/ui/select"
 import { toast } from "sonner"
 
-const AddMember = ({ refreshMembers, isSheetOpen, onClose }) => {
+export default function AddMember({ refreshMembers, isSheetOpen, onClose }) {
   const [form, setForm] = useState({
     first_name: "",
     last_name: "",
@@ -62,15 +61,15 @@ const AddMember = ({ refreshMembers, isSheetOpen, onClose }) => {
   const handleChange = e => {
     const { name, value } = e.target
     if (name === "contact_number" && /[^0-9]/.test(value)) return
-    setForm(prev => ({ ...prev, [name]: value }))
-    setTouched(prev => ({ ...prev, [name]: true }))
-    setErrors(prev => ({ ...prev, [name]: validateField(name, value) }))
+    setForm(f => ({ ...f, [name]: value }))
+    setTouched(t => ({ ...t, [name]: true }))
+    setErrors(err => ({ ...err, [name]: validateField(name, value) }))
   }
 
   const handleSelect = value => {
-    setForm(prev => ({ ...prev, durationId: value }))
-    setTouched(prev => ({ ...prev, durationId: true }))
-    setErrors(prev => ({ ...prev, durationId: validateField("durationId", value) }))
+    setForm(f => ({ ...f, durationId: value }))
+    setTouched(t => ({ ...t, durationId: true }))
+    setErrors(err => ({ ...err, durationId: validateField("durationId", value) }))
   }
 
   const handleFileChange = e => {
@@ -93,24 +92,23 @@ const AddMember = ({ refreshMembers, isSheetOpen, onClose }) => {
 
     const fd = new FormData()
     fd.append("first_name", form.first_name)
-    fd.append("last_name", form.last_name)
-    fd.append("email", form.email)
+    fd.append("last_name",  form.last_name)
+    fd.append("email",      form.email)
     fd.append("contact_number", form.contact_number)
-    fd.append("address", form.address)
+    fd.append("address",    form.address)
     fd.append("extend_date_id", form.durationId)
     if (photoFile) fd.append("photo", photoFile)
 
     try {
       setSubmitting(true)
-      await axios.post(MEMBERS_API, fd, {
-        headers: { "Content-Type": "multipart/form-data" }
-      })
+      await addMember(fd)
       toast.success("Member added!")
       refreshMembers?.()
       onClose()
     } catch (err) {
       console.error("Submit error", err)
       setErrors({ submit: "Failed to add member" })
+      toast.error("Failed to add member")
     } finally {
       setSubmitting(false)
     }
@@ -127,7 +125,7 @@ const AddMember = ({ refreshMembers, isSheetOpen, onClose }) => {
             </div>
 
             <div className="p-6 pt-2 space-y-4 max-w-md">
-              {["first_name", "last_name", "email", "contact_number", "address"].map(field => (
+              {["first_name","last_name","email","contact_number","address"].map(field => (
                 <div key={field}>
                   <Label className="pb-0.5 capitalize">
                     {field.replace("_", " ")}
@@ -143,12 +141,10 @@ const AddMember = ({ refreshMembers, isSheetOpen, onClose }) => {
                 </div>
               ))}
 
-              {/* Profile picture input */}
               <div className="grid w-full max-w-sm items-center gap-1.5">
                 <Label htmlFor="photo">Profile Picture</Label>
                 <Input
                   id="photo"
-                  name="photo"
                   type="file"
                   accept="image/*"
                   onChange={handleFileChange}
@@ -188,12 +184,7 @@ const AddMember = ({ refreshMembers, isSheetOpen, onClose }) => {
                 </p>
               )}
 
-              <Button
-                type="submit"
-                disabled={submitting}
-                size="sm"
-                className="w-full"
-              >
+              <Button type="submit" disabled={submitting} size="sm" className="w-full">
                 {submitting ? "Adding..." : "Add Member"}
               </Button>
             </div>
@@ -203,5 +194,3 @@ const AddMember = ({ refreshMembers, isSheetOpen, onClose }) => {
     </SheetContent>
   )
 }
-
-export default AddMember

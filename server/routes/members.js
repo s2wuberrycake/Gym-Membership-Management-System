@@ -1,6 +1,6 @@
 import express from "express"
 import { extractUser } from "../middleware/user.js"
-import { upload } from "../middleware/upload.js"
+import { upload }      from "../middleware/upload.js"
 import {
   getDurationsController,
   getAllMembersController,
@@ -13,20 +13,28 @@ import {
 
 const router = express.Router()
 
-// peel off req.user from the JWT (if present)
+// peel off the token into req.user
 router.use(extractUser)
 
-// read-only endpoints
-router.get("/durations", getDurationsController)
-router.get("/",           getAllMembersController)
-router.get("/:id",        getMemberByIdController)
+// file‐upload + create
+router.post(
+  "/",
+  upload.single("photo"),
+  createMemberController
+)
 
-// create & update with optional photo upload
-router.post("/",           upload.single("photo"), createMemberController)
-router.put("/:id",         upload.single("photo"), updateMemberController)
+// file‐upload + full update
+router.put(
+  "/:id",
+  upload.single("photo"),
+  updateMemberController
+)
 
-// membership extension and cancellation
-router.put("/:id/extend",  extendMembershipController)
+// the rest stay public
+router.get(   "/durations",  getDurationsController)
+router.get(   "/",           getAllMembersController)
+router.get(   "/:id",        getMemberByIdController)
+router.put(   "/:id/extend", extendMembershipController)
 router.delete("/:id/cancel", cancelMemberController)
 
 export default router
