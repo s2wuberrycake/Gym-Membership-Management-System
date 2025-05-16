@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from "react"
-import { updateMemberById } from "@/lib/api/members"
+import axios from "axios"
+import { MEMBERS_API } from "@/lib/api"
 import { jwtDecode } from "jwt-decode"
 import { cn } from "@/lib/utils"
 import { validateField, validateEditMemberForm } from "@/lib/helper/validate"
 import { DateTime } from "luxon"
 
 import { CalendarIcon } from "lucide-react"
-
 import { toast } from "sonner"
+
 import { Button } from "@/components/ui/button"
 import {
   SheetContent,
@@ -30,6 +31,7 @@ const EditMember = ({ member, isSheetOpen, onClose, refreshMember }) => {
     recent_join_date: null,
     expiration_date: null
   })
+  const [photoFile, setPhotoFile] = useState(null)
   const [errors, setErrors] = useState({})
   const [touched, setTouched] = useState({})
   const [submitting, setSubmitting] = useState(false)
@@ -53,6 +55,7 @@ const EditMember = ({ member, isSheetOpen, onClose, refreshMember }) => {
           ? new Date(member.expiration_date)
           : null
       })
+      setPhotoFile(null)
       setErrors({})
       setTouched({})
     }
@@ -66,9 +69,12 @@ const EditMember = ({ member, isSheetOpen, onClose, refreshMember }) => {
     setErrors(err => ({ ...err, [name]: validateField(name, value) }))
   }
 
+  const handleFileChange = e => {
+    setPhotoFile(e.target.files[0] || null)
+  }
+
   const handleSubmit = async e => {
     e.preventDefault()
-
     const { errors: newErrors, isValid } =
       validateEditMemberForm(form, member.original_join_date)
     setErrors(newErrors)
@@ -81,25 +87,39 @@ const EditMember = ({ member, isSheetOpen, onClose, refreshMember }) => {
     })
     if (!isValid) return
 
-    const payload = {
-      ...form,
-      recent_join_date: form.recent_join_date
-        ? DateTime.fromJSDate(form.recent_join_date)
-            .setZone("Asia/Manila")
-            .toFormat("yyyy-MM-dd")
-        : null,
-      expiration_date: form.expiration_date
-        ? DateTime.fromJSDate(form.expiration_date)
-            .setZone("Asia/Manila")
-            .toFormat("yyyy-MM-dd")
-        : null
+    const fd = new FormData()
+    fd.append("first_name", form.first_name)
+    fd.append("last_name", form.last_name)
+    fd.append("email", form.email)
+    fd.append("contact_number", form.contact_number)
+    fd.append("address", form.address)
+    if (form.recent_join_date) {
+      fd.append(
+        "recent_join_date",
+        DateTime.fromJSDate(form.recent_join_date)
+          .setZone("Asia/Manila")
+          .toFormat("yyyy-MM-dd")
+      )
+    }
+    if (form.expiration_date) {
+      fd.append(
+        "expiration_date",
+        DateTime.fromJSDate(form.expiration_date)
+          .setZone("Asia/Manila")
+          .toFormat("yyyy-MM-dd")
+      )
+    }
+    if (photoFile) {
+      fd.append("photo", photoFile)
     }
 
     try {
       setSubmitting(true)
-      await updateMemberById(member.id, payload)
+      await axios.put(`${MEMBERS_API}/${member.id}`, fd, {
+        headers: { "Content-Type": "multipart/form-data" }
+      })
       toast.success("Member updated successfully")
-      refreshMember()
+      refreshMember?.()
       onClose()
     } catch (err) {
       console.error("Update failed:", err)
@@ -118,8 +138,8 @@ const EditMember = ({ member, isSheetOpen, onClose, refreshMember }) => {
             <div className="p-6 pb-2 max-w-md">
               <h2 className="pb-0.5 text-xl font-bold">Edit Member Info</h2>
               <p>
-                Only edit member info when necessary (e.g. member requests for
-                updating of old info, incorrectly saved details, mismatched dates).
+                Only edit member info when necessary (e.g. member requests,
+                corrected details, or date adjustments).
               </p>
             </div>
 
@@ -127,9 +147,14 @@ const EditMember = ({ member, isSheetOpen, onClose, refreshMember }) => {
               {["first_name","last_name","email","contact_number","address"].map(field => (
                 <div key={field}>
                   <Label className="pb-0.5">
-                    {field === "email" ? "Email (optional)" :
-                     field === "contact_number" ? "Contact Number" :
-                     field.split("_").map(w=>w[0].toUpperCase()+w.slice(1)).join(" ")}
+                    {field === "email"
+                      ? "Email (optional)"
+                      : field === "contact_number"
+                      ? "Contact Number"
+                      : field
+                          .split("_")
+                          .map(w => w[0].toUpperCase() + w.slice(1))
+                          .join(" ")}
                   </Label>
                   <Input
                     name={field}
@@ -142,76 +167,84 @@ const EditMember = ({ member, isSheetOpen, onClose, refreshMember }) => {
                 </div>
               ))}
 
+              {/* Profile picture input */}
+              <div className="grid w-full max-w-sm items-center gap-1.5">
+                <Label htmlFor="photo">Profile Picture</Label>
+                <Input
+                  id="photo"
+                  name="photo"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                />
+              </div>
+
               <div>
                 <Label className="pb-0.5">Recent Join Date</Label>
-                <div className="w-full">
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className={cn(
-                          "w-full text-left font-normal",
-                          !form.recent_join_date && "text-muted-foreground"
-                        )}
-                        disabled={!isAdmin}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {form.recent_join_date
-                          ? DateTime.fromJSDate(form.recent_join_date).toFormat(
-                              "MMMM d, yyyy"
-                            )
-                          : "Pick a date"}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={form.recent_join_date}
-                        onSelect={date =>
-                          isAdmin && setForm(f => ({ ...f, recent_join_date: date }))
-                        }
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </div>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className={cn(
+                        "w-full text-left font-normal",
+                        !form.recent_join_date && "text-muted-foreground"
+                      )}
+                      disabled={!isAdmin}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {form.recent_join_date
+                        ? DateTime.fromJSDate(form.recent_join_date).toFormat(
+                            "MMMM d, yyyy"
+                          )
+                        : "Pick a date"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={form.recent_join_date}
+                      onSelect={date =>
+                        isAdmin && setForm(f => ({ ...f, recent_join_date: date }))
+                      }
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
               </div>
 
               <div>
                 <Label className="pb-0.5">Expiration Date</Label>
-                <div className="w-full">
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className={cn(
-                          "w-full text-left font-normal",
-                          !form.expiration_date && "text-muted-foreground"
-                        )}
-                        disabled={!isAdmin}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {form.expiration_date
-                          ? DateTime.fromJSDate(form.expiration_date).toFormat(
-                              "MMMM d, yyyy"
-                            )
-                          : "Pick a date"}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={form.expiration_date}
-                        onSelect={date =>
-                          isAdmin && setForm(f => ({ ...f, expiration_date: date }))
-                        }
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </div>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className={cn(
+                        "w-full text-left font-normal",
+                        !form.expiration_date && "text-muted-foreground"
+                      )}
+                      disabled={!isAdmin}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {form.expiration_date
+                        ? DateTime.fromJSDate(form.expiration_date).toFormat(
+                            "MMMM d, yyyy"
+                          )
+                        : "Pick a date"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={form.expiration_date}
+                      onSelect={date =>
+                        isAdmin && setForm(f => ({ ...f, expiration_date: date }))
+                      }
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
                 {errors.expirationValidation && (
                   <p className="text-red-500 text-sm mt-1 whitespace-pre-line">
                     {errors.expirationValidation}

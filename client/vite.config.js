@@ -11,4 +11,15 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  server: {
+    proxy: {
+      // forward /uploads/* to your API server
+      "/uploads": {
+        target: "http://localhost:3000",
+        changeOrigin: true,
+        // rewrite the path if needed; not necessary here since both servers use /uploads
+        // rewrite: (path) => path.replace(/^\/uploads/, "/uploads"),
+      },
+    },
+  },
 })

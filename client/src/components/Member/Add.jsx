@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react"
-import { getDurations, addMember } from "@/lib/api/members"
+import axios from "axios"
+import { MEMBERS_API } from "@/lib/api"
+import { getDurations } from "@/lib/api/members"
 import { validateMemberForm, validateField } from "@/lib/helper/validate"
 
 import {
@@ -9,6 +11,7 @@ import {
   SheetTitle
 } from "@/components/ui/sheet"
 import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import {
   Select,
@@ -17,7 +20,6 @@ import {
   SelectContent,
   SelectItem
 } from "@/components/ui/select"
-import { Label } from "@/components/ui/label"
 import { toast } from "sonner"
 
 const AddMember = ({ refreshMembers, isSheetOpen, onClose }) => {
@@ -29,12 +31,11 @@ const AddMember = ({ refreshMembers, isSheetOpen, onClose }) => {
     address: "",
     durationId: ""
   })
-
+  const [photoFile, setPhotoFile] = useState(null)
   const [errors, setErrors] = useState({})
   const [touched, setTouched] = useState({})
   const [durations, setDurations] = useState([])
   const [submitting, setSubmitting] = useState(false)
-  
 
   useEffect(() => {
     getDurations()
@@ -52,6 +53,7 @@ const AddMember = ({ refreshMembers, isSheetOpen, onClose }) => {
         address: "",
         durationId: ""
       })
+      setPhotoFile(null)
       setErrors({})
       setTouched({})
     }
@@ -60,25 +62,23 @@ const AddMember = ({ refreshMembers, isSheetOpen, onClose }) => {
   const handleChange = e => {
     const { name, value } = e.target
     if (name === "contact_number" && /[^0-9]/.test(value)) return
-
     setForm(prev => ({ ...prev, [name]: value }))
     setTouched(prev => ({ ...prev, [name]: true }))
-
-    const error = validateField(name, value)
-    setErrors(prev => ({ ...prev, [name]: error }))
+    setErrors(prev => ({ ...prev, [name]: validateField(name, value) }))
   }
 
   const handleSelect = value => {
     setForm(prev => ({ ...prev, durationId: value }))
     setTouched(prev => ({ ...prev, durationId: true }))
+    setErrors(prev => ({ ...prev, durationId: validateField("durationId", value) }))
+  }
 
-    const error = validateField("durationId", value)
-    setErrors(prev => ({ ...prev, durationId: error }))
+  const handleFileChange = e => {
+    setPhotoFile(e.target.files[0] || null)
   }
 
   const handleSubmit = async e => {
     e.preventDefault()
-
     const { errors: newErrors, isValid } = validateMemberForm(form)
     setErrors(newErrors)
     setTouched({
@@ -89,36 +89,25 @@ const AddMember = ({ refreshMembers, isSheetOpen, onClose }) => {
       address: true,
       durationId: true
     })
-
     if (!isValid) return
 
-    const payload = {
-      first_name: form.first_name,
-      last_name: form.last_name,
-      email: form.email,
-      contact_number: form.contact_number,
-      address: form.address,
-      extend_date_id: form.durationId
-    }    
+    const fd = new FormData()
+    fd.append("first_name", form.first_name)
+    fd.append("last_name", form.last_name)
+    fd.append("email", form.email)
+    fd.append("contact_number", form.contact_number)
+    fd.append("address", form.address)
+    fd.append("extend_date_id", form.durationId)
+    if (photoFile) fd.append("photo", photoFile)
 
     try {
       setSubmitting(true)
-      await addMember(payload)
-      toast.success("Member added!")
-      if (refreshMembers) refreshMembers()
-
-        onClose()
-      
-      setForm({
-        first_name: "",
-        last_name: "",
-        email: "",
-        contact_number: "",
-        address: "",
-        durationId: ""
+      await axios.post(MEMBERS_API, fd, {
+        headers: { "Content-Type": "multipart/form-data" }
       })
-      setErrors({})
-      setTouched({})
+      toast.success("Member added!")
+      refreshMembers?.()
+      onClose()
     } catch (err) {
       console.error("Submit error", err)
       setErrors({ submit: "Failed to add member" })
@@ -140,7 +129,9 @@ const AddMember = ({ refreshMembers, isSheetOpen, onClose }) => {
             <div className="p-6 pt-2 space-y-4 max-w-md">
               {["first_name", "last_name", "email", "contact_number", "address"].map(field => (
                 <div key={field}>
-                  <Label className="pb-0.5 capitalize">{field.replace("_", " ")}</Label>
+                  <Label className="pb-0.5 capitalize">
+                    {field.replace("_", " ")}
+                  </Label>
                   <Input
                     name={field}
                     value={form[field]}
@@ -152,10 +143,22 @@ const AddMember = ({ refreshMembers, isSheetOpen, onClose }) => {
                 </div>
               ))}
 
+              {/* Profile picture input */}
+              <div className="grid w-full max-w-sm items-center gap-1.5">
+                <Label htmlFor="photo">Profile Picture</Label>
+                <Input
+                  id="photo"
+                  name="photo"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                />
+              </div>
+
               <div>
                 <Label className="pb-0.5">Membership Duration</Label>
                 <p className="mb-2 text-sm text-muted-foreground leading-tight">
-                  Select initial membership duration availed by the client
+                  Select initial membership duration
                 </p>
                 <Select value={form.durationId} onValueChange={handleSelect}>
                   <SelectTrigger>
@@ -180,10 +183,17 @@ const AddMember = ({ refreshMembers, isSheetOpen, onClose }) => {
               </div>
 
               {errors.submit && (
-                <p className="text-red-500 text-sm text-center">{errors.submit}</p>
+                <p className="text-red-500 text-sm text-center">
+                  {errors.submit}
+                </p>
               )}
 
-              <Button type="submit" disabled={submitting} size="sm" className="w-full">
+              <Button
+                type="submit"
+                disabled={submitting}
+                size="sm"
+                className="w-full"
+              >
                 {submitting ? "Adding..." : "Add Member"}
               </Button>
             </div>

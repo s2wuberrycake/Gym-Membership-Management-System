@@ -5,9 +5,11 @@ import {
   insertMember,
   updateMember,
   extendMember,
-  cancelMember
+  cancelMember,
+  saveProfilePic
 } from "../services/members.js"
 
+// GET /api/members/durations
 export const getDurationsController = async (req, res, next) => {
   try {
     console.log("DEBUG >> Fetching all duration options")
@@ -18,6 +20,7 @@ export const getDurationsController = async (req, res, next) => {
   }
 }
 
+// GET /api/members
 export const getAllMembersController = async (req, res, next) => {
   try {
     console.log("DEBUG >> Fetching all members")
@@ -28,6 +31,7 @@ export const getAllMembersController = async (req, res, next) => {
   }
 }
 
+// GET /api/members/:id
 export const getMemberByIdController = async (req, res, next) => {
   try {
     const { id } = req.params
@@ -43,31 +47,50 @@ export const getMemberByIdController = async (req, res, next) => {
   }
 }
 
+// POST /api/members
 export const createMemberController = async (req, res, next) => {
   try {
     const account_id = req.user.id
     console.log("DEBUG >> Creating new member", req.body)
+
+    // 1) insert the text fields
     const member_id = await insertMember(req.body, account_id)
-    console.log(`DEBUG >> Member ${member_id} created`)
+
+    // 2) if a file was uploaded, save it and update the DB
+    if (req.file) {
+      await saveProfilePic(member_id, req.file)
+      console.log(`DEBUG >> Saved profile picture for member ${member_id}`)
+    }
+
     res.status(201).json({ success: true, member_id })
   } catch (err) {
     next(err)
   }
 }
 
+// PUT /api/members/:id
 export const updateMemberController = async (req, res, next) => {
   try {
     const { id } = req.params
     const account_id = req.user.id
     console.log(`DEBUG >> Updating member ${id}`, req.body)
+
+    // 1) update the text fields
     await updateMember(id, req.body, account_id)
-    console.log(`DEBUG >> Member ${id} updated`)
+
+    // 2) if a new photo was uploaded, overwrite it
+    if (req.file) {
+      await saveProfilePic(id, req.file)
+      console.log(`DEBUG >> Updated profile picture for member ${id}`)
+    }
+
     res.json({ success: true })
   } catch (err) {
     next(err)
   }
 }
 
+// PUT /api/members/:id/extend
 export const extendMembershipController = async (req, res, next) => {
   try {
     const { id } = req.params
@@ -88,6 +111,7 @@ export const extendMembershipController = async (req, res, next) => {
   }
 }
 
+// DELETE /api/members/:id/cancel
 export const cancelMemberController = async (req, res, next) => {
   try {
     const { id } = req.params

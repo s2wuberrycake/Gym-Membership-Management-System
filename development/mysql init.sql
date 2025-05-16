@@ -24,6 +24,7 @@ CREATE TABLE accounts (
     FOREIGN KEY (role_id) REFERENCES role_types(role_id)
 );
 
+-- Insert a account "system" with no password and set account_id = 0 manually after initializng
 INSERT INTO accounts (username, password, role_id) VALUES
 ('admin', '$2b$10$hoMHDmZGwpwwEdhQLbYyWeayxP/1MM6SrG5QG1jyqUvUohuQsdpta', '1');
 

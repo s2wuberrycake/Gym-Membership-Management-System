@@ -1,6 +1,7 @@
 import express from "express"
 import cors from "cors"
 import dotenv from "dotenv"
+import path from "path"
 import cron from "node-cron"
 
 import authRouter from "./routes/authorize.js"
@@ -17,18 +18,23 @@ const app = express()
 app.use(cors())
 app.use(express.json())
 
+// expose ./uploads/* at /uploads/*
+app.use("/uploads", express.static(path.resolve(process.cwd(), "uploads")))
+
 app.use("/auth",         authRouter)
 app.use("/api/members",  membersRouter)
 app.use("/api/archive",  archiveRouter)
 app.use("/api/settings", settingsRouter)
 app.use("/api/home",     logsRouter)
 
-// Auto expiration logic
 const SYSTEM_ACCOUNT_ID = Number(process.env.SYSTEM_ACCOUNT_ID ?? 0)
 
+// run one expiration check on startup
 expireMembers(SYSTEM_ACCOUNT_ID)
   .then(() => console.log("DEBUG >> Initial expiration check complete"))
   .catch(console.error)
+
+// schedule daily expiration check at 00:01 Manila time
 cron.schedule(
   "1 0 * * *",
   () => {
@@ -37,6 +43,7 @@ cron.schedule(
   },
   { timezone: "Asia/Manila" }
 )
+
 app.use(errorHandler)
 
 app.listen(process.env.PORT, () => {
