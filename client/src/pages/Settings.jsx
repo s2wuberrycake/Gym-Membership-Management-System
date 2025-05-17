@@ -114,16 +114,6 @@ const Settings = () => {
         !isAdmin ? "pointer-events-none opacity-50" : ""
       }`}
     >
-      <div className="col-span-6">
-        <TableSearch
-          value={globalFilter}
-          onChange={setGlobalFilter}
-          placeholder="Search accounts..."
-          className="w-full"
-        />
-      </div>
-      <div className="col-span-14" />
-
       <div className="col-span-20 flex flex-col gap-4 h-full"> 
         <Container className="flex-1 flex flex-col">
           <ContainerHeader>
@@ -133,10 +123,17 @@ const Settings = () => {
               for your staff.
             </p>
           </ContainerHeader>
-
           <Separator />
-
           <ContainerContent className="flex-1 flex flex-col">
+            <div className="flex items-center justify-between flex-wrap gap-4 mb-2">
+              <TableSearch
+                value={globalFilter}
+                onChange={setGlobalFilter}
+                placeholder="Search members..."
+                className="h-8 w-100"
+              />
+            </div>
+
             <div className="flex items-center justify-between flex-wrap gap-4 mb-4">
               <div className="flex items-center gap-2 flex-wrap">
                 <Button

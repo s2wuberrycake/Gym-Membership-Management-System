@@ -1,8 +1,9 @@
-// src/pages/Visits.jsx
 import React, { useEffect, useState } from "react"
-import { getAllVisitLogs } from "@/lib/api/log"
+import { getAllVisitLogs, logVisit } from "@/lib/api/log"
 import { getMemberById } from "@/lib/api/members"
 import { format } from "date-fns"
+
+import { ListRestart } from "lucide-react"
 
 import DataTable from "@/components/ui/data-table"
 import TableSearch from "@/components/ui/table-search"
@@ -17,19 +18,39 @@ import { Separator } from "@/components/ui/separator"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import { toast } from "sonner"
 
-const Visits = () => {
+const dateLabel = {
+  all:     "All Dates",
+  today:   "Today",
+  "7days": "Past 7 days",
+  month:   "Past Month"
+}
+
+const nextDate = {
+  all:     "today",
+  today:   "7days",
+  "7days": "month",
+  month:   "all"
+}
+
+export default function Visits() {
   const [visits, setVisits] = useState([])
   const [filter, setFilter] = useState(
     () => localStorage.getItem("visitGlobalFilter") || ""
   )
+  const [dateFilter, setDateFilter] = useState(
+    () => localStorage.getItem("visitsDateFilter") || "today"
+  )
   const [uuid, setUuid] = useState("")
   const [member, setMember] = useState(null)
-  const [error, setError] = useState("")
 
   useEffect(() => {
     localStorage.setItem("visitGlobalFilter", filter)
   }, [filter])
+  useEffect(() => {
+    localStorage.setItem("visitsDateFilter", dateFilter)
+  }, [dateFilter])
 
   useEffect(() => {
     ;(async () => {
@@ -42,24 +63,60 @@ const Visits = () => {
     })()
   }, [])
 
-  const lookupMember = async () => {
-    if (!uuid) return
-    setError("")
-    try {
-      const m = await getMemberById(uuid)
-      setMember(m)
-    } catch (e) {
-      console.error(e)
-      setMember(null)
-      setError("Member not found or expired")
-    }
-    setUuid("")
+  const cycleDateFilter = () => {
+    setDateFilter(prev => nextDate[prev])
   }
 
-  const isExpired = member && new Date(member.expiration_date) < new Date()
-  const initials = member
-    ? `${member.first_name?.[0] || ""}${member.last_name?.[0] || ""}`.toUpperCase()
-    : ""
+  const resetFilters = () => {
+    setFilter("")
+    setDateFilter("today")
+    localStorage.removeItem("visitGlobalFilter")
+    localStorage.removeItem("visitsDateFilter")
+  }
+
+  const handleLogVisit = async () => {
+    const memberId = uuid.trim()
+    if (!memberId) return
+
+    try {
+      const resp = await logVisit(memberId)
+      if (resp.message) {
+        toast.error(resp.message)
+      } else {
+        setVisits(v => [resp, ...v])
+        toast.success("Visit logged successfully!")
+      }
+
+      const m = await getMemberById(memberId)
+      setMember(m)
+      setTimeout(() => setMember(null), 5000)
+    } catch (err) {
+      console.error(err)
+      toast.error(err.message)
+      setMember(null)
+    } finally {
+      setUuid("")
+    }
+  }
+
+  const filteredVisits = visits.filter(v => {
+    const d = new Date(v.visit_date)
+    const now = new Date()
+    if (dateFilter === "today") {
+      return d.toDateString() === now.toDateString()
+    }
+    if (dateFilter === "7days") {
+      const ago = new Date()
+      ago.setDate(now.getDate() - 7)
+      return d >= ago
+    }
+    if (dateFilter === "month") {
+      const ago = new Date()
+      ago.setMonth(now.getMonth() - 1)
+      return d >= ago
+    }
+    return true
+  })
 
   const globalFilterFn = (row, _colId, value) => {
     const lower = value.toLowerCase()
@@ -74,75 +131,104 @@ const Visits = () => {
 
   return (
     <div className="grid grid-cols-20 gap-4 mb-4 h-full">
-      {/* Visit UI container (40%) */}
-      <div className="col-span-8 flex flex-col gap-4">
+      <div className="col-span-6 flex flex-col sticky top-0 self-start">
         <Container>
           <ContainerHeader>
-            <ContainerTitle className="font-bold">Visiting Member Info</ContainerTitle>
+            <ContainerTitle className="font-bold">
+              Visiting Member Info
+            </ContainerTitle>
             <p className="text-sm text-muted-foreground">
-              Scan the card via a scanner, or manually input the RFID tag (UUID) in the input field
+              Scan the card or manually input the RFID tag (UUID)
             </p>
           </ContainerHeader>
           <Separator />
-          <ContainerContent className="flex flex-col items-center gap-4 p-4">
-            <Avatar className="w-70 h-70 rounded-full overflow-hidden">
-              <AvatarImage
-                className="w-full h-full object-cover object-center"
-                src={
-                  member?.profile_picture
-                    ? `/uploads/profiles/${member.profile_picture}`
-                    : undefined
-                }
-                alt={member ? `${member.first_name} ${member.last_name}` : ""}
-              />
-              <AvatarFallback>{initials}</AvatarFallback>
-            </Avatar>
 
-            {member ? (
-              <>
-                <p className="text-lg font-semibold">
-                  {member.first_name} {member.last_name}
-                </p>
-                <p className={`text-sm ${isExpired ? "text-red-500" : "text-green-600"}`}>
-                  {isExpired ? "Expired" : "Active"}
-                </p>
-                <p className="text-sm">
-                  Expires:{" "}
-                  {member.expiration_date
-                    ? format(new Date(member.expiration_date), "MMMM d, yyyy")
-                    : "N/A"}
-                </p>
-              </>
-            ) : (
-              <p className="text-sm text-muted-foreground">
-                Enter UUID below to load member
-              </p>
-            )}
-
-            {error && <p className="text-sm text-red-500">{error}</p>}
-
+          <div className="flex gap-2 mb-2">
             <Input
               value={uuid}
               onChange={e => setUuid(e.target.value)}
               placeholder="Member UUID"
-              onKeyDown={e => e.key === "Enter" && lookupMember()}
+              onKeyDown={e => e.key === "Enter" && handleLogVisit()}
               autoFocus
+              className="flex-[3] h-8"
             />
-            <Button onClick={lookupMember} size="sm" className="h-8 text-sm w-full">
-              Lookup
+            <Button
+              onClick={handleLogVisit}
+              size="sm"
+              className="flex-1 h-8 text-sm"
+            >
+              Log Visit
             </Button>
-          </ContainerContent>
+          </div>
+
+          <ContainerContent className="grid grid-cols-20 gap-4">
+            <div className="col-span-20 flex flex-col h-90">
+              <Avatar className="w-full h-full overflow-hidden rounded-[1rem]">
+                <AvatarImage
+                  className="w-full h-full object-cover object-center rounded-[1rem]"
+                  src={
+                    member?.profile_picture &&
+                    `/uploads/profiles/${member.profile_picture}`
+                  }
+                  alt={member ? `${member.first_name} ${member.last_name}` : ""}
+                />
+                <AvatarFallback className="flex items-center justify-center rounded-[1rem]">
+                  {member
+                    ? `${member.first_name[0] || ""}${member.last_name[0] || ""}`
+                    : ""}
+                </AvatarFallback>
+              </Avatar>
+            </div>
+
+            <div className="col-span-20 flex flex-col p-2">
+              <div className="flex justify-between mb-1">
+                <span className="text-3xl font-bold">
+                  {member
+                    ? `${member.first_name} ${member.last_name}`
+                    : "Name"}
+                </span>
+              </div>
+              <div className="flex justify-between mb-1">
+                <span className="font-medium">Status</span>
+                <span
+                  className={
+                    member
+                      ? (member.status?.toLowerCase() === "cancelled"
+                          ? "text-red-500"
+                          : new Date(member.expiration_date) < new Date()
+                            ? "text-orange-500"
+                            : "text-green-600")
+                      : ""
+                  }
+                >
+                  {member
+                    ? (member.status?.toLowerCase() === "cancelled"
+                        ? "Cancelled"
+                        : new Date(member.expiration_date) < new Date()
+                          ? "Expired"
+                          : "Active")
+                    : ""}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-medium">Expiration Date</span>
+                <span>
+                  {member?.expiration_date
+                    ? format(new Date(member.expiration_date), "MMMM d, yyyy")
+                    : ""}
+                </span>
+              </div>
+            </div>
+            </ContainerContent>
         </Container>
       </div>
-      
-      {/* Table container (60%) */}
-      <div className="col-span-12 flex flex-col gap-4">
+
+      <div className="col-span-14 flex flex-col gap-4">
         <Container className="flex-1 flex flex-col">
           <ContainerHeader>
             <ContainerTitle className="font-bold">Visit Log</ContainerTitle>
             <p className="text-sm text-muted-foreground">
-              Record of member visits. Scanned expired or cancelled memberships will not be recorded and be
-              required to renew their memberships before being allowed entry
+              Filter by date range, search, or scroll through the logs below.
             </p>
           </ContainerHeader>
           <Separator />
@@ -152,13 +238,43 @@ const Visits = () => {
                 value={filter}
                 onChange={setFilter}
                 placeholder="Search visits..."
-                className="h-8 w-[35%]"
+                className="h-8 w-100"
               />
             </div>
-
+            <div className="flex items-center justify-between flex-wrap gap-4 mb-4">
+              <div className="flex items-center gap-1 flex-wrap">
+                <Button
+                  variant={dateFilter === "all" ? "outline" : "default"}
+                  size="sm"
+                  onClick={cycleDateFilter}
+                  className="h-8 text-sm"
+                >
+                  {dateLabel[dateFilter]}
+                </Button>
+                {(filter || dateFilter !== "today") ? (
+                  <Button
+                    variant="default"
+                    size="sm"
+                    onClick={resetFilters}
+                    className="h-8 text-sm"
+                  >
+                    Reset Filters
+                  </Button>
+                ) : (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={resetFilters}
+                    className="h-8 text-sm"
+                  >
+                    <ListRestart className="w-4 h-4" />
+                  </Button>
+                )}
+              </div>
+            </div>
             <DataTable
               columns={visitLogColumns()}
-              data={visits}
+              data={filteredVisits}
               globalFilter={filter}
               onGlobalFilterChange={setFilter}
               globalFilterFn={globalFilterFn}
@@ -166,9 +282,6 @@ const Visits = () => {
           </ContainerContent>
         </Container>
       </div>
-
     </div>
   )
 }
-
-export default Visits

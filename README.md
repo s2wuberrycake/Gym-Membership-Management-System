@@ -20,7 +20,6 @@ Locally hosted webapp for managing memberships
 
 - Visits
   - ACR122U (RFID scanner, use UUID as ID)
-  - RFID scanning  (For now, input UUID and logs as visit)
 
 - Backup (Admin only)
   - Separate database
@@ -28,5 +27,10 @@ Locally hosted webapp for managing memberships
   - Decide on file type (CSV?)
 
 - Optional
-  - Customization of date extension table
+  - Customization of date extension options table
   - Profile picture crop UI
+  - Change filter buttons to have no icons even if toggled, but filter reset button be just an "X" from Lucide-react even if filters are toggled or not
+
+- FIX
+  - When editing member info, should preserve profile picture path rather than starting with no file selected (resulting in having to reselect a new picture everytime editing, even if just editing other fields)
+  - Different filters for visit log table so it can filter by current day, previous week, previous month

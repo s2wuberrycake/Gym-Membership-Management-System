@@ -36,7 +36,7 @@ export const getUserById = async id => {
   return rows[0] || null
 }
 
-// Get all accounts except the system account (0)
+// Get all accounts
 export const getAccounts = async () => {
   const [rows] = await defaultDb.query(
     `SELECT
@@ -68,7 +68,7 @@ export const getAccountById = async id => {
   return rows[0] || null
 }
 
-// Insert a new account
+// Add a new account
 export const insertAccount = async ({ username, password, role_id }) => {
   const hashedPassword = await bcrypt.hash(password, 10)
   const [result] = await defaultDb.query(
@@ -82,9 +82,8 @@ export const insertAccount = async ({ username, password, role_id }) => {
   return { account_id: result.insertId }
 }
 
-// Update an existing account (cannot modify "admin")
+// Edit account info
 export const updateAccount = async ({ account_id, username, password, role_id }) => {
-  // fetch existing username
   const [existingRows] = await defaultDb.query(
     `SELECT username
        FROM accounts
@@ -117,9 +116,8 @@ export const updateAccount = async ({ account_id, username, password, role_id })
   }
 }
 
-// Remove an account (cannot delete "admin")
+// Remove an account
 export const removeAccount = async id => {
-  // fetch existing username
   const [existingRows] = await defaultDb.query(
     `SELECT username
        FROM accounts

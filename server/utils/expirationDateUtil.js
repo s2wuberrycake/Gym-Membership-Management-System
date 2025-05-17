@@ -5,7 +5,7 @@ import timezone from "dayjs/plugin/timezone"
 dayjs.extend(utc)
 dayjs.extend(timezone)
 
-const TIMEZONE = "Asia/Manila" // UTC+8
+const TIMEZONE = "Asia/Manila"
 
 export function calculateExpirationDate(startDate, daysToAdd) {
   if (!startDate || typeof daysToAdd !== "number") return null

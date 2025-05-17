@@ -6,7 +6,27 @@ export const getAllUpdateLogs = async () => {
   return res.data
 }
 
+export const logUpdate = async (memberId, actionId, accountId) => {
+  await axios.post(HOME_API, {
+    member_id:  memberId,
+    action_id:  actionId,
+    account_id: accountId
+  })
+}
+
 export const getAllVisitLogs = async () => {
   const res = await axios.get(VISITS_API)
   return res.data
+}
+
+export const logVisit = async (memberId) => {
+  try {
+    const res = await axios.post(VISITS_API, { member_id: memberId })
+    return res.data
+  } catch (err) {
+    if (err.response?.data?.message) {
+      throw new Error(err.response.data.message)
+    }
+    throw err
+  }
 }

@@ -8,7 +8,7 @@ const Navbar = () => {
   const { theme, toggleTheme } = useTheme()
 
   return (
-    <nav className="p-4 flex items-center justify-between">
+    <nav className="sticky top-0 z-50 bg-background p-4 flex items-center justify-between">
       <SidebarTrigger
         className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full
           text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1

@@ -9,7 +9,6 @@ import {
   saveProfilePic
 } from "../services/members.js"
 
-// GET /api/members/durations
 export const getDurationsController = async (req, res, next) => {
   try {
     const durations = await getDurations()
@@ -19,7 +18,6 @@ export const getDurationsController = async (req, res, next) => {
   }
 }
 
-// GET /api/members
 export const getAllMembersController = async (req, res, next) => {
   try {
     const members = await getMembers()
@@ -29,7 +27,6 @@ export const getAllMembersController = async (req, res, next) => {
   }
 }
 
-// GET /api/members/:id
 export const getMemberByIdController = async (req, res, next) => {
   try {
     const member = await getMemberById(req.params.id)
@@ -40,18 +37,14 @@ export const getMemberByIdController = async (req, res, next) => {
   }
 }
 
-// POST /api/members
 export const createMemberController = async (req, res, next) => {
   try {
-    // guard if no user
     if (!req.user?.id) {
       return res.status(401).json({ success: false, message: "Unauthorized" })
     }
 
-    // 1) insert the text fields
     const member_id = await insertMember(req.body, req.user.id)
 
-    // 2) if they uploaded a file, save it now
     if (req.file) {
       await saveProfilePic(member_id, req.file)
     }
@@ -62,17 +55,14 @@ export const createMemberController = async (req, res, next) => {
   }
 }
 
-// PUT /api/members/:id
 export const updateMemberController = async (req, res, next) => {
   try {
     if (!req.user?.id) {
       return res.status(401).json({ success: false, message: "Unauthorized" })
     }
 
-    // 1) update text
     await updateMember(req.params.id, req.body, req.user.id)
 
-    // 2) overwrite photo if given
     if (req.file) {
       await saveProfilePic(req.params.id, req.file)
     }
@@ -83,7 +73,6 @@ export const updateMemberController = async (req, res, next) => {
   }
 }
 
-// PUT /api/members/:id/extend
 export const extendMembershipController = async (req, res, next) => {
   try {
     if (!req.user?.id) {
@@ -99,7 +88,6 @@ export const extendMembershipController = async (req, res, next) => {
   }
 }
 
-// DELETE /api/members/:id/cancel
 export const cancelMemberController = async (req, res, next) => {
   try {
     if (!req.user?.id) {

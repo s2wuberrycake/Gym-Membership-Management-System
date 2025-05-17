@@ -36,6 +36,7 @@ CREATE TABLE members (
     email VARCHAR(255),
     contact_number VARCHAR(20),
     address TEXT,
+    profile_picture VARCHAR(512),
 	original_join_date DATE,
     recent_join_date DATE,
     expiration_date DATE,
@@ -106,9 +107,6 @@ CREATE TABLE update_log (
 CREATE TABLE visit_log (
     visit_id INT AUTO_INCREMENT PRIMARY KEY,
     member_id CHAR(36),
-    entry_date DATETIME,
-    exit_date DATETIME,
-    status_id INT,
-    FOREIGN KEY (member_id) REFERENCES members(member_id),
-    FOREIGN KEY (status_id) REFERENCES status_types(status_id)
+	visit_date DATETIME,
+    FOREIGN KEY (member_id) REFERENCES members(member_id)
 );

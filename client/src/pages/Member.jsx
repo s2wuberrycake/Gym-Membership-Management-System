@@ -65,7 +65,6 @@ const Member = () => {
       </Button>
 
       <div className="flex items-center gap-4">
-        {/* square container with overflow-hidden + object-cover */}
         <Avatar className="w-24 h-24 rounded-full overflow-hidden">
           <AvatarImage
             className="w-full h-full object-cover object-center"

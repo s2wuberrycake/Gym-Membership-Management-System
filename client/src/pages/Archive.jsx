@@ -115,7 +115,7 @@ const Archive = () => {
                 value={globalFilter}
                 onChange={setGlobalFilter}
                 placeholder="Search cancelled members..."
-                className="h-8 w-[35%]"
+                className="h-8 w-100"
               />
             </div>
 

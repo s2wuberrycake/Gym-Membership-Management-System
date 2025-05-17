@@ -1,4 +1,3 @@
-// server.js
 import express from "express"
 import cors from "cors"
 import dotenv from "dotenv"
@@ -24,7 +23,6 @@ const app = express()
 app.use(cors())
 app.use(express.json())
 
-// expose ./uploads/* at /uploads/*
 app.use(
   "/uploads",
   express.static(path.resolve(process.cwd(), "uploads"))
@@ -35,15 +33,9 @@ app.use("/api/members", membersRouter)
 app.use("/api/archive", archiveRouter)
 app.use("/api/settings", settingsRouter)
 
-// ── Update‐log endpoints ────────────────────────────────────────────────────
-// GET  /api/home       → all update logs
-// POST /api/home       → record an update log
 app.get("/api/home", getAllUpdateLogsController)
 app.post("/api/home", logUpdateController)
 
-// ── Visit‐log endpoints ─────────────────────────────────────────────────────
-// GET  /api/visits     → all visit logs (only one per member/day)
-// POST /api/visits     → record a visit (if active and not already logged today)
 app.get("/api/visits", getAllVisitLogsController)
 app.post("/api/visits", logVisitController)
 

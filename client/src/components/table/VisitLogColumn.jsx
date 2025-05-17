@@ -31,12 +31,4 @@ export const visitLogColumns = () => [
     header: "Time",
     cell: info => formatTime(info.getValue())
   }),
-  columnHelper.accessor(
-    () => "",
-    {
-      id: "tier",
-      header: "Tier",
-      cell: info => info.getValue()
-    }
-  )
 ]

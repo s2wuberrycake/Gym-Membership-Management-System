@@ -37,11 +37,23 @@ export const logVisitController = async (req, res, next) => {
   try {
     const { member_id } = req.body
     const visit = await logVisit(member_id)
+
     if (!visit) {
       return res.status(200).json({ message: "Visit already logged today" })
     }
-    res.json(visit)
+    return res.json(visit)
+
   } catch (err) {
+    console.error("ERROR >> ", err.message)
+
+    if ([
+      "Member not found",
+      "Membership expired",
+      "Membership cancelled"
+    ].includes(err.message)) {
+      return res.status(400).json({ message: err.message })
+    }
+
     next(err)
   }
 }

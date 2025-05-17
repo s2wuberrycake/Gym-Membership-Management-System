@@ -1,7 +1,6 @@
 import axios from "axios"
 import { MEMBERS_API, DURATIONS_API } from "."
 
-// grab our bearer token (if any)
 const getAuthHeaders = () => {
   const token = localStorage.getItem("token")
   return token ? { Authorization: `Bearer ${token}` } : {}
@@ -23,7 +22,6 @@ export const getMemberById = async memberId => {
 }
 
 export const addMember = async payload => {
-  // if payload is FormData (i.e. file upload), let axios set the multipart header
   const isForm = payload instanceof FormData
 
   const { data } = await axios.post(
@@ -31,7 +29,6 @@ export const addMember = async payload => {
     payload,
     {
       headers: {
-        // only set JSON content type if NOT FormData
         ...(isForm ? {} : { "Content-Type": "application/json" }),
         ...getAuthHeaders()
       }
@@ -77,7 +74,7 @@ export const cancelMemberById = async id => {
     `${MEMBERS_API}/${id}/cancel`,
     {
       headers: getAuthHeaders(),
-      data: {}  // axios.delete requires `data` for a body
+      data: {}
     }
   )
   return data

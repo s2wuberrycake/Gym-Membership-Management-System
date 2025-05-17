@@ -17,7 +17,7 @@ const getDaysToAdd = async extend_date_id => {
   return rows[0].days
 }
 
-// 1) Enrollment
+// Add new member
 export const insertMember = async (data, account_id) => {
   const {
     first_name,
