@@ -129,7 +129,7 @@ const Settings = () => {
               <TableSearch
                 value={globalFilter}
                 onChange={setGlobalFilter}
-                placeholder="Search members..."
+                placeholder="Search accounts..."
                 className="h-8 w-100"
               />
             </div>

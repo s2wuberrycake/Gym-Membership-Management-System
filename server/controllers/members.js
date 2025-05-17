@@ -6,7 +6,8 @@ import {
   updateMember,
   extendMember,
   cancelMember,
-  saveProfilePic
+  saveProfilePic,
+  restoreProfilePic
 } from "../services/members.js"
 
 export const getDurationsController = async (req, res, next) => {
@@ -65,8 +66,10 @@ export const updateMemberController = async (req, res, next) => {
 
     if (req.file) {
       await saveProfilePic(req.params.id, req.file)
+    } else if (req.body.existingPhoto) {
+      await restoreProfilePic(req.params.id, req.body.existingPhoto)
     }
-
+    
     res.json({ success: true })
   } catch (err) {
     next(err)

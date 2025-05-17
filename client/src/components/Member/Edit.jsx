@@ -1,4 +1,3 @@
-// src/components/Member/Edit.jsx
 import React, { useEffect, useState } from "react"
 import { updateMemberById } from "@/lib/api/members"
 import { jwtDecode } from "jwt-decode"
@@ -113,6 +112,8 @@ export default function EditMember({ member, isSheetOpen, onClose, refreshMember
     }
     if (photoFile) {
       fd.append("photo", photoFile)
+    } else if (member.profile_picture) {
+      fd.append("existingPhoto", member.profile_picture)
     }
 
     try {

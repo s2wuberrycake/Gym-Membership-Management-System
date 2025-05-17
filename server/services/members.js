@@ -71,7 +71,7 @@ export const insertMember = async (data, account_id) => {
   return member_id
 }
 
-// 6) Re-enrollment (restore with new expiration)
+// Re-enroll cancelled member
 export const restoreMember = async (id, extend_date_id, account_id) => {
   const conn = await defaultDb.getConnection()
   try {
@@ -108,7 +108,7 @@ export const restoreMember = async (id, extend_date_id, account_id) => {
   await logUpdate(id, 6, account_id)
 }
 
-// 3) Membership extension
+// Extend membership duration
 export const extendMember = async (id, extend_date_id, account_id) => {
   const [rows] = await defaultDb.query(
     "SELECT expiration_date FROM members WHERE member_id = ?",
@@ -140,7 +140,7 @@ export const extendMember = async (id, extend_date_id, account_id) => {
   await logUpdate(id, 3, account_id)
 }
 
-// 2) Member info update
+// Update member info
 export const updateMember = async (id, data, account_id) => {
   const {
     first_name,
@@ -148,7 +148,6 @@ export const updateMember = async (id, data, account_id) => {
     email,
     contact_number,
     address,
-    profile_picture = null,
     recent_join_date,
     expiration_date
   } = data
@@ -156,34 +155,32 @@ export const updateMember = async (id, data, account_id) => {
   const recent = DateTime.fromISO(recent_join_date, { zone: TIMEZONE })
   const exp    = DateTime.fromISO(expiration_date,   { zone: TIMEZONE })
 
-  await defaultDb.query(
-    `UPDATE members
-       SET first_name        = ?,
-           last_name         = ?,
-           email             = ?,
-           contact_number    = ?,
-           address           = ?,
-           profile_picture   = ?,
-           recent_join_date  = ?,
-           expiration_date   = ?
-     WHERE member_id = ?`,
-    [
-      first_name,
-      last_name,
-      email || null,
-      contact_number,
-      address,
-      profile_picture,
-      formatDate(recent),
-      formatDate(exp),
-      id
-    ]
-  )
+  const sql = `
+    UPDATE members
+       SET first_name       = ?,
+           last_name        = ?,
+           email            = ?,
+           contact_number   = ?,
+           address          = ?,
+           recent_join_date = ?,
+           expiration_date  = ?
+     WHERE member_id = ?
+  `
+  await defaultDb.query(sql, [
+    first_name,
+    last_name,
+    email || null,
+    contact_number,
+    address,
+    formatDate(recent),
+    formatDate(exp),
+    id
+  ])
 
   await logUpdate(id, 2, account_id)
 }
 
-// 4) Cancellation (soft-delete & archive)
+// Cancels membership
 export const cancelMember = async (id, account_id) => {
   const conn = await defaultDb.getConnection()
   try {
@@ -232,7 +229,7 @@ export const cancelMember = async (id, account_id) => {
   await logUpdate(id, 4, account_id)
 }
 
-// 5) Expiration logging
+// Expires members with due expiration dates
 export async function expireMembers(systemAccountId) {
   const [rows] = await defaultDb.query(
     `SELECT member_id
@@ -358,6 +355,7 @@ export const getCancelledMemberById = async id => {
   return rows[0] || null
 }
 
+// Save selected profile picture for member
 export async function saveProfilePic(member_id, file) {
   if (!file) return
   const ext      = path.extname(file.originalname)
@@ -368,4 +366,14 @@ export async function saveProfilePic(member_id, file) {
     "UPDATE members SET profile_picture = ? WHERE member_id = ?",
     [filename, member_id]
   )
+}
+
+// Keeps current profile picture for member
+export async function restoreProfilePic(memberId, filename) {
+  const sql = `
+    UPDATE members
+       SET profile_picture = ?
+     WHERE member_id = ?
+  `
+  await defaultDb.query(sql, [filename, memberId])
 }

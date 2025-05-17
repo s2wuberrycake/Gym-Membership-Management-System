@@ -1,4 +1,3 @@
-// src/components/Member/Add.jsx
 import React, { useEffect, useState } from "react"
 import { getDurations, addMember } from "@/lib/api/members"
 import { validateMemberForm, validateField } from "@/lib/helper/validate"

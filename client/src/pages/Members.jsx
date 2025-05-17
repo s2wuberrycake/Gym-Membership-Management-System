@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { getAllMembers } from "@/lib/api/members"
 
-import { ListRestart, Contact, CalendarCheck, X } from "lucide-react"
+import { ListRestart, X } from "lucide-react"
 
 import DataTable from "@/components/ui/data-table"
 import TableSearch from "@/components/ui/table-search"
@@ -161,7 +161,6 @@ const Members = () => {
                   onClick={() => toggleColumn("contactNumber")}
                   className="h-8 text-sm flex items-center gap-1"
                 >
-                  <Contact className="w-4 h-4" />
                   Contact Number
                   {visibleColumns.contactNumber && <X className="w-3 h-3" />}
                 </Button>
@@ -172,7 +171,6 @@ const Members = () => {
                   onClick={() => toggleColumn("joinDate")}
                   className="h-8 text-sm flex items-center gap-1"
                 >
-                  <CalendarCheck className="w-4 h-4" />
                   Join Date
                   {visibleColumns.joinDate && <X className="w-3 h-3" />}
                 </Button>
@@ -183,7 +181,6 @@ const Members = () => {
                   onClick={() => toggleColumn("expireDate")}
                   className="h-8 text-sm flex items-center gap-1"
                 >
-                  <CalendarCheck className="w-4 h-4" />
                   Expire Date
                   {visibleColumns.expireDate && <X className="w-3 h-3" />}
                 </Button>

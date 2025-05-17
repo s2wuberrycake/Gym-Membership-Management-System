@@ -1,8 +1,7 @@
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useState, useRef } from "react"
 import { getAllVisitLogs, logVisit } from "@/lib/api/log"
 import { getMemberById } from "@/lib/api/members"
 import { format } from "date-fns"
-
 import { ListRestart } from "lucide-react"
 
 import DataTable from "@/components/ui/data-table"
@@ -12,7 +11,7 @@ import {
   Container,
   ContainerHeader,
   ContainerTitle,
-  ContainerContent
+  ContainerContent,
 } from "@/components/ui/container"
 import { Separator } from "@/components/ui/separator"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
@@ -24,30 +23,33 @@ const dateLabel = {
   all:     "All Dates",
   today:   "Today",
   "7days": "Past 7 days",
-  month:   "Past Month"
+  month:   "Past Month",
 }
 
 const nextDate = {
   all:     "today",
   today:   "7days",
   "7days": "month",
-  month:   "all"
+  month:   "all",
 }
 
 export default function Visits() {
-  const [visits, setVisits] = useState([])
-  const [filter, setFilter] = useState(
+  const [visits, setVisits]         = useState([])
+  const [filter, setFilter]         = useState(
     () => localStorage.getItem("visitGlobalFilter") || ""
   )
   const [dateFilter, setDateFilter] = useState(
     () => localStorage.getItem("visitsDateFilter") || "today"
   )
-  const [uuid, setUuid] = useState("")
-  const [member, setMember] = useState(null)
+  const [uuid, setUuid]             = useState("")
+  const [member, setMember]         = useState(null)
+
+  const clearTimer = useRef(null)
 
   useEffect(() => {
     localStorage.setItem("visitGlobalFilter", filter)
   }, [filter])
+
   useEffect(() => {
     localStorage.setItem("visitsDateFilter", dateFilter)
   }, [dateFilter])
@@ -78,41 +80,62 @@ export default function Visits() {
     const memberId = uuid.trim()
     if (!memberId) return
 
-    try {
-      const resp = await logVisit(memberId)
-      if (resp.message) {
-        toast.error(resp.message)
-      } else {
-        setVisits(v => [resp, ...v])
-        toast.success("Visit logged successfully!")
-      }
-
-      const m = await getMemberById(memberId)
-      setMember(m)
-      setTimeout(() => setMember(null), 5000)
-    } catch (err) {
-      console.error(err)
-      toast.error(err.message)
-      setMember(null)
-    } finally {
-      setUuid("")
+    if (clearTimer.current) {
+      clearTimeout(clearTimer.current)
     }
+
+    let m
+    try {
+      m = await getMemberById(memberId)
+      setMember(m)
+    } catch {
+      toast.error("Member not found")
+      setMember(null)
+      setUuid("")
+      return
+    }
+
+    const expired   = new Date(m.expiration_date) < new Date()
+    const cancelled = m.status?.toLowerCase() === "cancelled"
+
+    if (expired || cancelled) {
+      toast.error(cancelled ? "Membership cancelled" : "Membership expired")
+    } else {
+      try {
+        const resp = await logVisit(memberId)
+        if (resp.message) {
+          toast.error(resp.message)
+        } else {
+          setVisits(v => [resp, ...v])
+          toast.success("Visit logged successfully!")
+        }
+      } catch (err) {
+        console.error(err)
+        toast.error(err.message)
+      }
+    }
+
+    setUuid("")
+
+    clearTimer.current = window.setTimeout(() => {
+      setMember(null)
+      clearTimer.current = null
+    }, 10000)
   }
 
   const filteredVisits = visits.filter(v => {
-    const d = new Date(v.visit_date)
+    const d   = new Date(v.visit_date)
     const now = new Date()
+
     if (dateFilter === "today") {
       return d.toDateString() === now.toDateString()
     }
     if (dateFilter === "7days") {
-      const ago = new Date()
-      ago.setDate(now.getDate() - 7)
+      const ago = new Date(); ago.setDate(now.getDate() - 7)
       return d >= ago
     }
     if (dateFilter === "month") {
-      const ago = new Date()
-      ago.setMonth(now.getMonth() - 1)
+      const ago = new Date(); ago.setMonth(now.getMonth() - 1)
       return d >= ago
     }
     return true
@@ -143,7 +166,7 @@ export default function Visits() {
           </ContainerHeader>
           <Separator />
 
-          <div className="flex gap-2 mb-2">
+          <div className="flex gap-2 mb-4">
             <Input
               value={uuid}
               onChange={e => setUuid(e.target.value)}
@@ -193,20 +216,20 @@ export default function Visits() {
                 <span
                   className={
                     member
-                      ? (member.status?.toLowerCase() === "cancelled"
-                          ? "text-red-500"
-                          : new Date(member.expiration_date) < new Date()
-                            ? "text-orange-500"
-                            : "text-green-600")
+                      ? member.status?.toLowerCase() === "cancelled"
+                        ? "text-red-500"
+                        : new Date(member.expiration_date) < new Date()
+                        ? "text-orange-500"
+                        : "text-green-600"
                       : ""
                   }
                 >
                   {member
-                    ? (member.status?.toLowerCase() === "cancelled"
-                        ? "Cancelled"
-                        : new Date(member.expiration_date) < new Date()
-                          ? "Expired"
-                          : "Active")
+                    ? member.status?.toLowerCase() === "cancelled"
+                      ? "Cancelled"
+                      : new Date(member.expiration_date) < new Date()
+                      ? "Expired"
+                      : "Active"
                     : ""}
                 </span>
               </div>
@@ -214,12 +237,15 @@ export default function Visits() {
                 <span className="font-medium">Expiration Date</span>
                 <span>
                   {member?.expiration_date
-                    ? format(new Date(member.expiration_date), "MMMM d, yyyy")
+                    ? format(
+                        new Date(member.expiration_date),
+                        "MMMM d, yyyy"
+                      )
                     : ""}
                 </span>
               </div>
             </div>
-            </ContainerContent>
+          </ContainerContent>
         </Container>
       </div>
 
@@ -241,6 +267,7 @@ export default function Visits() {
                 className="h-8 w-100"
               />
             </div>
+
             <div className="flex items-center justify-between flex-wrap gap-4 mb-4">
               <div className="flex items-center gap-1 flex-wrap">
                 <Button
@@ -272,6 +299,7 @@ export default function Visits() {
                 )}
               </div>
             </div>
+
             <DataTable
               columns={visitLogColumns()}
               data={filteredVisits}
