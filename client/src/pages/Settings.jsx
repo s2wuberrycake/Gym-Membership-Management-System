@@ -110,86 +110,90 @@ const Settings = () => {
 
   return (
     <div
-      className={`grid grid-cols-20 grid-rows-[auto_1fr] gap-4 mb-4 h-full ${
+      className={`grid grid-cols-20 gap-4 mb-4 h-full ${
         !isAdmin ? "pointer-events-none opacity-50" : ""
       }`}
     >
-      <div className="col-span-20 flex justify-between items-center">
+      <div className="col-span-6">
         <TableSearch
           value={globalFilter}
           onChange={setGlobalFilter}
           placeholder="Search accounts..."
+          className="w-full"
         />
       </div>
+      <div className="col-span-14" />
 
-      <Container className="col-span-20 flex flex-col gap-4 h-full">
-        <ContainerHeader>
-          <ContainerTitle>Accounts</ContainerTitle>
-          <p className="text-sm text-muted-foreground">
-            Requires "Admin" role to access. Create, delete, and update accounts
-            for your staff.
-          </p>
-        </ContainerHeader>
+      <div className="col-span-20 flex flex-col gap-4 h-full"> 
+        <Container className="flex-1 flex flex-col">
+          <ContainerHeader>
+            <ContainerTitle>Accounts</ContainerTitle>
+            <p className="text-sm text-muted-foreground">
+              Requires "Admin" role to access. Create, delete, and update accounts
+              for your staff.
+            </p>
+          </ContainerHeader>
 
-        <Separator />
+          <Separator />
 
-        <ContainerContent className="flex-1 flex flex-col">
-          <div className="flex items-center justify-between flex-wrap gap-4 mb-4">
-            <div className="flex items-center gap-2 flex-wrap">
-              <Button
-                variant={roleFilter === "all" ? "default" : "outline"}
-                size="sm"
-                onClick={cycleRoleFilter}
-                className="h-8 text-sm"
-              >
-                {roleLabel[roleFilter]}
-              </Button>
-
-              {hasActiveFilters ? (
+          <ContainerContent className="flex-1 flex flex-col">
+            <div className="flex items-center justify-between flex-wrap gap-4 mb-4">
+              <div className="flex items-center gap-2 flex-wrap">
                 <Button
-                  variant="default"
+                  variant={roleFilter === "all" ? "default" : "outline"}
                   size="sm"
-                  onClick={resetFilters}
+                  onClick={cycleRoleFilter}
                   className="h-8 text-sm"
                 >
-                  Reset Filters
+                  {roleLabel[roleFilter]}
                 </Button>
-              ) : (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={resetFilters}
-                  className="h-8 text-sm"
-                >
-                  <ListRestart className="w-4 h-4" />
-                </Button>
-              )}
+
+                {hasActiveFilters ? (
+                  <Button
+                    variant="default"
+                    size="sm"
+                    onClick={resetFilters}
+                    className="h-8 text-sm"
+                  >
+                    Reset Filters
+                  </Button>
+                ) : (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={resetFilters}
+                    className="h-8 text-sm"
+                  >
+                    <ListRestart className="w-4 h-4" />
+                  </Button>
+                )}
+              </div>
+
+              <Sheet open={isAddOpen} onOpenChange={setIsAddOpen}>
+                <SheetTrigger asChild>
+                  <Button size="sm" className="h-8 text-sm">
+                    Add Account
+                  </Button>
+                </SheetTrigger>
+                <AddAccount
+                  refreshAccounts={fetchAccounts}
+                  isSheetOpen={isAddOpen}
+                  onClose={() => setIsAddOpen(false)}
+                />
+              </Sheet>
             </div>
 
-            <Sheet open={isAddOpen} onOpenChange={setIsAddOpen}>
-              <SheetTrigger asChild>
-                <Button size="sm" className="h-8 text-sm">
-                  Add Account
-                </Button>
-              </SheetTrigger>
-              <AddAccount
-                refreshAccounts={fetchAccounts}
-                isSheetOpen={isAddOpen}
-                onClose={() => setIsAddOpen(false)}
-              />
-            </Sheet>
-          </div>
-
-          <DataTable
-            columns={accountsColumns(navigate)}
-            data={displayedData}
-            globalFilter={globalFilter}
-            onGlobalFilterChange={setGlobalFilter}
-            setTableRef={setTableRef}
-            globalFilterFn={globalFilterFn}
-          />
-        </ContainerContent>
-      </Container>
+            <DataTable
+              columns={accountsColumns(navigate)}
+              data={displayedData}
+              globalFilter={globalFilter}
+              onGlobalFilterChange={setGlobalFilter}
+              setTableRef={setTableRef}
+              globalFilterFn={globalFilterFn}
+            />
+          </ContainerContent>
+        </Container>
+      </div>
     </div>
   )
 }

@@ -77,6 +77,9 @@ importers:
       luxon:
         specifier: ^3.6.1
         version: 3.6.1
+      onscan.js:
+        specifier: ^1.5.2
+        version: 1.5.2
       react:
         specifier: ^19.0.0
         version: 19.1.0
@@ -1658,6 +1661,9 @@ packages:
 
   node-releases@2.0.19:
     resolution: {integrity: sha512-xxOWJsBKtzAq7DY0J+DTzuz58K8e7sJbdgwkbMWQe8UYB6ekmsQ45q0M/tJDsGaZmbC+l7n57UV8Hl5tHxO9uw==}
+
+  onscan.js@1.5.2:
+    resolution: {integrity: sha512-9oGYy2gXYRjvXO9GYqqVca0VuCTAmWhbmX3egBSBP13rXiMNb+dKPJzKFEeECGqPBpf0m40Zoo+GUQ7eCackdw==}
 
   optionator@0.9.4:
     resolution: {integrity: sha512-6IpQ7mKUxRcZNLIObR0hz7lxsapSSIYNZJwXPGeF0mTVqGKFIXj1DQcMoT22S3ROcLyY/rz0PWaWZ9ayWmad9g==}
@@ -3320,6 +3326,8 @@ snapshots:
   natural-compare@1.4.0: {}
 
   node-releases@2.0.19: {}
+
+  onscan.js@1.5.2: {}
 
   optionator@0.9.4:
     dependencies:

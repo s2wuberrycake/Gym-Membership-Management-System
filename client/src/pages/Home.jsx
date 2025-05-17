@@ -52,35 +52,38 @@ const Home = () => {
   }
 
   return (
-    <div className="grid grid-cols-20 grid-rows-[auto_1fr] gap-4 h-full">
-      <div className="col-span-20 flex justify-between items-center">
-        <TableSearch
-          value={globalFilter}
-          onChange={setGlobalFilter}
-          placeholder="Search update log..."
-        />
+    <div className="grid grid-cols-20 gap-4 mb-4 h-full">
+      <div className="col-span-20 flex flex-col gap-4 h-full">
+        <Container className="flex-1 flex flex-col">
+          <ContainerHeader>
+            <ContainerTitle className="font-bold">Update Log</ContainerTitle>
+            <p className="text-sm text-muted-foreground">
+              A chronological record of all member-related actions in the system.
+            </p>
+          </ContainerHeader>
+
+          <Separator />
+
+          <ContainerContent className="flex-1 flex flex-col">
+            <div className="flex items-center justify-between flex-wrap gap-4 mb-2">
+              <TableSearch
+                value={globalFilter}
+                onChange={setGlobalFilter}
+                placeholder="Search update log..."
+                className="h-8 w-[35%]"
+              />
+            </div>
+            
+            <DataTable
+              columns={updateLogColumns()}
+              data={data}
+              globalFilter={globalFilter}
+              onGlobalFilterChange={setGlobalFilter}
+              globalFilterFn={globalFilterFn}
+            />
+          </ContainerContent>
+        </Container>
       </div>
-
-      <Container className="col-span-20 flex flex-col gap-4 h-full">
-        <ContainerHeader>
-          <ContainerTitle className="font-bold">Update Log</ContainerTitle>
-          <p className="text-sm text-muted-foreground">
-            A chronological record of all member-related actions in the system.
-          </p>
-        </ContainerHeader>
-
-        <Separator />
-
-        <ContainerContent className="flex-1 flex flex-col">
-          <DataTable
-            columns={updateLogColumns()}
-            data={data}
-            globalFilter={globalFilter}
-            onGlobalFilterChange={setGlobalFilter}
-            globalFilterFn={globalFilterFn}
-          />
-        </ContainerContent>
-      </Container>
     </div>
   )
 }

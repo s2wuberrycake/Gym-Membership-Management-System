@@ -65,8 +65,10 @@ const Member = () => {
       </Button>
 
       <div className="flex items-center gap-4">
-        <Avatar className="w-24 h-24">
+        {/* square container with overflow-hidden + object-cover */}
+        <Avatar className="w-24 h-24 rounded-full overflow-hidden">
           <AvatarImage
+            className="w-full h-full object-cover object-center"
             src={
               member.profile_picture
                 ? `/uploads/profiles/${member.profile_picture}`
@@ -76,6 +78,7 @@ const Member = () => {
           />
           <AvatarFallback>{initials}</AvatarFallback>
         </Avatar>
+
         <h1 className="text-2xl font-bold">
           {member.first_name} {member.last_name}
         </h1>

@@ -18,19 +18,15 @@ Locally hosted webapp for managing memberships
   - Analytics : Bar graphs for statistical data
   - Generate reports
 
-- Members
-  - Add profile-picture column and storing function
-  - Data Culling
-
 - Visits
   - ACR122U (RFID scanner, use UUID as ID)
   - RFID scanning  (For now, input UUID and logs as visit)
-  - Visit log
 
 - Backup (Admin only)
   - Separate database
   - Restore function
   - Decide on file type (CSV?)
 
-- Settings (Admin only)
-  - Optional customization of date extension table
+- Optional
+  - Customization of date extension table
+  - Profile picture crop UI

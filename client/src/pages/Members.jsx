@@ -124,115 +124,116 @@ const Members = () => {
     Object.values(visibleColumns).some(v => !v)
 
   return (
-    <div className="grid grid-cols-20 grid-rows-[auto_1fr] gap-4 mb-4 h-full">
-      <div className="col-span-20 flex justify-between items-center">
-        <TableSearch
-          value={globalFilter}
-          onChange={setGlobalFilter}
-          placeholder="Search members..."
-        />
-      </div>
-
-      <Container className="col-span-20 flex flex-col gap-4 h-full">
-        <ContainerHeader>
-          <ContainerTitle className="font-bold">Members</ContainerTitle>
-          <p className="text-sm text-muted-foreground">
-            View and manage members. Toggle status filters and column visibility, or add a new member.
-          </p>
-        </ContainerHeader>
-
-        <Separator />
-
-        <ContainerContent className="flex-1 flex flex-col">
-          <div className="flex items-center justify-between flex-wrap gap-4 mb-4">
-            <div className="flex items-center gap-1 flex-wrap">
-              <Button
-                variant={statusFilter === "all" ? "default" : "outline"}
-                size="sm"
-                onClick={cycleStatusFilter}
-                className="h-8 text-sm"
-              >
-                {statusLabel[statusFilter]}
-              </Button>
-
-              <Button
-                variant={visibleColumns.contactNumber ? "default" : "outline"}
-                size="sm"
-                onClick={() => toggleColumn("contactNumber")}
-                className="h-8 text-sm flex items-center gap-1"
-              >
-                <Contact className="w-4 h-4" />
-                Contact Number
-                {visibleColumns.contactNumber && <X className="w-3 h-3" />}
-              </Button>
-
-              <Button
-                variant={visibleColumns.joinDate ? "default" : "outline"}
-                size="sm"
-                onClick={() => toggleColumn("joinDate")}
-                className="h-8 text-sm flex items-center gap-1"
-              >
-                <CalendarCheck className="w-4 h-4" />
-                Join Date
-                {visibleColumns.joinDate && <X className="w-3 h-3" />}
-              </Button>
-
-              <Button
-                variant={visibleColumns.expireDate ? "default" : "outline"}
-                size="sm"
-                onClick={() => toggleColumn("expireDate")}
-                className="h-8 text-sm flex items-center gap-1"
-              >
-                <CalendarCheck className="w-4 h-4" />
-                Expire Date
-                {visibleColumns.expireDate && <X className="w-3 h-3" />}
-              </Button>
-
-              {hasActiveFilters ? (
-                <Button
-                  variant="default"
-                  size="sm"
-                  onClick={resetFilters}
-                  className="h-8 text-sm"
-                >
-                  Reset Filters
-                </Button>
-              ) : (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={resetFilters}
-                  className="h-8 text-sm"
-                >
-                  <ListRestart className="w-4 h-4" />
-                </Button>
-              )}
+    <div className="grid grid-cols-20 gap-4 mb-4 h-full">
+      <div className="col-span-20 flex flex-col gap-4 h-full">
+        <Container className="flex-1 flex flex-col">
+          <ContainerHeader>
+            <ContainerTitle className="font-bold">Members</ContainerTitle>
+            <p className="text-sm text-muted-foreground">
+              View and manage members. Add a member, toggle column visibility, or reset filters below.
+            </p>
+          </ContainerHeader>
+          <Separator />
+          <ContainerContent className="flex-1 flex flex-col">
+            <div className="flex items-center justify-between flex-wrap gap-4 mb-2">
+              <TableSearch
+                value={globalFilter}
+                onChange={setGlobalFilter}
+                placeholder="Search members..."
+                className="h-8 w-[35%]"
+              />
             </div>
 
-            <Sheet open={isAddOpen} onOpenChange={setIsAddOpen}>
-              <SheetTrigger asChild>
-                <Button size="sm" className="h-8 text-sm">
-                  Add Member
+            <div className="flex items-center justify-between flex-wrap gap-4 mb-4">
+              <div className="flex items-center gap-1 flex-wrap">
+                <Button
+                  variant={statusFilter === "all" ? "default" : "outline"}
+                  size="sm"
+                  onClick={cycleStatusFilter}
+                  className="h-8 text-sm"
+                >
+                  {statusLabel[statusFilter]}
                 </Button>
-              </SheetTrigger>
-              <AddMember
-                refreshMembers={fetchMembers}
-                isSheetOpen={isAddOpen}
-                onClose={() => setIsAddOpen(false)}
-              />
-            </Sheet>
-          </div>
 
-          <DataTable
-            columns={membersColumns(navigate, visibleColumns)}
-            data={filteredData}
-            globalFilter={globalFilter}
-            onGlobalFilterChange={setGlobalFilter}
-            setTableRef={setTableRef}
-            globalFilterFn={globalFilterFn}
-          />
-        </ContainerContent>
-      </Container>
+                <Button
+                  variant={visibleColumns.contactNumber ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => toggleColumn("contactNumber")}
+                  className="h-8 text-sm flex items-center gap-1"
+                >
+                  <Contact className="w-4 h-4" />
+                  Contact Number
+                  {visibleColumns.contactNumber && <X className="w-3 h-3" />}
+                </Button>
+
+                <Button
+                  variant={visibleColumns.joinDate ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => toggleColumn("joinDate")}
+                  className="h-8 text-sm flex items-center gap-1"
+                >
+                  <CalendarCheck className="w-4 h-4" />
+                  Join Date
+                  {visibleColumns.joinDate && <X className="w-3 h-3" />}
+                </Button>
+
+                <Button
+                  variant={visibleColumns.expireDate ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => toggleColumn("expireDate")}
+                  className="h-8 text-sm flex items-center gap-1"
+                >
+                  <CalendarCheck className="w-4 h-4" />
+                  Expire Date
+                  {visibleColumns.expireDate && <X className="w-3 h-3" />}
+                </Button>
+
+                {hasActiveFilters ? (
+                  <Button
+                    variant="default"
+                    size="sm"
+                    onClick={resetFilters}
+                    className="h-8 text-sm"
+                  >
+                    Reset Filters
+                  </Button>
+                ) : (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={resetFilters}
+                    className="h-8 text-sm"
+                  >
+                    <ListRestart className="w-4 h-4" />
+                  </Button>
+                )}
+              </div>
+
+              <Sheet open={isAddOpen} onOpenChange={setIsAddOpen}>
+                <SheetTrigger asChild>
+                  <Button size="sm" className="h-8 text-sm">
+                    Add Member
+                  </Button>
+                </SheetTrigger>
+                <AddMember
+                  refreshMembers={fetchMembers}
+                  isSheetOpen={isAddOpen}
+                  onClose={() => setIsAddOpen(false)}
+                />
+              </Sheet>
+            </div>
+
+            <DataTable
+              columns={membersColumns(navigate, visibleColumns)}
+              data={filteredData}
+              globalFilter={globalFilter}
+              onGlobalFilterChange={setGlobalFilter}
+              setTableRef={setTableRef}
+              globalFilterFn={globalFilterFn}
+            />
+          </ContainerContent>
+        </Container>
+      </div>
     </div>
   )
 }

@@ -97,81 +97,82 @@ const Archive = () => {
   }
 
   return (
-    <div className="grid grid-cols-20 grid-rows-[auto_1fr] gap-4 mb-4 h-full">
-      <div className="col-span-20 flex justify-between items-center">
-        <TableSearch
-          value={globalFilter}
-          onChange={setGlobalFilter}
-          placeholder="Search cancelled members..."
-        />
-      </div>
-
-      <Container className="col-span-20 flex flex-col gap-4 h-full">
-        <ContainerHeader>
-          <ContainerTitle className="font-bold">
-            Cancelled Members
-          </ContainerTitle>
-          <p className="text-sm text-muted-foreground">
-            View and restore cancelled members. Toggle column visibility or reset filters below.
-          </p>
-        </ContainerHeader>
-
-        <Separator />
-
-        <ContainerContent className="flex-1 flex flex-col">
-          <div className="flex items-center justify-between flex-wrap gap-4 mb-4">
-            <div className="flex items-center gap-2 flex-wrap">
-              <Button
-                variant={visibleColumns.contactNumber ? "default" : "outline"}
-                size="sm"
-                onClick={() => toggleColumn("contactNumber")}
-                className="h-8 text-sm flex items-center gap-1"
-              >
-                Contact Number
-                {visibleColumns.contactNumber && <X className="w-3 h-3" />}
-              </Button>
-
-              <Button
-                variant={visibleColumns.cancelDate ? "default" : "outline"}
-                size="sm"
-                onClick={() => toggleColumn("cancelDate")}
-                className="h-8 text-sm flex items-center gap-1"
-              >
-                Cancel Date
-                {visibleColumns.cancelDate && <X className="w-3 h-3" />}
-              </Button>
-
-              {hasActiveFilters ? (
-                <Button
-                  variant="default"
-                  size="sm"
-                  onClick={resetFilters}
-                  className="h-8 text-sm"
-                >
-                  Reset Filters
-                </Button>
-              ) : (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={resetFilters}
-                  className="h-8 text-sm"
-                >
-                  <ListRestart className="w-4 h-4" />
-                </Button>
-              )}
+    <div className="grid grid-cols-20 gap-4 mb-4 h-full">
+      <div className="col-span-20 flex flex-col gap-4 h-full">
+        <Container className="flex-1 flex flex-col">
+          <ContainerHeader>
+            <ContainerTitle className="font-bold">
+              Cancelled Members
+            </ContainerTitle>
+            <p className="text-sm text-muted-foreground">
+              View and restore cancelled members. Toggle column visibility or reset filters below.
+            </p>
+          </ContainerHeader>
+          <Separator />
+          <ContainerContent className="flex-1 flex flex-col">
+            <div className="flex items-center justify-between flex-wrap gap-4 mb-2">
+              <TableSearch
+                value={globalFilter}
+                onChange={setGlobalFilter}
+                placeholder="Search cancelled members..."
+                className="h-8 w-[35%]"
+              />
             </div>
-          </div>
 
-          <DataTable
-            columns={archiveColumns(visibleColumns, { openRestore })}
-            data={data}
-            globalFilter={globalFilter}
-            onGlobalFilterChange={setGlobalFilter}
-            globalFilterFn={globalFilterFn}
-          />
-        </ContainerContent>
-      </Container>
+            <div className="flex items-center justify-between flex-wrap gap-4 mb-4">
+              <div className="flex items-center gap-2 flex-wrap">
+                <Button
+                  variant={visibleColumns.contactNumber ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => toggleColumn("contactNumber")}
+                  className="h-8 text-sm flex items-center gap-1"
+                >
+                  Contact Number
+                  {visibleColumns.contactNumber && <X className="w-3 h-3" />}
+                </Button>
+
+                <Button
+                  variant={visibleColumns.cancelDate ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => toggleColumn("cancelDate")}
+                  className="h-8 text-sm flex items-center gap-1"
+                >
+                  Cancel Date
+                  {visibleColumns.cancelDate && <X className="w-3 h-3" />}
+                </Button>
+
+                {hasActiveFilters ? (
+                  <Button
+                    variant="default"
+                    size="sm"
+                    onClick={resetFilters}
+                    className="h-8 text-sm"
+                  >
+                    Reset Filters
+                  </Button>
+                ) : (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={resetFilters}
+                    className="h-8 text-sm"
+                  >
+                    <ListRestart className="w-4 h-4" />
+                  </Button>
+                )}
+              </div>
+            </div>
+
+            <DataTable
+              columns={archiveColumns(visibleColumns, { openRestore })}
+              data={data}
+              globalFilter={globalFilter}
+              onGlobalFilterChange={setGlobalFilter}
+              globalFilterFn={globalFilterFn}
+            />
+          </ContainerContent>
+        </Container>
+      </div>
 
       <Sheet open={isRestoreOpen} onOpenChange={setIsRestoreOpen}>
         <RestoreMember
