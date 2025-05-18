@@ -48,14 +48,14 @@ export default function ChartSingleBar({
 
         <Legend
           payload={[
-            {
-              value: "Visits",
-              type: "circle",
-              id: dataKey,
-              color: color
-            }
+            { value: "Visits", type: "circle", id: dataKey, color }
           ]}
+          layout="horizontal"
+          verticalAlign="bottom"
+          align="left"
+          wrapperStyle={{ marginTop: 16, paddingLeft: 0 }}
         />
+
         <Bar
           dataKey={dataKey}
           fill={color}

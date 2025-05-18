@@ -23,3 +23,6 @@ export const getMemberRatio = async () => {
   )
   return res.data
 }
+
+export const downloadAnalyticsReportUrl = period =>
+  `${ANALYTICS_API}/analytics-report.xlsx?period=${period}`

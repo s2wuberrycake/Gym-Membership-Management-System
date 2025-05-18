@@ -135,6 +135,7 @@ export default function Members() {
             </p>
           </ContainerHeader>
           <Separator />
+          
           <ContainerContent className="flex-1 flex flex-col">
             <div className="flex items-center justify-between flex-wrap gap-4 mb-2">
               <TableSearch

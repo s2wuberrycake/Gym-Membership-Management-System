@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react"
-import { getAllUpdateLogs } from "@/lib/api/log"
-import { Button } from "@/components/ui/button"
+import { getAllUpdateLogs }   from "@/lib/api/log"
+import { getMemberGrowth }    from "@/lib/api/analytics"
+import { ANALYTICS_API } from "@/lib/api"
 
-import DataTable from "@/components/ui/data-table"
+import { Button }             from "@/components/ui/button"
+import DataTable   from "@/components/ui/data-table"
 import TableSearch from "@/components/ui/table-search"
 import { updateLogColumns } from "@/components/table/UpdateLogColumn"
 import {
@@ -13,15 +15,15 @@ import {
 } from "@/components/ui/container"
 import { Separator } from "@/components/ui/separator"
 import MemberGrowthChart from "@/components/Chart/Wrapper/MemberGrowth"
-import VisitRateChart from "@/components/Chart/Wrapper/VisitRate"
-import MemberRatioChart from "../components/Chart/Wrapper/MemberRatio"
+import VisitRateChart    from "@/components/Chart/Wrapper/VisitRate"
+import MemberRatioChart  from "@/components/Chart/Wrapper/MemberRatio"
 
-import { API_BASE } from "@/lib/api"
+
 
 const periods = [
   { label: "Today",       value: "default" },
   { label: "Last 7 Days", value: "week"    },
-  { label: "Last Year",   value: "year"    }
+  { label: "Last 12 Months",   value: "year"    }
 ]
 
 const Home = () => {
@@ -67,19 +69,6 @@ const Home = () => {
 
   return (
     <div className="grid grid-cols-20 gap-4 mb-4 h-full">
-      <Button
-  variant="outline"
-  size="sm"
-  asChild
->
-  <a
-    href={`${API_BASE}/api/analytics/analytics-report.xlsx?period=${period}`}
-    target="_blank"
-    rel="noopener noreferrer"
-  >
-    Download Growth Report
-  </a>
-</Button>
       <div className="col-span-20 flex flex-col">
         <Container className="flex-1 flex flex-col">
           <ContainerHeader>
@@ -91,18 +80,30 @@ const Home = () => {
           <Separator />
 
           <ContainerContent className="grid grid-cols-20 gap-4">
-            <div className="col-span-20 flex space-x-2 mb-4">
-              {periods.map(p => (
-                <Button
-                  key={p.value}
-                  variant={period === p.value ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setPeriod(p.value)}
-                  className="h-8 text-sm"
+            <div className="col-span-20 flex items-center justify-between">
+              <div className="flex space-x-2">
+                {periods.map(p => (
+                  <Button
+                    key={p.value}
+                    variant={period === p.value ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setPeriod(p.value)}
+                    className="h-8 text-sm"
+                  >
+                    {p.label}
+                  </Button>
+                ))}
+              </div>
+
+              <Button variant="default" size="sm" asChild>
+                <a
+                  href={`${ANALYTICS_API}/analytics-report.xlsx?period=${period}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
                 >
-                  {p.label}
-                </Button>
-              ))}
+                  Download Analytics Report
+                </a>
+              </Button>
             </div>
 
             <div className="col-span-4">
@@ -138,24 +139,6 @@ const Home = () => {
               </Container>
             </div>
 
-            <div className="col-span-6">
-              <Container className="h-full flex flex-col">
-                <ContainerHeader>
-                  <ContainerTitle>Stats</ContainerTitle>
-                </ContainerHeader>
-                <ContainerContent className="flex-1">
-                </ContainerContent>
-              </Container>
-            </div>
-            <div className="col-span-14">
-              <Container className="h-full flex flex-col">
-                <ContainerHeader>
-                  <ContainerTitle>Latest Visit</ContainerTitle>
-                </ContainerHeader>
-                <ContainerContent className="flex-1">
-                </ContainerContent>
-              </Container>
-            </div>
           </ContainerContent>
         </Container>
       </div>

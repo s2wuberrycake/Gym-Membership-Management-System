@@ -55,7 +55,13 @@ export default function ChartMultiBar({
 
         <ChartTooltip content={<ChartTooltipContent />} />
 
-        <Legend payload={legendPayload} />
+        <Legend
+          payload={legendPayload}
+          layout="horizontal"
+          verticalAlign="bottom"
+          align="left"
+          wrapperStyle={{ marginTop: 16, paddingLeft: 0 }}
+        />
 
         {dataKeys.map((key, idx) => (
           <Bar

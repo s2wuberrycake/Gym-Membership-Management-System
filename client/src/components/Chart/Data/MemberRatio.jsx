@@ -15,6 +15,7 @@ export default function MemberRatio({ data }) {
       nameKey="status_id"
       config={config}
       totalLabel="Members"
+      className="mx-auto aspect-square max-h-[350px] w-full"
     />
   )
 }

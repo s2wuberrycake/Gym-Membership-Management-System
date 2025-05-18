@@ -10,6 +10,7 @@ export default function ChartPie({
   innerRadius = 60,
   strokeWidth = 5,
   totalLabel = ""
+  , className = "mx-auto aspect-square max-h-[250px]"
 }) {
   const total = useMemo(
     () => data.reduce((sum, entry) => sum + (entry[dataKey] || 0), 0),
@@ -17,7 +18,7 @@ export default function ChartPie({
   )
 
   return (
-    <ChartContainer config={config} className="mx-auto aspect-square max-h-[250px]">
+    <ChartContainer config={config} className={className}>
       <PieChart>
         <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
         <Pie
