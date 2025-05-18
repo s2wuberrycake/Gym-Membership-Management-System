@@ -1,5 +1,6 @@
 import axios from "axios"
 import { API_BASE } from "./index"
+import { ANALYTICS_API } from "./index"
 
 export const getMemberGrowth = async period => {
   const res = await axios.get(
@@ -26,3 +27,13 @@ export const getMemberRatio = async () => {
 
 export const downloadAnalyticsReportUrl = period =>
   `${ANALYTICS_API}/analytics-report.xlsx?period=${period}`
+
+export const getDashboardStats = async () => {
+  const res = await axios.get(`${ANALYTICS_API}/dashboard-stats`)
+  return res.data
+}
+
+export const getMostRecentVisit = async () => {
+  const res = await axios.get(`${ANALYTICS_API}/most-recent-visit`)
+  return res.data
+}

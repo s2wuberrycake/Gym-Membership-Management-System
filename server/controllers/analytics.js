@@ -1,7 +1,9 @@
 import {
   getMemberGrowth,
   getVisitRate,
-  getMemberRatio
+  getMemberRatio,
+  getDashboardStats,
+  getMostRecentVisit
 } from "../services/analytics.js"
 
 export const getMemberGrowthController = async (req, res, next) => {
@@ -28,6 +30,24 @@ export const getMemberRatioController = async (req, res, next) => {
   try {
     const data = await getMemberRatio()
     res.json(data)
+  } catch (err) {
+    next(err)
+  }
+}
+
+export const getDashboardStatsController = async (req, res, next) => {
+  try {
+    const stats = await getDashboardStats()
+    res.json(stats)
+  } catch (err) {
+    next(err)
+  }
+}
+
+export const getMostRecentVisitController = async (req, res, next) => {
+  try {
+    const visit = await getMostRecentVisit()
+    res.json(visit)
   } catch (err) {
     next(err)
   }

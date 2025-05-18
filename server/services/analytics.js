@@ -131,3 +131,50 @@ export const getMemberRatio = async () => {
   const [rows] = await conn.query(query)
   return rows
 }
+
+export const getDashboardStats = async () => {
+  // reuse existing service functions
+  const { getMemberRatio, getVisitRate } = await import("./analytics.js")
+
+  // 1️⃣ Membership counts
+  const ratioRows = await getMemberRatio()
+  const totalMembers     = ratioRows.reduce((sum, r) => sum + Number(r.value), 0)
+  const activeMembers    = ratioRows.find(r => r.status_id === 1)?.value || 0
+  const expiredMembers   = ratioRows.find(r => r.status_id === 2)?.value || 0
+  const cancelledMembers = ratioRows.find(r => r.status_id === 3)?.value || 0
+
+  // 2️⃣ Visits: sum up today, week, year
+  const sumVisits = rows => rows.reduce((sum, r) => sum + Number(r.visits || 0), 0)
+  const todayRows = await getVisitRate("default")
+  const weekRows  = await getVisitRate("week")
+  const yearRows  = await getVisitRate("year")
+
+  return {
+    totalMembers,
+    activeMembers,
+    expiredMembers,
+    cancelledMembers,
+    visits: {
+      today: sumVisits(todayRows),
+      week:  sumVisits(weekRows),
+      year:  sumVisits(yearRows),
+    }
+  }
+}
+
+export const getMostRecentVisit = async () => {
+  const conn = await defaultDb
+  const query = `
+    SELECT
+      m.first_name,
+      m.last_name,
+      m.profile_picture,
+      vl.visit_date
+    FROM visit_log vl
+    JOIN members    m  ON vl.member_id = m.member_id
+    ORDER BY vl.visit_date DESC
+    LIMIT 1
+  `
+  const [rows] = await conn.query(query)
+  return rows[0] || null
+}
