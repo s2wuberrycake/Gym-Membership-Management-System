@@ -8,7 +8,12 @@ import DataTable from "@/components/ui/data-table"
 import TableSearch from "@/components/ui/table-search"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetTrigger } from "@/components/ui/sheet"
-import { Container, ContainerHeader, ContainerTitle, ContainerContent } from "@/components/ui/container"
+import {
+  Container,
+  ContainerHeader,
+  ContainerTitle,
+  ContainerContent
+} from "@/components/ui/container"
 import { Separator } from "@/components/ui/separator"
 import { membersColumns } from "@/components/table/MembersColumn"
 import AddMember from "@/components/Member/Add"
@@ -26,7 +31,7 @@ const nextStatus = {
   expired: "all"
 }
 
-const Members = () => {
+export default function Members() {
   const navigate = useNavigate()
   const [data, setData] = useState([])
   const [tableRef, setTableRef] = useState(null)
@@ -38,7 +43,7 @@ const Members = () => {
     const saved = localStorage.getItem("membersVisibleColumns")
     return saved
       ? JSON.parse(saved)
-      : { contactNumber: true, joinDate: true, expireDate: true }
+      : { contactNumber: true, expireDate: true }
   })
   const [statusFilter, setStatusFilter] = useState(
     () => localStorage.getItem("membersStatusFilter") || "all"
@@ -48,11 +53,9 @@ const Members = () => {
   useEffect(() => {
     localStorage.setItem("membersGlobalFilter", globalFilter)
   }, [globalFilter])
-
   useEffect(() => {
     localStorage.setItem("membersVisibleColumns", JSON.stringify(visibleColumns))
   }, [visibleColumns])
-
   useEffect(() => {
     localStorage.setItem("membersStatusFilter", statusFilter)
   }, [statusFilter])
@@ -66,7 +69,6 @@ const Members = () => {
       toast.error("Failed to load members")
     }
   }
-
   useEffect(() => {
     fetchMembers()
   }, [])
@@ -81,7 +83,7 @@ const Members = () => {
 
   const resetFilters = () => {
     setGlobalFilter("")
-    setVisibleColumns({ contactNumber: true, joinDate: true, expireDate: true })
+    setVisibleColumns({ contactNumber: true, expireDate: true })
     setStatusFilter("all")
     localStorage.removeItem("membersGlobalFilter")
     localStorage.removeItem("membersVisibleColumns")
@@ -93,15 +95,14 @@ const Members = () => {
       ? data
       : data.filter(member => member.status?.toLowerCase() === statusFilter)
 
-  const globalFilterFn = (row, columnId, filterValue) => {
+  const globalFilterFn = (row, _colId, filterValue) => {
     const fields = ["id", "first_name", "last_name"]
     if (visibleColumns.contactNumber) fields.push("contact_number")
-    if (visibleColumns.joinDate)     fields.push("recent_join_date")
     if (visibleColumns.expireDate)   fields.push("expiration_date")
 
     return fields.some(field => {
       const value = row.original[field]
-      if (field === "recent_join_date" || field === "expiration_date") {
+      if (field === "expiration_date") {
         const date = value ? new Date(value) : null
         const formatted = date
           ? date.toLocaleDateString("en-US", {
@@ -166,22 +167,12 @@ const Members = () => {
                 </Button>
 
                 <Button
-                  variant={visibleColumns.joinDate ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => toggleColumn("joinDate")}
-                  className="h-8 text-sm flex items-center gap-1"
-                >
-                  Join Date
-                  {visibleColumns.joinDate && <X className="w-3 h-3" />}
-                </Button>
-
-                <Button
                   variant={visibleColumns.expireDate ? "default" : "outline"}
                   size="sm"
                   onClick={() => toggleColumn("expireDate")}
                   className="h-8 text-sm flex items-center gap-1"
                 >
-                  Expire Date
+                  Expiration Date
                   {visibleColumns.expireDate && <X className="w-3 h-3" />}
                 </Button>
 
@@ -234,5 +225,3 @@ const Members = () => {
     </div>
   )
 }
-
-export default Members

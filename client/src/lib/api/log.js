@@ -1,13 +1,13 @@
 import axios from "axios"
-import { HOME_API, VISITS_API } from "."
+import { UPDATES_API, VISITS_API } from "."
 
 export const getAllUpdateLogs = async () => {
-  const res = await axios.get(HOME_API)
+  const res = await axios.get(UPDATES_API)
   return res.data
 }
 
 export const logUpdate = async (memberId, actionId, accountId) => {
-  await axios.post(HOME_API, {
+  await axios.post(UPDATES_API, {
     member_id:  memberId,
     action_id:  actionId,
     account_id: accountId
@@ -19,7 +19,7 @@ export const getAllVisitLogs = async () => {
   return res.data
 }
 
-export const logVisit = async (memberId) => {
+export const logVisit = async memberId => {
   try {
     const res = await axios.post(VISITS_API, { member_id: memberId })
     return res.data

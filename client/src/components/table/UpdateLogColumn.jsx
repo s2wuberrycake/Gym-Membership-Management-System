@@ -20,16 +20,6 @@ const actionStyles = {
 }
 
 export const updateLogColumns = () => [
-  columnHelper.accessor("update_id", {
-    header: "Update ID",
-    cell: info => info.getValue()
-  }),
-
-  columnHelper.accessor("member_id", {
-    header: "UUID",
-    cell: info => info.getValue()
-  }),
-
   columnHelper.accessor(
     row => `${row.first_name || ""} ${row.last_name || ""}`.trim(),
     {

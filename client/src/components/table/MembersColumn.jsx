@@ -42,12 +42,6 @@ export const membersColumns = (navigate, visibleColumns = {}) => {
         cell: info => info.getValue()
       }),
 
-    visibleColumns.joinDate &&
-      columnHelper.accessor("recent_join_date", {
-        header: "Recent Join Date",
-        cell: info => formatDate(info.getValue())
-      }),
-
     visibleColumns.expireDate &&
       columnHelper.accessor("expiration_date", {
         header: "Expiration Date",

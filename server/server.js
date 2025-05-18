@@ -8,12 +8,8 @@ import authRouter from "./routes/authorize.js"
 import membersRouter from "./routes/members.js"
 import archiveRouter from "./routes/archive.js"
 import settingsRouter from "./routes/settings.js"
-import {
-  getAllUpdateLogsController,
-  logUpdateController,
-  getAllVisitLogsController,
-  logVisitController
-} from "./controllers/logs.js"
+import analyticsRouter from "./routes/analytics.js"
+import logsRouter from "./routes/logs.js"
 import { errorHandler } from "./middleware/error.js"
 import { expireMembers } from "./services/members.js"
 
@@ -32,12 +28,8 @@ app.use("/auth", authRouter)
 app.use("/api/members", membersRouter)
 app.use("/api/archive", archiveRouter)
 app.use("/api/settings", settingsRouter)
-
-app.get("/api/home", getAllUpdateLogsController)
-app.post("/api/home", logUpdateController)
-
-app.get("/api/visits", getAllVisitLogsController)
-app.post("/api/visits", logVisitController)
+app.use("/api/analytics", analyticsRouter)
+app.use("/api/logs", logsRouter)
 
 const SYSTEM_ACCOUNT_ID = Number(process.env.SYSTEM_ACCOUNT_ID ?? 0)
 

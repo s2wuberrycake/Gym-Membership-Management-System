@@ -15,7 +15,12 @@ Locally hosted webapp for managing memberships
 
 ## TODOs
 - Home
-  - Analytics : Bar graphs for statistical data
+  - Analytics
+    - FILTERED : by day, week, year
+    - Bar graph: Visit count CAN FILTERED
+    - Pie chart: Active, expired, and cancelled members ratio
+    - Stats: Total members, active, expired, and cancelled
+    - Stats: Total visits by the day, week, month, quarter, year
   - Generate reports
 
 - Visits

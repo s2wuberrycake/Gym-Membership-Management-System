@@ -10,10 +10,6 @@ const formatTime = value =>
   value ? format(new Date(value), "HH:mm:ss") : "-"
 
 export const visitLogColumns = () => [
-  columnHelper.accessor("visit_id", {
-    header: "Visit ID",
-    cell: info => info.getValue()
-  }),
   columnHelper.accessor(
     row => `${row.first_name || ""} ${row.last_name || ""}`.trim(),
     {

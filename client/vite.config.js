@@ -17,8 +17,12 @@ export default defineConfig({
       "/uploads": {
         target: "http://localhost:3000",
         changeOrigin: true,
-        // rewrite the path if needed; not necessary here since both servers use /uploads
-        // rewrite: (path) => path.replace(/^\/uploads/, "/uploads"),
+      },
+      // forward all /api/* requests to your backend
+      "/api": {
+        target: "http://localhost:3000",
+        changeOrigin: true,
+        secure: false,
       },
     },
   },
