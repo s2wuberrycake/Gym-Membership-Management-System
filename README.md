@@ -16,12 +16,8 @@ Locally hosted webapp for managing memberships
 ## TODOs
 - Home
   - Analytics
-    - FILTERED : by day, week, year
-    - Bar graph: Visit count CAN FILTERED
-    - Pie chart: Active, expired, and cancelled members ratio
     - Stats: Total members, active, expired, and cancelled
     - Stats: Total visits by the day, week, month, quarter, year
-  - Generate reports
 
 - Visits
   - ACR122U (RFID scanner, use UUID as ID)
@@ -38,3 +34,5 @@ Locally hosted webapp for managing memberships
 - FIX
   - Members info page and Account info page design
   - Apply same char limit of 25 before truncating name to other tables (update log, cancelled members, visit log)
+  - Search filters needs customized filter depending on page's table columns
+  - Logged-in account icon should change if logged-in account is staff for clarity

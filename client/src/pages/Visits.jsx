@@ -185,8 +185,8 @@ export default function Visits() {
           </div>
 
           <ContainerContent className="grid grid-cols-20 gap-4">
-            <div className="col-span-20 flex flex-col h-90">
-              <Avatar className="h-full w-full overflow-hidden rounded-[1rem]">
+            <div className="col-span-20 flex flex-col h-100">
+              <Avatar className="h-[100%] w-full overflow-hidden rounded-[1rem]">
                 <AvatarImage
                   className="w-full h-full object-cover object-center rounded-[1rem]"
                   src={

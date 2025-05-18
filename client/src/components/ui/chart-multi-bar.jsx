@@ -5,10 +5,11 @@ import {
   Bar,
   XAxis,
   YAxis,
-  Tooltip,
   Legend,
-  CartesianGrid
+  CartesianGrid,
+  Cell
 } from "recharts"
+import { ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 
 export default function ChartMultiBar({
   data,
@@ -16,10 +17,28 @@ export default function ChartMultiBar({
   colors,
   height = 300
 }) {
+  const maxValue = data.reduce(
+    (mx, row) =>
+      Math.max(mx, ...dataKeys.map(key => row[key] || 0)),
+    0
+  )
+  const maxTick = Math.ceil(maxValue / 5) * 5
+  const ticks = Array.from(
+    { length: maxTick / 5 + 1 },
+    (_, i) => i * 5
+  )
+
+  const legendPayload = dataKeys.map(key => ({
+    value: key.charAt(0).toUpperCase() + key.slice(1),
+    type: "circle",
+    id: key,
+    color: colors[key]
+  }))
+
   return (
     <ResponsiveContainer width="100%" height={height}>
       <BarChart data={data}>
-        <CartesianGrid vertical={false}/>
+        <CartesianGrid vertical={false} />
         <XAxis
           dataKey="label"
           tickLine={false}
@@ -27,32 +46,39 @@ export default function ChartMultiBar({
           axisLine={false}
         />
         <YAxis
+          ticks={ticks}
+          domain={[0, maxTick]}
           tickLine={false}
           tickMargin={10}
           axisLine={false}
         />
-        <Tooltip
-          // gives you a semi‐transparent overlay on hover:
-          cursor={{ fill: "var(--color-muted-foreground)", opacity: 0.1 }}
-          // style the box to match your cards:
-          contentStyle={{
-            backgroundColor: "var(--color-card)",
-            border: "none",
-            borderRadius: "1rem",
-            boxShadow: "0 2px 8px rgba(0,0,0,0.1)"
-          }}
-          // text colors
-          labelStyle={{ color: "var(--color-card-foreground)" }}
-          itemStyle={{ color: "inherit" }}
-        />
-        <Legend formatter={value => value} />
-        {dataKeys.map(key => (
+
+        <ChartTooltip content={<ChartTooltipContent />} />
+
+        <Legend payload={legendPayload} />
+
+        {dataKeys.map((key, idx) => (
           <Bar
             key={key}
             dataKey={key}
+            stackId="a"
             fill={colors[key]}
-            radius={4}
-          />
+          >
+            {data.map((entry, i) => {
+              if (idx === 0) {
+                const hasTop = entry[dataKeys[1]] > 0
+                const radius = hasTop
+                  ? [0, 0, 4, 4]
+                  : [4, 4, 4, 4]
+                return <Cell key={i} radius={radius} />
+              }
+              const hasBottom = entry[dataKeys[0]] > 0
+              const radius = hasBottom
+                ? [4, 4, 0, 0]
+                : [4, 4, 4, 4]
+              return <Cell key={i} radius={radius} />
+            })}
+          </Bar>
         ))}
       </BarChart>
     </ResponsiveContainer>

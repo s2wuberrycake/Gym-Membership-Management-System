@@ -1,4 +1,3 @@
-// src/pages/Home.jsx
 import React, { useEffect, useState } from "react"
 import { getAllUpdateLogs } from "@/lib/api/log"
 import { Button } from "@/components/ui/button"
@@ -13,22 +12,24 @@ import {
   ContainerContent
 } from "@/components/ui/container"
 import { Separator } from "@/components/ui/separator"
-import AnalyticsHome from "@/components/Chart/AnalyticsHome"
+import MemberGrowthChart from "@/components/Chart/Wrapper/MemberGrowth"
+import VisitRateChart from "@/components/Chart/Wrapper/VisitRate"
+import MemberRatioChart from "../components/Chart/Wrapper/MemberRatio"
+
+import { API_BASE } from "@/lib/api"
 
 const periods = [
-  { label: "Today",       value: "day"     },
+  { label: "Today",       value: "default" },
   { label: "Last 7 Days", value: "week"    },
-  { label: "Last Year",   value: "default" }
+  { label: "Last Year",   value: "year"    }
 ]
 
 const Home = () => {
-  // update‐log state
   const [data, setData] = useState([])
   const [globalFilter, setGlobalFilter] = useState(
     () => localStorage.getItem("updateLogGlobalFilter") || ""
   )
 
-  // analytics filter state
   const [period, setPeriod] = useState("default")
 
   useEffect(() => {
@@ -66,7 +67,19 @@ const Home = () => {
 
   return (
     <div className="grid grid-cols-20 gap-4 mb-4 h-full">
-      {/* Analytics Panel */}
+      <Button
+  variant="outline"
+  size="sm"
+  asChild
+>
+  <a
+    href={`${API_BASE}/api/analytics/analytics-report.xlsx?period=${period}`}
+    target="_blank"
+    rel="noopener noreferrer"
+  >
+    Download Growth Report
+  </a>
+</Button>
       <div className="col-span-20 flex flex-col">
         <Container className="flex-1 flex flex-col">
           <ContainerHeader>
@@ -78,7 +91,6 @@ const Home = () => {
           <Separator />
 
           <ContainerContent className="grid grid-cols-20 gap-4">
-            {/* date‐filter buttons */}
             <div className="col-span-20 flex space-x-2 mb-4">
               {periods.map(p => (
                 <Button
@@ -93,50 +105,45 @@ const Home = () => {
               ))}
             </div>
 
-            {/* Members ratio Container */}
             <div className="col-span-4">
               <Container className="h-full flex flex-col">
                 <ContainerHeader>
                   <ContainerTitle>Members</ContainerTitle>
                 </ContainerHeader>
                 <ContainerContent className="flex-1">
-                  {/* pie chart here */}
+                  <MemberRatioChart />
                 </ContainerContent>
               </Container>
             </div>
 
-            {/* Membership Growth Container */}
             <div className="col-span-8">
               <Container className="h-full flex flex-col">
                 <ContainerHeader>
                   <ContainerTitle>Membership Growth</ContainerTitle>
                 </ContainerHeader>
                 <ContainerContent className="flex-1">
-                  <AnalyticsHome period={period} />
+                  <MemberGrowthChart period={period} />
                 </ContainerContent>
               </Container>
             </div>
 
-            {/* Visit Rate Container*/}
             <div className="col-span-8">
               <Container className="h-full flex flex-col">
                 <ContainerHeader>
                   <ContainerTitle>Visit Rate</ContainerTitle>
                 </ContainerHeader>
                 <ContainerContent className="flex-1">
-                  {/* Bar graph here */}
+                  <VisitRateChart period={period} />
                 </ContainerContent>
               </Container>
             </div>
 
-            {/* Additional Containers... */}
             <div className="col-span-6">
               <Container className="h-full flex flex-col">
                 <ContainerHeader>
                   <ContainerTitle>Stats</ContainerTitle>
                 </ContainerHeader>
                 <ContainerContent className="flex-1">
-                  {/* stats here */}
                 </ContainerContent>
               </Container>
             </div>
@@ -146,7 +153,6 @@ const Home = () => {
                   <ContainerTitle>Latest Visit</ContainerTitle>
                 </ContainerHeader>
                 <ContainerContent className="flex-1">
-                  {/* latest visit component */}
                 </ContainerContent>
               </Container>
             </div>
@@ -154,7 +160,6 @@ const Home = () => {
         </Container>
       </div>
 
-      {/* Update Log Panel */}
       <div className="col-span-20 flex flex-col">
         <Container className="flex-1 flex flex-col">
           <ContainerHeader>
