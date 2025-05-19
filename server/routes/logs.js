@@ -8,10 +8,24 @@ import {
 
 const router = express.Router()
 
-router.get("/updates", getAllUpdateLogsController)
-router.post("/updates", logUpdateController)
+router.get(
+  "/updates",
+  getAllUpdateLogsController
+)
 
-router.get("/visits", getAllVisitLogsController)
-router.post("/visits", logVisitController)
+router.post(
+  "/updates",
+  logUpdateController
+)
+
+router.get(
+  "/visits",
+  getAllVisitLogsController
+)
+
+router.post(
+  "/visits",
+  logVisitController
+)
 
 export default router

@@ -12,28 +12,45 @@ import { verifyToken } from "../middleware/auth.js"
 
 const router = express.Router()
 
-// Public
-router.get("/",                getAllAccountsController)
-router.get("/check-username",  checkUsernameExistsController)
-router.get("/roles",           getRolesController)
+router.get(
+  "/",
+  getAllAccountsController
+)
+router.get(
+  "/check-username",
+  checkUsernameExistsController
+)
+router.get(
+  "/roles",
+  getRolesController
+)
 
-// Protected
+const authorizeAccountAccess = (req, res, next) => {
+  const { id: userId, role: userRole } = req.user || {}
+  const targetId = Number(req.params.id)
+  if (userRole === "admin" || userId === targetId) {
+    return next()
+  }
+  return res.status(403).json({ message: "Access denied" })
+}
 router.get(
   "/:id",
   verifyToken,
-  (req, res, next) => {
-    const { id: userId, role: userRole } = req.user || {}
-    const targetId = Number(req.params.id)
-    if (userRole === "admin" || userId === targetId) {
-      return next()
-    }
-    return res.status(403).json({ message: "Access denied" })
-  },
+  authorizeAccountAccess,
   getAccountByIdController
 )
 
-router.post("/",       createAccountController)
-router.put("/:id",     updateAccountController)
-router.delete("/:id",  deleteAccountController)
+router.post(
+  "/",
+  createAccountController
+)
+router.put(
+  "/:id",
+  updateAccountController
+)
+router.delete(
+  "/:id",
+  deleteAccountController
+)
 
 export default router

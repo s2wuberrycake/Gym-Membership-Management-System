@@ -1,6 +1,6 @@
 import express from "express"
 import { extractUser } from "../middleware/user.js"
-import { upload }      from "../middleware/upload.js"
+import { upload } from "../middleware/upload.js"
 import {
   getDurationsController,
   getAllMembersController,
@@ -27,10 +27,29 @@ router.put(
   updateMemberController
 )
 
-router.get(   "/durations",  getDurationsController)
-router.get(   "/",           getAllMembersController)
-router.get(   "/:id",        getMemberByIdController)
-router.put(   "/:id/extend", extendMembershipController)
-router.delete("/:id/cancel", cancelMemberController)
+router.get(
+  "/durations",
+  getDurationsController
+)
+
+router.get(
+  "/",
+  getAllMembersController
+)
+
+router.get(
+  "/:id",
+  getMemberByIdController
+)
+
+router.put(
+  "/:id/extend",
+  extendMembershipController
+)
+
+router.delete(
+  "/:id/cancel",
+  cancelMemberController
+)
 
 export default router

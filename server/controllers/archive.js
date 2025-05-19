@@ -6,7 +6,6 @@ import {
 
 export const getCancelledMembersController = async (req, res, next) => {
   try {
-    console.log("DEBUG >> Fetching all cancelled members")
     const cancelled = await getCancelledMembers()
     res.json(cancelled)
   } catch (err) {
@@ -17,10 +16,8 @@ export const getCancelledMembersController = async (req, res, next) => {
 export const getCancelledMemberByIdController = async (req, res, next) => {
   try {
     const { id } = req.params
-    console.log(`DEBUG >> Fetching cancelled member by ID: ${id}`)
     const member = await getCancelledMemberById(id)
     if (!member) {
-      console.log("DEBUG >> Cancelled member not found")
       return res.status(404).json({ success: false, message: "Cancelled member not found" })
     }
     res.json(member)
@@ -33,17 +30,15 @@ export const restoreCancelledMemberController = async (req, res, next) => {
   try {
     const { id } = req.params
     const { extend_date_id } = req.body
+
     if (!extend_date_id) {
-      return res.status(400).json({
-        success: false,
-        message: "extend_date_id is required to restore a member"
-      })
+      return res.status(400).json({ success: false, message: "extend_date_id is required" })
     }
-    const account_id = req.user.id
-    console.log(`DEBUG >> Restoring member ${id}`)
-    await restoreMember(id, extend_date_id, account_id)
-    console.log(`DEBUG >> Member ${id} restored`)
-    res.json({ success: true, message: "Member restored successfully" })
+
+    const account_id = req.user?.id
+    const memberId = await restoreMember(id, extend_date_id, account_id)
+
+    res.json({ success: true, memberId })
   } catch (err) {
     next(err)
   }

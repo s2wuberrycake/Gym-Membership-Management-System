@@ -1,38 +1,26 @@
 import React, { useEffect, useState } from "react"
 import { format } from "date-fns"
 
-import { getAllUpdateLogs }     from "@/lib/api/log"
-import {
-  getDashboardStats,
-  getMostRecentVisit
-} from "@/lib/api/analytics"
+import { getAllUpdateLogs } from "@/lib/api/log"
+import { getDashboardStats, getMostRecentVisit } from "@/lib/api/analytics"
 import { ANALYTICS_API, API_BASE } from "@/lib/api"
 
-import { Button }               from "@/components/ui/button"
-import DataTable                from "@/components/ui/data-table"
-import TableSearch              from "@/components/ui/table-search"
-import { updateLogColumns }     from "@/components/table/UpdateLogColumn"
-import {
-  Container,
-  ContainerHeader,
-  ContainerTitle,
-  ContainerContent
-} from "@/components/ui/container"
-import { Separator }            from "@/components/ui/separator"
-import MemberGrowthChart        from "@/components/Chart/Wrapper/MemberGrowth"
-import VisitRateChart           from "@/components/Chart/Wrapper/VisitRate"
-import MemberRatioChart         from "@/components/Chart/Wrapper/MemberRatio"
-
-import {
-  Avatar,
-  AvatarImage,
-  AvatarFallback
-} from "@/components/ui/avatar"
+import { Button } from "@/components/ui/button"
+import DataTable from "@/components/ui/data-table"
+import TableSearch from "@/components/ui/table-search"
+import { updateLogColumns } from "@/components/table/UpdateLogColumn"
+import { Container, ContainerHeader, ContainerTitle, ContainerContent } from "@/components/ui/container"
+import { Separator } from "@/components/ui/separator"
+import MemberGrowthChart from "@/components/Chart/Wrapper/MemberGrowth"
+import VisitRateChart from "@/components/Chart/Wrapper/VisitRate"
+import MemberRatioChart from "@/components/Chart/Wrapper/MemberRatio"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 
 const periods = [
-  { label: "Today",          value: "default" },
-  { label: "Last 7 Days",    value: "week"    },
-  { label: "Last 12 Months", value: "year"    }
+  { label: "Today", value: "default" },
+  { label: "Last 7 Days", value: "week" },
+  { label: "Last 12 Months", value: "year" }
 ]
 
 export default function Home() {
@@ -41,28 +29,21 @@ export default function Home() {
     () => localStorage.getItem("updateLogGlobalFilter") || ""
   )
 
-  const [period, setPeriod]       = useState("default")
-  const [stats, setStats]         = useState(null)
-  const [recentVisit, setRecent]  = useState(null)
+  const [period, setPeriod] = useState("default")
+  const [stats, setStats] = useState(null)
+  const [recentVisit, setRecent] = useState(null)
 
   useEffect(() => {
     localStorage.setItem("updateLogGlobalFilter", globalFilter)
   }, [globalFilter])
 
   useEffect(() => {
-    getAllUpdateLogs()
-      .then(setLogs)
-      .catch(console.error)
+    getAllUpdateLogs().then(setLogs).catch(console.error)
   }, [])
 
   useEffect(() => {
-    getDashboardStats()
-      .then(setStats)
-      .catch(console.error)
-
-    getMostRecentVisit()
-      .then(setRecent)
-      .catch(console.error)
+    getDashboardStats().then(setStats).catch(console.error)
+    getMostRecentVisit().then(setRecent).catch(console.error)
   }, [])
 
   const globalFilterFn = (row, columnId, filterValue) => {
@@ -75,10 +56,9 @@ export default function Home() {
       "logged_expiration_date"
     ]
     const lower = filterValue.toLowerCase()
-    return fields.some(f => {
-      const v = row.original[f]
-      return String(v ?? "").toLowerCase().includes(lower)
-    })
+    return fields.some((f) =>
+      String(row.original[f] ?? "").toLowerCase().includes(lower)
+    )
   }
 
   const getInitials = (first, last) =>
@@ -89,12 +69,9 @@ export default function Home() {
       <div className="col-span-20 flex flex-col">
         <Container className="flex-1 flex flex-col">
           <ContainerHeader>
-            <ContainerTitle className="font-bold">
-              Analytics
-            </ContainerTitle>
+            <ContainerTitle className="font-bold">Analytics</ContainerTitle>
             <p className="text-sm text-muted-foreground">
-              Statistical data for business and market analysis. Generate
-              and import reports below.
+              Statistical data for business and market analysis. Generate and import reports below.
             </p>
           </ContainerHeader>
           <Separator />
@@ -102,7 +79,7 @@ export default function Home() {
           <ContainerContent className="grid grid-cols-20 gap-4">
             <div className="col-span-20 flex items-center justify-between mb-4">
               <div className="flex space-x-2">
-                {periods.map(p => (
+                {periods.map((p) => (
                   <Button
                     key={p.value}
                     variant={period === p.value ? "default" : "outline"}
@@ -125,6 +102,7 @@ export default function Home() {
               </Button>
             </div>
 
+            {/* Charts */}
             <div className="col-span-4">
               <Container className="h-full flex flex-col">
                 <ContainerHeader>
@@ -158,61 +136,88 @@ export default function Home() {
               </Container>
             </div>
 
-            <div className="col-span-8">
+            {/* Stats */}
+            <div className="col-span-7">
               <Container className="h-full flex flex-col">
-                <ContainerContent>
+                <ContainerContent className="space-y-2">
                   {stats ? (
                     <>
-                      <div className="text-4xl font-extrabold mb-0.5">Total Members: {stats.totalMembers}</div>
-                      <div className="font-medium">Active Members: {stats.activeMembers}</div>
-                      <div className="font-medium">Expired Members: {stats.expiredMembers}</div>
-                      <div className="font-medium">Cancelled Members: {stats.cancelledMembers}</div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-4xl font-extrabold">Total Members</span>
+                        <span className="text-4xl font-extrabold">{stats.totalMembers}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="font-medium">Active Members</span>
+                        <span className="font-medium">{stats.activeMembers}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="font-medium">Expired Members</span>
+                        <span className="font-medium">{stats.expiredMembers}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="font-medium">Cancelled Members</span>
+                        <span className="font-medium">{stats.cancelledMembers}</span>
+                      </div>
                     </>
                   ) : (
-                    <div>Loading stats…</div>
+                    <Skeleton className="h-6 w-full" />
                   )}
                 </ContainerContent>
               </Container>
             </div>
 
-            <div className="col-span-8">
+            {/* Visits */}
+            <div className="col-span-7">
               <Container className="h-full flex flex-col">
-                <ContainerContent>
+                <ContainerContent className="space-y-2">
                   {stats ? (
                     <>
-                      <div className="text-4xl font-extrabold mb-0.5">Visits Today: {stats.visits.today}</div>
-                      <div className="font-medium">Recent Week: {stats.visits.week}</div>
-                      <div className="font-medium">Recent Year: {stats.visits.year}</div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-4xl font-extrabold">Visits Today</span>
+                        <span className="text-4xl font-extrabold">{stats.visits.today}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="font-medium">Last 7 Days</span>
+                        <span className="font-medium">{stats.visits.week}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="font-medium">Last 30 Days</span>
+                        <span className="font-medium">{stats.visits.last30}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="font-medium">Last 12 Months</span>
+                        <span className="font-medium">{stats.visits.year}</span>
+                      </div>
                     </>
                   ) : (
-                    <div>Loading stats…</div>
+                    <Skeleton className="h-6 w-full" />
                   )}
                 </ContainerContent>
               </Container>
             </div>
 
-            <div className="col-span-4">
+            {/* Most Recent Visit */}
+            <div className="col-span-6">
               <Container className="h-full flex flex-col">
                 <ContainerHeader>
                   <ContainerTitle>Most Recent Visit</ContainerTitle>
                 </ContainerHeader>
                 <ContainerContent className="flex items-center space-x-4">
                   {recentVisit ? (
-                    <>  
-                      <Avatar className="h-12 w-30 rounded-[0_1rem_0_1rem]">
+                    <>
+                      <Avatar className="h-12 w-12">
                         <AvatarImage
                           className="w-full h-full object-cover object-center rounded-[0_1rem_0_1rem]"
                           src={`${API_BASE}/uploads/profiles/${recentVisit.profile_picture}`}
                           alt={`${recentVisit.first_name} ${recentVisit.last_name}`}
                         />
-                        <AvatarFallback className="flex items-center justify-center rounded-[1rem]">
+                        <AvatarFallback>
                           {getInitials(
                             recentVisit.first_name,
                             recentVisit.last_name
                           )}
                         </AvatarFallback>
                       </Avatar>
-
                       <div>
                         <div className="font-bold">
                           {recentVisit.first_name} {recentVisit.last_name}
@@ -223,7 +228,7 @@ export default function Home() {
                       </div>
                     </>
                   ) : (
-                    <div>Loading…</div>
+                    <Skeleton className="h-12 w-full" />
                   )}
                 </ContainerContent>
               </Container>
@@ -232,6 +237,7 @@ export default function Home() {
         </Container>
       </div>
 
+      {/* Update Log Section */}
       <div className="col-span-20 flex flex-col">
         <Container className="flex-1 flex flex-col">
           <ContainerHeader>

@@ -6,9 +6,11 @@ import {
   updateMember,
   extendMember,
   cancelMember,
+} from "../services/members.js"
+import {
   saveProfilePic,
   restoreProfilePic
-} from "../services/members.js"
+} from "../services/files.js"
 
 export const getDurationsController = async (req, res, next) => {
   try {
@@ -31,7 +33,9 @@ export const getAllMembersController = async (req, res, next) => {
 export const getMemberByIdController = async (req, res, next) => {
   try {
     const member = await getMemberById(req.params.id)
-    if (!member) return res.status(404).json({ success: false, message: "Member not found" })
+    if (!member) {
+      return res.status(404).json({ success: false, message: "Member not found" })
+    }
     res.json(member)
   } catch (err) {
     next(err)
@@ -43,13 +47,10 @@ export const createMemberController = async (req, res, next) => {
     if (!req.user?.id) {
       return res.status(401).json({ success: false, message: "Unauthorized" })
     }
-
     const member_id = await insertMember(req.body, req.user.id)
-
     if (req.file) {
       await saveProfilePic(member_id, req.file)
     }
-
     res.status(201).json({ success: true, member_id })
   } catch (err) {
     next(err)
@@ -61,16 +62,17 @@ export const updateMemberController = async (req, res, next) => {
     if (!req.user?.id) {
       return res.status(401).json({ success: false, message: "Unauthorized" })
     }
-
-    await updateMember(req.params.id, req.body, req.user.id)
-
+    const updatedMember = await updateMember(
+      req.params.id,
+      req.body,
+      req.user.id
+    )
     if (req.file) {
       await saveProfilePic(req.params.id, req.file)
     } else if (req.body.existingPhoto) {
       await restoreProfilePic(req.params.id, req.body.existingPhoto)
     }
-    
-    res.json({ success: true })
+    res.json({ success: true, member: updatedMember })
   } catch (err) {
     next(err)
   }
@@ -84,8 +86,12 @@ export const extendMembershipController = async (req, res, next) => {
     if (!req.body.extend_date_id) {
       return res.status(400).json({ success: false, message: "extend_date_id is required" })
     }
-    await extendMember(req.params.id, req.body.extend_date_id, req.user.id)
-    res.json({ success: true, message: "Membership extended" })
+    const { memberId, newExpiration } = await extendMember(
+      req.params.id,
+      req.body.extend_date_id,
+      req.user.id
+    )
+    res.json({ success: true, memberId, newExpiration })
   } catch (err) {
     next(err)
   }
@@ -96,8 +102,8 @@ export const cancelMemberController = async (req, res, next) => {
     if (!req.user?.id) {
       return res.status(401).json({ success: false, message: "Unauthorized" })
     }
-    await cancelMember(req.params.id, req.user.id)
-    res.json({ success: true, message: "Member cancelled and archived" })
+    const { memberId } = await cancelMember(req.params.id, req.user.id)
+    res.json({ success: true, memberId })
   } catch (err) {
     next(err)
   }

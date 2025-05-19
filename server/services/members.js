@@ -1,23 +1,19 @@
-import fs from "fs/promises"
-import path from "path"
 import { defaultDb } from "../config/db.js"
 import { DateTime } from "luxon"
 import { logUpdate } from "./logs.js"
-
-const TIMEZONE = "Asia/Manila"
-const getToday   = () => DateTime.now().setZone(TIMEZONE).startOf("day")
-const formatDate = dt => dt.toFormat("yyyy-MM-dd")
+import { TIMEZONE, getToday, formatDate } from "../utils/date.js"
 
 const getDaysToAdd = async extend_date_id => {
-  const [rows] = await defaultDb.query(
-    "SELECT days FROM extend_date WHERE extend_date_id = ?",
-    [extend_date_id]
-  )
+  const sql = `
+    SELECT days
+    FROM extend_date
+    WHERE extend_date_id = ?
+  `
+  const [rows] = await defaultDb.query(sql, [extend_date_id])
   if (!rows.length) throw new Error("Invalid extend_date_id")
   return rows[0].days
 }
 
-// Add new member
 export const insertMember = async (data, account_id) => {
   const {
     first_name,
@@ -30,49 +26,38 @@ export const insertMember = async (data, account_id) => {
     status_id = 1
   } = data
 
-  const [[{ member_id }]] = await defaultDb.query(
-    "SELECT UUID() AS member_id"
-  )
-
+  const [[{ member_id }]] = await defaultDb.query("SELECT UUID() AS member_id")
   const daysToAdd  = await getDaysToAdd(extend_date_id)
   const today      = getToday()
   const expiration = today.plus({ days: daysToAdd })
 
-  await defaultDb.query(
-    `INSERT INTO members (
-       member_id,
-       first_name,
-       last_name,
-       email,
-       contact_number,
-       address,
-       profile_picture,
-       original_join_date,
-       recent_join_date,
-       expiration_date,
-       status_id
-     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    [
-      member_id,
-      first_name,
-      last_name,
-      email || null,
-      contact_number,
-      address,
-      profile_picture,
-      formatDate(today),
-      formatDate(today),
-      formatDate(expiration),
-      status_id
-    ]
-  )
+  const sql = `
+    INSERT INTO members (
+      member_id, first_name, last_name, email,
+      contact_number, address, profile_picture,
+      original_join_date, recent_join_date,
+      expiration_date, status_id
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `
+  await defaultDb.query(sql, [
+    member_id,
+    first_name,
+    last_name,
+    email || null,
+    contact_number,
+    address,
+    profile_picture,
+    formatDate(today),
+    formatDate(today),
+    formatDate(expiration),
+    status_id
+  ])
 
   await logUpdate(member_id, 1, account_id)
   return member_id
 }
 
-// Re-enroll cancelled member
-export const restoreMember = async (id, extend_date_id, account_id) => {
+export const restoreMember = async (memberId, extend_date_id, account_id) => {
   const conn = await defaultDb.getConnection()
   try {
     await conn.beginTransaction()
@@ -82,20 +67,18 @@ export const restoreMember = async (id, extend_date_id, account_id) => {
     const fmtToday  = formatDate(today)
     const fmtExpiry = formatDate(today.plus({ days }))
 
-    await conn.query(
-      `UPDATE members
-         SET recent_join_date = ?,
-             expiration_date  = ?,
-             status_id        = 1
-       WHERE member_id = ?`,
-      [fmtToday, fmtExpiry, id]
-    )
+    const updateSql = `
+      UPDATE members
+        SET recent_join_date = ?, expiration_date = ?, status_id = 1
+      WHERE member_id = ?
+    `
+    await conn.query(updateSql, [fmtToday, fmtExpiry, memberId])
 
-    await conn.query(
-      `DELETE FROM cancelled_members
-       WHERE member_id = ?`,
-      [id]
-    )
+    const deleteSql = `
+      DELETE FROM cancelled_members
+      WHERE member_id = ?
+    `
+    await conn.query(deleteSql, [memberId])
 
     await conn.commit()
   } catch (err) {
@@ -105,14 +88,14 @@ export const restoreMember = async (id, extend_date_id, account_id) => {
     conn.release()
   }
 
-  await logUpdate(id, 6, account_id)
+  await logUpdate(memberId, 6, account_id)
+  return memberId
 }
 
-// Extend membership duration
-export const extendMember = async (id, extend_date_id, account_id) => {
+export const extendMember = async (memberId, extend_date_id, account_id) => {
   const [rows] = await defaultDb.query(
     "SELECT expiration_date FROM members WHERE member_id = ?",
-    [id]
+    [memberId]
   )
   if (!rows.length) throw new Error("Member not found")
 
@@ -123,25 +106,24 @@ export const extendMember = async (id, extend_date_id, account_id) => {
   const newExp   = base.plus({ days })
   const fmtExp   = formatDate(newExp)
 
-  const labelSql = newExp < today ? "expired" : "active"
+  const label = newExp < today ? "expired" : "active"
   const [[{ status_id }]] = await defaultDb.query(
     "SELECT status_id FROM status_types WHERE status_label = ?",
-    [labelSql]
+    [label]
   )
 
-  await defaultDb.query(
-    `UPDATE members
-       SET expiration_date = ?,
-           status_id       = ?
-     WHERE member_id = ?`,
-    [fmtExp, status_id, id]
-  )
+  const sql = `
+    UPDATE members
+      SET expiration_date = ?, status_id = ?
+    WHERE member_id = ?
+  `
+  const [result] = await defaultDb.query(sql, [fmtExp, status_id, memberId])
 
-  await logUpdate(id, 3, account_id)
+  await logUpdate(memberId, 3, account_id)
+  return { memberId, affectedRows: result.affectedRows, newExpiration: fmtExp }
 }
 
-// Update member info
-export const updateMember = async (id, data, account_id) => {
+export const updateMember = async (memberId, data, account_id) => {
   const {
     first_name,
     last_name,
@@ -157,16 +139,16 @@ export const updateMember = async (id, data, account_id) => {
 
   const sql = `
     UPDATE members
-       SET first_name       = ?,
-           last_name        = ?,
-           email            = ?,
-           contact_number   = ?,
-           address          = ?,
-           recent_join_date = ?,
-           expiration_date  = ?
-     WHERE member_id = ?
+      SET first_name       = ?,
+          last_name        = ?,
+          email            = ?,
+          contact_number   = ?,
+          address          = ?,
+          recent_join_date = ?,
+          expiration_date  = ?
+    WHERE member_id = ?
   `
-  await defaultDb.query(sql, [
+  const [result] = await defaultDb.query(sql, [
     first_name,
     last_name,
     email || null,
@@ -174,49 +156,47 @@ export const updateMember = async (id, data, account_id) => {
     address,
     formatDate(recent),
     formatDate(exp),
-    id
+    memberId
   ])
 
-  await logUpdate(id, 2, account_id)
+  await logUpdate(memberId, 2, account_id)
+
+  const selectSql = `
+    SELECT *
+      FROM members
+    WHERE member_id = ?
+  `
+  const [rows] = await defaultDb.query(selectSql, [memberId])
+  return rows[0] || null
 }
 
-// Cancels membership
-export const cancelMember = async (id, account_id) => {
+// Cancel membership
+export const cancelMember = async (memberId, account_id) => {
   const conn = await defaultDb.getConnection()
   try {
     await conn.beginTransaction()
 
-    await conn.query(
-      "UPDATE members SET status_id = 3 WHERE member_id = ?",
-      [id]
-    )
+    const updateSql = `
+      UPDATE members
+        SET status_id = 3
+      WHERE member_id = ?
+    `
+    await conn.query(updateSql, [memberId])
 
-    await conn.query(
-      `INSERT INTO cancelled_members (
-         member_id,
-         first_name,
-         last_name,
-         email,
-         contact_number,
-         address,
-         original_join_date,
-         cancel_date,
-         status_id
-       )
-       SELECT
-         member_id,
-         first_name,
-         last_name,
-         email,
-         contact_number,
-         address,
-         original_join_date,
-         CURDATE(),
-         status_id
-       FROM members
-       WHERE member_id = ?`,
-      [id]
-    )
+    const insertSql = `
+      INSERT INTO cancelled_members (
+        member_id, first_name, last_name, email,
+        contact_number, address, original_join_date,
+        cancel_date, status_id
+      )
+      SELECT
+        member_id, first_name, last_name, email,
+        contact_number, address, original_join_date,
+        CURDATE(), status_id
+      FROM members
+      WHERE member_id = ?
+    `
+    await conn.query(insertSql, [memberId])
 
     await conn.commit()
   } catch (err) {
@@ -226,46 +206,49 @@ export const cancelMember = async (id, account_id) => {
     conn.release()
   }
 
-  await logUpdate(id, 4, account_id)
+  await logUpdate(memberId, 4, account_id)
+  return { memberId }
 }
 
-// Expires members with due expiration dates
+// Expire due members
 export async function expireMembers(systemAccountId) {
-  const [rows] = await defaultDb.query(
-    `SELECT member_id
-       FROM members
-      WHERE status_id = 1
-        AND expiration_date <= CURDATE()`
-  )
+  const selectSql = `
+    SELECT member_id
+      FROM members
+    WHERE status_id = 1
+      AND expiration_date <= CURDATE()
+  `
+  const [rows] = await defaultDb.query(selectSql)
   const expiredIds = rows.map(r => r.member_id)
   if (!expiredIds.length) {
     console.log("DEBUG >> No members to expire")
-    return
+    return []
   }
 
-  const [result] = await defaultDb.query(
-    `UPDATE members
-       SET status_id = 2
-     WHERE member_id IN (?)`,
-    [expiredIds]
-  )
+  const updateSql = `
+    UPDATE members
+      SET status_id = 2
+    WHERE member_id IN (?)
+  `
+  const [result] = await defaultDb.query(updateSql, [expiredIds])
   console.log(`DEBUG >> ${result.affectedRows} member(s) marked expired`)
 
   for (const member_id of expiredIds) {
     await logUpdate(member_id, 5, systemAccountId)
   }
   console.log(`DEBUG >> Logged expiration for ${expiredIds.length} member(s)`)
+
+  return expiredIds
 }
 
-// Get extension durations
 export const getDurations = async () => {
-  const [rows] = await defaultDb.query("SELECT * FROM extend_date")
+  const sql = `SELECT * FROM extend_date`
+  const [rows] = await defaultDb.query(sql)
   return rows
 }
 
-// Get all active or expired members
 export const getMembers = async () => {
-  const [rows] = await defaultDb.query(`
+  const sql = `
     SELECT
       m.member_id       AS id,
       m.first_name,
@@ -281,15 +264,14 @@ export const getMembers = async () => {
     LEFT JOIN status_types st
       ON m.status_id = st.status_id
     WHERE m.status_id IN (1, 2)
-    ORDER BY m.recent_join_date DESC,
-             m.last_name ASC
-  `)
+    ORDER BY m.recent_join_date DESC, m.last_name ASC
+  `
+  const [rows] = await defaultDb.query(sql)
   return rows
 }
 
-// Get a member by ID
-export const getMemberById = async id => {
-  const [rows] = await defaultDb.query(`
+export const getMemberById = async memberId => {
+  const sql = `
     SELECT
       m.member_id       AS id,
       m.first_name,
@@ -307,13 +289,13 @@ export const getMemberById = async id => {
     LEFT JOIN status_types st
       ON m.status_id = st.status_id
     WHERE m.member_id = ?
-  `, [id])
+  `
+  const [rows] = await defaultDb.query(sql, [memberId])
   return rows[0] || null
 }
 
-// Get all archived members
 export const getCancelledMembers = async () => {
-  const [rows] = await defaultDb.query(`
+  const sql = `
     SELECT
       cm.member_id     AS id,
       cm.first_name,
@@ -327,15 +309,14 @@ export const getCancelledMembers = async () => {
     FROM cancelled_members cm
     LEFT JOIN status_types st
       ON cm.status_id = st.status_id
-    ORDER BY cm.cancel_date DESC,
-             cm.last_name ASC
-  `)
+    ORDER BY cm.cancel_date DESC, cm.last_name ASC
+  `
+  const [rows] = await defaultDb.query(sql)
   return rows
 }
 
-// Get an archived member by ID
-export const getCancelledMemberById = async id => {
-  const [rows] = await defaultDb.query(`
+export const getCancelledMemberById = async memberId => {
+  const sql = `
     SELECT
       cm.member_id     AS id,
       cm.first_name,
@@ -351,29 +332,7 @@ export const getCancelledMemberById = async id => {
     LEFT JOIN status_types st
       ON cm.status_id = st.status_id
     WHERE cm.member_id = ?
-  `, [id])
-  return rows[0] || null
-}
-
-// Save selected profile picture for member
-export async function saveProfilePic(member_id, file) {
-  if (!file) return
-  const ext      = path.extname(file.originalname)
-  const filename = `${member_id}${ext}`
-  const dest     = path.resolve("uploads", "profiles", filename)
-  await fs.writeFile(dest, file.buffer)
-  await defaultDb.query(
-    "UPDATE members SET profile_picture = ? WHERE member_id = ?",
-    [filename, member_id]
-  )
-}
-
-// Keeps current profile picture for member
-export async function restoreProfilePic(memberId, filename) {
-  const sql = `
-    UPDATE members
-       SET profile_picture = ?
-     WHERE member_id = ?
   `
-  await defaultDb.query(sql, [filename, memberId])
+  const [rows] = await defaultDb.query(sql, [memberId])
+  return rows[0] || null
 }

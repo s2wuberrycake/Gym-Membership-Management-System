@@ -9,7 +9,7 @@ import {
 export const getMemberGrowthController = async (req, res, next) => {
   try {
     const period = req.query.period || "default"
-    const data = await getMemberGrowth(period)
+    const data   = await getMemberGrowth(period)
     res.json(data)
   } catch (err) {
     next(err)
@@ -19,7 +19,7 @@ export const getMemberGrowthController = async (req, res, next) => {
 export const getVisitRateController = async (req, res, next) => {
   try {
     const period = req.query.period || "default"
-    const data = await getVisitRate(period)
+    const data   = await getVisitRate(period)
     res.json(data)
   } catch (err) {
     next(err)

@@ -16,14 +16,17 @@ import { expireMembers } from "./services/members.js"
 dotenv.config()
 const app = express()
 
+// Middleware
 app.use(cors())
 app.use(express.json())
 
+// Uploads
 app.use(
   "/uploads",
   express.static(path.resolve(process.cwd(), "uploads"))
 )
 
+// Routes
 app.use("/auth", authRouter)
 app.use("/api/members", membersRouter)
 app.use("/api/archive", archiveRouter)
@@ -31,27 +34,28 @@ app.use("/api/settings", settingsRouter)
 app.use("/api/analytics", analyticsRouter)
 app.use("/api/logs", logsRouter)
 
+// Expiration checks
 const SYSTEM_ACCOUNT_ID = Number(process.env.SYSTEM_ACCOUNT_ID ?? 0)
 
-// initial expiration check
 expireMembers(SYSTEM_ACCOUNT_ID)
   .then(() => console.log("DEBUG >> Initial expiration check complete"))
   .catch(console.error)
 
-// schedule daily expiration check at 00:01 Manila time
-cron.schedule(
+const defaultCron = cron.schedule(
   "1 0 * * *",
-  () => {
-    console.log("DEBUG >> Running daily expiration check")
-    expireMembers(SYSTEM_ACCOUNT_ID).catch(console.error)
-  },
+  () => expireMembers(SYSTEM_ACCOUNT_ID)
+    .then(() => console.log("DEBUG >> Daily expiration check complete"))
+    .catch(console.error),
   { timezone: "Asia/Manila" }
 )
 
+defaultCron.start()
+
+// Global error handling
 app.use(errorHandler)
 
-app.listen(process.env.PORT, () => {
-  console.log(
-    `DEBUG >> Server listening on port ${process.env.PORT}`
-  )
+// Start server
+const PORT = Number(process.env.PORT ?? 3000)
+app.listen(PORT, () => {
+  console.log(`DEBUG >> Server listening on port ${PORT}`)
 })

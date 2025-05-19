@@ -10,8 +10,19 @@ const router = express.Router()
 
 router.use(extractUser)
 
-router.get("/",    getCancelledMembersController)
-router.get("/:id", getCancelledMemberByIdController)
-router.put("/:id/restore", restoreCancelledMemberController)
+router.get(
+  "/",
+  getCancelledMembersController
+)
+
+router.get(
+  "/:id",
+  getCancelledMemberByIdController
+)
+
+router.put(
+  "/:id/restore",
+  restoreCancelledMemberController
+)
 
 export default router

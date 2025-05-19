@@ -2,9 +2,10 @@ import React, { useState, useEffect } from "react"
 import axios from "axios"
 import MemberGrowth from "../Data/MemberGrowth"
 import { format, subDays, subMonths } from "date-fns"
+import { Skeleton } from "@/components/ui/skeleton"
 
 export default function MemberGrowthChart({ period }) {
-  const [data, setData]       = useState([])
+  const [data, setData] = useState([])
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
@@ -15,8 +16,6 @@ export default function MemberGrowthChart({ period }) {
           "/api/analytics/member-growth",
           { params: { period } }
         )
-        console.log("DEBUG >> member growth raw data", res.data)
-
         const now = new Date()
         let formatted = []
 
@@ -61,7 +60,7 @@ export default function MemberGrowthChart({ period }) {
 
         setData(formatted)
       } catch (error) {
-        console.log("DEBUG >> fetch analytics error", error)
+        console.error("DEBUG >> fetch analytics error", error)
       } finally {
         setLoading(false)
       }
@@ -71,7 +70,7 @@ export default function MemberGrowthChart({ period }) {
   }, [period])
 
   if (loading) {
-    return <div>Loading...</div>
+    return <Skeleton className="h-full w-full" />
   }
 
   return <MemberGrowth data={data} />

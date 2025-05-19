@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react"
 import axios from "axios"
 import VisitRate from "../Data/VisitRate"
 import { format, subDays, subMonths } from "date-fns"
+import { Skeleton } from "@/components/ui/skeleton"
 
 export default function VisitRateChart({ period }) {
   const [data, setData] = useState([])
@@ -15,8 +16,6 @@ export default function VisitRateChart({ period }) {
           "/api/analytics/visit-rate",
           { params: { period } }
         )
-        console.log("DEBUG >> visit rate raw data", res.data)
-
         const now = new Date()
         let formatted = []
 
@@ -49,7 +48,7 @@ export default function VisitRateChart({ period }) {
 
         setData(formatted)
       } catch (error) {
-        console.log("DEBUG >> fetch visit rate error", error)
+        console.error("DEBUG >> fetch visit rate error", error)
       } finally {
         setLoading(false)
       }
@@ -59,7 +58,7 @@ export default function VisitRateChart({ period }) {
   }, [period])
 
   if (loading) {
-    return <div>Loading...</div>
+    return <Skeleton className="h-full w-full" />
   }
 
   return <VisitRate data={data} />

@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react"
+import { Skeleton } from "@/components/ui/skeleton"
 import { getMemberRatio } from "@/lib/api/analytics"
 import MemberRatio from "../Data/MemberRatio"
 
 export default function MemberRatioChart() {
-  const [data,    setData]    = useState([])
+  const [data, setData] = useState([])
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
@@ -11,10 +12,9 @@ export default function MemberRatioChart() {
       setLoading(true)
       try {
         const rows = await getMemberRatio()
-        console.log("DEBUG >> member ratio raw data", rows)
         setData(rows)
       } catch (err) {
-        console.log("DEBUG >> fetch member ratio error", err)
+        console.error("DEBUG >> fetch member ratio error", err)
       } finally {
         setLoading(false)
       }
@@ -22,6 +22,9 @@ export default function MemberRatioChart() {
     fetchData()
   }, [])
 
-  if (loading) return <div>Loading...</div>
+  if (loading) {
+    return <Skeleton className="h-full w-full" />
+  }
+
   return <MemberRatio data={data} />
 }
