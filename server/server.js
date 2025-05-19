@@ -33,6 +33,11 @@ app.use("/api/archive", archiveRouter)
 app.use("/api/settings", settingsRouter)
 app.use("/api/analytics", analyticsRouter)
 app.use("/api/logs", logsRouter)
+app.use(
+  "/backups",
+  express.static(path.resolve(process.cwd(), "server/backups"))
+)
+
 
 // Expiration checks
 const SYSTEM_ACCOUNT_ID = Number(process.env.SYSTEM_ACCOUNT_ID ?? 0)

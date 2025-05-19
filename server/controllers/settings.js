@@ -7,6 +7,11 @@ import {
   checkUsernameExists,
   getRoles
 } from "../services/authorize.js"
+import {
+  backupDatabase,
+  restoreDatabase,
+  listBackups
+} from "../services/backup.js"
 
 export const getAllAccountsController = async (req, res, next) => {
   try {
@@ -84,6 +89,41 @@ export const deleteAccountController = async (req, res, next) => {
     const { id } = req.params
     await removeAccount(id)
     res.json({ message: "Account deleted successfully" })
+  } catch (err) {
+    next(err)
+  }
+}
+
+export const listBackupsController = (req, res, next) => {
+  try {
+    const files = listBackups()
+    res.json(files)
+  } catch (err) {
+    next(err)
+  }
+}
+
+export const backupDatabaseController = async (req, res, next) => {
+  try {
+    const { filepath, filename } = await backupDatabase()
+    res.download(filepath, filename, err => {
+      if (err) next(err)
+    })
+  } catch (err) {
+    next(err)
+  }
+}
+
+export const restoreDatabaseController = async (req, res, next) => {
+  try {
+    const { filename } = req.body
+    if (!filename) {
+      return res
+        .status(400)
+        .json({ message: "Must provide a backup filename to restore." })
+    }
+    await restoreDatabase(filename)
+    res.json({ message: "Database restored successfully." })
   } catch (err) {
     next(err)
   }

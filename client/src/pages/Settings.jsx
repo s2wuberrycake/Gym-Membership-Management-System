@@ -1,6 +1,11 @@
 import React, { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { getAllAccounts } from "@/lib/api/accounts"
+import {
+  getAllAccounts,
+  backupDatabase,
+  listBackups,
+  restoreDatabase
+} from "@/lib/api/settings"
 
 import { ListRestart } from "lucide-react"
 
@@ -8,6 +13,13 @@ import DataTable from "@/components/ui/data-table"
 import { accountsColumns } from "@/components/table/AccountsColumn"
 import TableSearch from "@/components/ui/table-search"
 import { Button } from "@/components/ui/button"
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem
+} from "@/components/ui/select"
 import { Sheet, SheetTrigger } from "@/components/ui/sheet"
 import { toast } from "sonner"
 import AddAccount from "@/components/Account/Add"
@@ -53,8 +65,12 @@ const Settings = () => {
   )
   const [isAddOpen, setIsAddOpen] = useState(false)
 
-  const { role: userRole } = decodeJwt(localStorage.getItem("token") || "")
+  const token = localStorage.getItem("token") || ""
+  const { role: userRole } = decodeJwt(token)
   const isAdmin = userRole === "admin"
+
+  const [backups, setBackups] = useState([])
+  const [selectedBackup, setSelectedBackup] = useState("")
 
   useEffect(() => {
     localStorage.setItem("accountsGlobalFilter", globalFilter)
@@ -74,8 +90,20 @@ const Settings = () => {
     }
   }
 
+  const fetchBackups = async () => {
+    try {
+      const files = await listBackups()
+      setBackups(files)
+      if (files.length) setSelectedBackup(files[0])
+    } catch (err) {
+      console.error("Error fetching backups:", err)
+      toast.error("Failed to load backups")
+    }
+  }
+
   useEffect(() => {
     fetchAccounts()
+    fetchBackups()
   }, [])
 
   const cycleRoleFilter = () => {
@@ -108,13 +136,41 @@ const Settings = () => {
 
   const hasActiveFilters = globalFilter || roleFilter !== "all"
 
+  const handleBackup = async () => {
+    try {
+      const { blob, filename } = await backupDatabase()
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      a.href = url
+      a.download = filename
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      window.URL.revokeObjectURL(url)
+      toast.success("Backup created! ✨")
+      await fetchBackups()
+    } catch (err) {
+      console.error("Backup error", err)
+      toast.error("Backup failed")
+    }
+  }
+
+  const handleRestore = async () => {
+    if (!selectedBackup) return
+    try {
+      await restoreDatabase(selectedBackup)
+      toast.success("Database restored successfully! ✨")
+    } catch (err) {
+      console.error("Restore error", err)
+      toast.error("Restore failed")
+    }
+  }
+
   return (
-    <div
-      className={`grid grid-cols-20 gap-4 mb-4 h-full ${
+    <div className="grid grid-cols-20 gap-4 mb-4 h-full">
+      <div className={`col-span-20 flex flex-col gap-4 h-full ${
         !isAdmin ? "pointer-events-none opacity-50" : ""
-      }`}
-    >
-      <div className="col-span-20 flex flex-col gap-4 h-full"> 
+      }`}> 
         <Container className="flex-1 flex flex-col">
           <ContainerHeader>
             <ContainerTitle>Accounts</ContainerTitle>
@@ -188,6 +244,49 @@ const Settings = () => {
               setTableRef={setTableRef}
               globalFilterFn={globalFilterFn}
             />
+          </ContainerContent>
+        </Container>
+      </div>
+
+      <div className="col-span-20 flex flex-col gap-4 h-full">
+        <Container className="flex-1 flex flex-col">
+          <ContainerHeader>
+            <ContainerTitle>Backup and Restore</ContainerTitle>
+            <p className="text-sm text-muted-foreground">
+              Generate and restore backups.
+            </p>
+          </ContainerHeader>
+          <Separator />
+          <ContainerContent className="flex-1 flex flex-col items-start justify-center gap-4">
+            <Button onClick={handleBackup} disabled={!isAdmin} className="h-10">
+              Backup Database
+            </Button>
+            <div className="flex items-center gap-2">
+              <Select
+                value={selectedBackup}
+                onValueChange={setSelectedBackup}
+                disabled={!isAdmin}
+              >
+                <SelectTrigger className="w-60 h-10">
+                  <SelectValue placeholder="Select backup to restore" />
+                </SelectTrigger>
+                <SelectContent>
+                  {backups.map(fn => (
+                    <SelectItem key={fn} value={fn}>
+                      {fn}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Button
+                variant="destructive"
+                onClick={handleRestore}
+                disabled={!isAdmin || !selectedBackup}
+                className="h-10"
+              >
+                Restore
+              </Button>
+            </div>
           </ContainerContent>
         </Container>
       </div>

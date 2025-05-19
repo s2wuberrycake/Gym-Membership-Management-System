@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react"
-import { updateAccountById, getRoles } from "@/lib/api/accounts"
+import { updateAccountById, getRoles } from "@/lib/api/settings"
 import { validateField, validateAccountForm } from "@/lib/helper/validate"
 
 import { toast } from "sonner"

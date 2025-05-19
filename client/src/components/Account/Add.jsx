@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react"
-import { addAccount, getRoles, checkUsernameAvailability } from "@/lib/api/accounts"
+import { addAccount, getRoles, checkUsernameAvailability } from "@/lib/api/settings"
 import { validateField } from "@/lib/helper/validate"
 
 import {

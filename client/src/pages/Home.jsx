@@ -65,7 +65,7 @@ export default function Home() {
     `${first?.[0] || ""}${last?.[0] || ""}`.toUpperCase()
 
   return (
-    <div className="grid grid-cols-20 gap-4 mb-4 h-full">
+    <div className="grid grid-cols-1 md:grid-cols-20 gap-4 mb-4 h-full">
       <div className="col-span-20 flex flex-col">
         <Container className="flex-1 flex flex-col">
           <ContainerHeader>
@@ -76,7 +76,7 @@ export default function Home() {
           </ContainerHeader>
           <Separator />
 
-          <ContainerContent className="grid grid-cols-20 gap-4">
+          <ContainerContent className="grid grid-cols-1 md:grid-cols-20 gap-4">
             <div className="col-span-20 flex items-center justify-between mb-4">
               <div className="flex space-x-2">
                 {periods.map((p) => (

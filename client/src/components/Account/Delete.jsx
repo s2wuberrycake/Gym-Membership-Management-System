@@ -1,5 +1,5 @@
 import React, { useState } from "react"
-import { deleteAccount } from "@/lib/api/accounts"
+import { deleteAccount } from "@/lib/api/settings"
 
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"

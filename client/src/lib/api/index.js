@@ -8,6 +8,9 @@ export const LOGOUT_API    = `${AUTH_API}/logout`
 export const AUTH_HOME_API = `${AUTH_API}/home`
 
 export const SETTINGS_API = `${API_BASE}/api/settings`
+export const BACKUPS_API   = `${SETTINGS_API}/backups`
+export const BACKUP_API   = `${SETTINGS_API}/backup`
+export const RESTORE_API  = `${SETTINGS_API}/restore`
 
 export const LOGS_API    = `${API_BASE}/api/logs`
 export const UPDATES_API = `${LOGS_API}/updates`

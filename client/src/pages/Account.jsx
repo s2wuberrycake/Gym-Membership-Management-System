@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react"
 import { useParams, useNavigate } from "react-router-dom"
-import { getAccountById } from "@/lib/api/accounts"
+import { getAccountById } from "@/lib/api/settings"
 
 import { CornerDownLeft } from "lucide-react"
 
