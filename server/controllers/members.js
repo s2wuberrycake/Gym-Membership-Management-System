@@ -80,6 +80,8 @@ export const updateMemberController = async (req, res, next) => {
 
 export const extendMembershipController = async (req, res, next) => {
   try {
+    console.log("DEBUG >> extendMembershipController params.id:", req.params.id)
+    console.log("DEBUG >> extendMembershipController body:", req.body)
     if (!req.user?.id) {
       return res.status(401).json({ success: false, message: "Unauthorized" })
     }

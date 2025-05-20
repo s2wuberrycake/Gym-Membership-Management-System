@@ -152,12 +152,12 @@ export default function Member() {
 
                   <Sheet open={isExtendOpen} onOpenChange={setIsExtendOpen}>
                     <SheetTrigger asChild>
-                      <Button size="sm" variant="outline">
+                      <Button size="sm" variant="default">
                         Extend Membership
                       </Button>
                     </SheetTrigger>
                     <ExtendMember
-                      memberId={member.member_id}
+                      memberId={member.id}
                       isSheetOpen={isExtendOpen}
                       onClose={() => { setIsExtendOpen(false); loadMember() }}
                       refreshMember={loadMember}
@@ -191,7 +191,7 @@ export default function Member() {
                 </div>
                 <div className="flex justify-between sm:col-span-2 items-start min-w-0">
                   <span className="font-medium text-muted-foreground">Address:</span>
-                  <span className="ml-2 flex-1 min-w-0 break-words -mr-1">
+                  <span className="ml-2 flex-1 min-w-0 break-words -mr-1 text-right">
                     {member.address}
                   </span>
                 </div>
