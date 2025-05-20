@@ -42,5 +42,5 @@
 
 - FIX
   - Members info page and Account info page design
-  - Search filters needs customized filter for update_log table
-  - There should be a weekly automatic backup with cron job
+  
+  - Add RFID (not priority) column in members table. Make visit log manual input accept RFID column

@@ -171,8 +171,13 @@ export default function Settings() {
       fetchAccounts()
       setIsRestoreOpen(false)
     } catch (err) {
-      console.error("Restore error", err)
-      toast.error("Restore failed")
+      console.error("🔥 Restore error (full):", err)
+      if (err.response) {
+        console.error("→ status:", err.response.status)
+        console.error("→ headers:", err.response.headers)
+        console.error("→ data:", err.response.data)
+      }
+      toast.error(`Restore failed: ${err.response?.data?.message || err.message}`)
     }
   }
 

@@ -158,7 +158,7 @@ export default function Members() {
             </div>
 
             <div className="flex items-center justify-between flex-wrap gap-4 mb-4">
-              <div className="flex items-center gap-1 flex-wrap">
+              <div className="flex items-center gap-2 flex-wrap">
                 <Button
                   variant={statusFilter === "all" ? "default" : "outline"}
                   size="sm"
