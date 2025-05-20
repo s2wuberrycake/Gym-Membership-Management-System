@@ -1,4 +1,3 @@
-// server/routes/settings.js
 import express from "express"
 import {
   getAllAccountsController,
@@ -16,15 +15,6 @@ import { verifyToken } from "../middleware/auth.js"
 
 const router = express.Router()
 
-// Public account routes
-router.get("/", getAllAccountsController)
-router.get("/check-username", checkUsernameExistsController)
-router.get("/roles", getRolesController)
-router.post("/", createAccountController)
-router.put("/:id", updateAccountController)
-router.delete("/:id", deleteAccountController)
-
-// Admin-only backup/restore routes (must come before :id)
 const adminOnly = [
   verifyToken,
   (req, res, next) => {
@@ -35,26 +25,69 @@ const adminOnly = [
   }
 ]
 
-// List available backups
-router.get("/backups", adminOnly, listBackupsController)
-// Download a fresh backup
-router.post("/backup", adminOnly, backupDatabaseController)
-// Restore from a chosen backup
-router.post("/restore", adminOnly, restoreDatabaseController)
+const authorizeAccountAccess = (req, res, next) => {
+  const { id: userId, role: userRole } = req.user || {}
+  const targetId = Number(req.params.id)
+  if (userRole === "admin" || userId === targetId) {
+    return next()
+  }
+  return res.status(403).json({ message: "Access denied" })
+}
 
-// Parameterized account route (should come after specific routes)
+router.get(
+  "/check-username",
+  checkUsernameExistsController
+)
+
+router.get(
+  "/roles",
+  getRolesController
+)
+
+router.get(
+  "/",
+  adminOnly,
+  getAllAccountsController
+)
+router.post(
+  "/",
+  adminOnly,
+  createAccountController
+)
+
+router.get(
+  "/backups",
+  adminOnly,
+  listBackupsController
+)
+router.post(
+  "/backup",
+  adminOnly,
+  backupDatabaseController
+)
+router.post(
+  "/restore",
+  adminOnly,
+  restoreDatabaseController
+)
+
 router.get(
   "/:id",
   verifyToken,
-  (req, res, next) => {
-    const { id: userId, role: userRole } = req.user || {}
-    const targetId = Number(req.params.id)
-    if (userRole === "admin" || userId === targetId) {
-      return next()
-    }
-    return res.status(403).json({ message: "Access denied" })
-  },
+  authorizeAccountAccess,
   getAccountByIdController
+)
+router.put(
+  "/:id",
+  verifyToken,
+  authorizeAccountAccess,
+  updateAccountController
+)
+
+router.delete(
+  "/:id",
+  adminOnly,
+  deleteAccountController
 )
 
 export default router

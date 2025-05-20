@@ -73,10 +73,26 @@ export const createAccountController = async (req, res, next) => {
 export const updateAccountController = async (req, res, next) => {
   try {
     const { id } = req.params
-    const { username, password, role_id } = req.body
-    if (!username || !role_id) {
-      return res.status(400).json({ message: "username and role_id are required" })
+    const { username, password, role_id: incomingRole } = req.body
+
+    if (!username) {
+      return res.status(400).json({ message: "username is required" })
     }
+
+    let role_id
+    if (req.user.role === "admin") {
+      if (!incomingRole) {
+        return res.status(400).json({ message: "role_id is required for admins" })
+      }
+      role_id = incomingRole
+    } else {
+      const existing = await getAccountById(id)
+      if (!existing) {
+        return res.status(404).json({ message: "Account not found" })
+      }
+      role_id = existing.role_id
+    }
+
     await updateAccount({ account_id: id, username, password, role_id })
     res.json({ message: "Account updated successfully" })
   } catch (err) {

@@ -1,4 +1,3 @@
-// src/lib/api/settings.js
 import axios from "axios"
 import {
   SETTINGS_API,
@@ -8,7 +7,12 @@ import {
 } from "."
 
 export const getAllAccounts = async () => {
-  const res = await axios.get(SETTINGS_API)
+  const token = localStorage.getItem("token")
+  const res = await axios.get(SETTINGS_API, {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  })
   return res.data
 }
 
@@ -23,17 +27,32 @@ export const getAccountById = async (id) => {
 }
 
 export const addAccount = async formData => {
-  const res = await axios.post(SETTINGS_API, formData)
+  const token = localStorage.getItem("token")
+  const res = await axios.post(SETTINGS_API, formData, {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  })
   return res.data
 }
 
 export const updateAccountById = async (id, formData) => {
-  const res = await axios.put(`${SETTINGS_API}/${id}`, formData)
+  const token = localStorage.getItem("token")
+  const res = await axios.put(`${SETTINGS_API}/${id}`, formData, {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  })
   return res.data
 }
 
 export const deleteAccount = async id => {
-  const res = await axios.delete(`${SETTINGS_API}/${id}`)
+  const token = localStorage.getItem("token")
+  const res = await axios.delete(`${SETTINGS_API}/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  })
   return res.data
 }
 
@@ -45,26 +64,28 @@ export const checkUsernameAvailability = async username => {
 }
 
 export const getRoles = async () => {
-  const res = await axios.get(`${SETTINGS_API}/roles`)
+  const res = await axios.get(`${SETTINGS_API}/roles`, {
+  })
   return res.data
 }
 
-/** fetch the list of available backups (admin only) */
 export const listBackups = async () => {
   const token = localStorage.getItem("token")
   const res = await axios.get(BACKUPS_API, {
     headers: { Authorization: `Bearer ${token}` }
   })
-  return res.data    // an array of filenames
+  return res.data
 }
 
-/** trigger a new backup */
 export const backupDatabase = async () => {
   const token = localStorage.getItem("token")
   const res = await axios.post(
     BACKUP_API,
     null,
-    { headers: { Authorization: `Bearer ${token}` }, responseType: "blob" }
+    {
+      headers: { Authorization: `Bearer ${token}` },
+      responseType: "blob"
+    }
   )
   const dispo = res.headers["content-disposition"] || ""
   const match = dispo.match(/filename="?(.+)"?/)
@@ -72,13 +93,14 @@ export const backupDatabase = async () => {
   return { blob: res.data, filename }
 }
 
-/** restore from a selected backup */
 export const restoreDatabase = async (filename) => {
   const token = localStorage.getItem("token")
   const res = await axios.post(
     RESTORE_API,
     { filename },
-    { headers: { Authorization: `Bearer ${token}` } }
+    {
+      headers: { Authorization: `Bearer ${token}` }
+    }
   )
-  return res.data   // { message: "Database restored successfully." }
+  return res.data
 }

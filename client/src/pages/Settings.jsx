@@ -85,6 +85,7 @@ const Settings = () => {
       const accounts = await getAllAccounts()
       setData(accounts)
     } catch (err) {
+      if (err.response?.status === 403) return
       console.error("Error fetching accounts:", err)
       toast.error("Failed to load accounts")
     }
@@ -96,6 +97,7 @@ const Settings = () => {
       setBackups(files)
       if (files.length) setSelectedBackup(files[0])
     } catch (err) {
+      if (err.response?.status === 403) return
       console.error("Error fetching backups:", err)
       toast.error("Failed to load backups")
     }
@@ -168,6 +170,7 @@ const Settings = () => {
 
   return (
     <div className="grid grid-cols-20 gap-4 mb-4 h-full">
+      {/* Accounts management container */}
       <div className={`col-span-20 flex flex-col gap-4 h-full ${
         !isAdmin ? "pointer-events-none opacity-50" : ""
       }`}> 
@@ -184,6 +187,7 @@ const Settings = () => {
             <div className="flex items-center justify-between flex-wrap gap-4 mb-2">
               <TableSearch
                 value={globalFilter}
+                disabled={!isAdmin}
                 onChange={setGlobalFilter}
                 placeholder="Search accounts..."
                 className="h-8 w-100"
@@ -195,6 +199,7 @@ const Settings = () => {
                 <Button
                   variant={roleFilter === "all" ? "default" : "outline"}
                   size="sm"
+                  disabled={!isAdmin}
                   onClick={cycleRoleFilter}
                   className="h-8 text-sm"
                 >
@@ -205,6 +210,7 @@ const Settings = () => {
                   <Button
                     variant="default"
                     size="sm"
+                    disabled={!isAdmin}
                     onClick={resetFilters}
                     className="h-8 text-sm"
                   >
@@ -214,6 +220,7 @@ const Settings = () => {
                   <Button
                     variant="outline"
                     size="sm"
+                    disabled={!isAdmin}
                     onClick={resetFilters}
                     className="h-8 text-sm"
                   >
@@ -224,7 +231,7 @@ const Settings = () => {
 
               <Sheet open={isAddOpen} onOpenChange={setIsAddOpen}>
                 <SheetTrigger asChild>
-                  <Button size="sm" className="h-8 text-sm">
+                  <Button size="sm" disabled={!isAdmin} className="h-8 text-sm">
                     Add Account
                   </Button>
                 </SheetTrigger>
@@ -248,7 +255,10 @@ const Settings = () => {
         </Container>
       </div>
 
-      <div className="col-span-20 flex flex-col gap-4 h-full">
+      {/* Backup and restore container */}
+      <div className={`col-span-20 flex flex-col gap-4 h-full ${
+        !isAdmin ? "pointer-events-none opacity-50" : ""
+      }`}>
         <Container className="flex-1 flex flex-col">
           <ContainerHeader>
             <ContainerTitle>Backup and Restore</ContainerTitle>
@@ -258,16 +268,33 @@ const Settings = () => {
           </ContainerHeader>
           <Separator />
           <ContainerContent className="flex-1 flex flex-col items-start justify-center gap-4">
-            <Button onClick={handleBackup} disabled={!isAdmin} className="h-10">
-              Backup Database
-            </Button>
+            <div className="flex items-center gap-2 flex-wrap">
+              <Button
+                size="sm"
+                disabled={!isAdmin}
+                onClick={handleBackup}
+                className="h-8 text-sm"
+              >
+                Generate a Backup
+              </Button>
+              <Button
+                size="sm"
+                variant="destructive"
+                disabled={!isAdmin || !selectedBackup}
+                onClick={handleRestore}
+                className="h-8 text-sm"
+              >
+                Restore a Backup
+              </Button>
+            </div>
+            
             <div className="flex items-center gap-2">
               <Select
                 value={selectedBackup}
-                onValueChange={setSelectedBackup}
                 disabled={!isAdmin}
+                onValueChange={setSelectedBackup}
               >
-                <SelectTrigger className="w-60 h-10">
+                <SelectTrigger className="w-100 h-8">
                   <SelectValue placeholder="Select backup to restore" />
                 </SelectTrigger>
                 <SelectContent>
@@ -278,14 +305,6 @@ const Settings = () => {
                   ))}
                 </SelectContent>
               </Select>
-              <Button
-                variant="destructive"
-                onClick={handleRestore}
-                disabled={!isAdmin || !selectedBackup}
-                className="h-10"
-              >
-                Restore
-              </Button>
             </div>
           </ContainerContent>
         </Container>

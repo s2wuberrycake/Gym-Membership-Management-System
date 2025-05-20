@@ -1,10 +1,8 @@
 -- 1) Drop existing schemas (be careful—this wipes everything!)
 DROP SCHEMA IF EXISTS mmsDefault;
-DROP SCHEMA IF EXISTS mmsBackup;
 
 -- 2) Recreate schemas
 CREATE SCHEMA mmsDefault;
-CREATE SCHEMA mmsBackup;
 
 USE mmsDefault;
 

@@ -44,4 +44,4 @@ STEP 5 : Verify installations
   - Search filters needs customized filter for update_log table
   - Logged-in account icon should change if logged-in account is staff for clarity
   - Move dark mode toggle to Settings
-  - Remove MMSbackup, not using it anymore
+  - Make it so theres only maximum of 5 backup files before older files gets removed

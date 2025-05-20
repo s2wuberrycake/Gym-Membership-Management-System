@@ -20,6 +20,15 @@ import {
   SelectItem
 } from "@/components/ui/select"
 
+const decodeJwt = token => {
+  try {
+    const payload = token.split(".")[1]
+    return JSON.parse(atob(payload))
+  } catch {
+    return {}
+  }
+}
+
 const EditAccount = ({
   account,
   isSheetOpen,
@@ -37,11 +46,19 @@ const EditAccount = ({
   const [touched, setTouched] = useState({})
   const [submitting, setSubmitting] = useState(false)
 
+  const token = localStorage.getItem("token") || ""
+  const { role: userRole } = decodeJwt(token)
+  const isAdmin = userRole === "admin"
+
   useEffect(() => {
-    getRoles()
-      .then(setRoles)
-      .catch(() => toast.error("Failed to load roles"))
-  }, [])
+    if (isAdmin) {
+      getRoles()
+        .then(setRoles)
+        .catch(() => toast.error("Failed to load roles"))
+    } else if (account) {
+      setRoles([{ role_id: account.role_id, role: account.role }])
+    }
+  }, [account, isAdmin])
 
   useEffect(() => {
     if (!account) return
@@ -55,17 +72,18 @@ const EditAccount = ({
     setTouched({})
   }, [account])
 
-  const handleChange = (e) => {
+  const handleChange = e => {
     const { name, value } = e.target
     setForm(f => ({ ...f, [name]: value }))
     setTouched(t => ({ ...t, [name]: true }))
-    const err = name === "repeatPassword"
-      ? validateField(name, value, form.password)
-      : validateField(name, value)
+    const err =
+      name === "repeatPassword"
+        ? validateField(name, value, form.password)
+        : validateField(name, value)
     setErrors(errs => ({ ...errs, [name]: err }))
   }
 
-  const handleSelect = (value) => {
+  const handleSelect = value => {
     setForm(f => ({ ...f, roleId: value }))
     setTouched(t => ({ ...t, roleId: true }))
     setErrors(errs => ({
@@ -74,14 +92,20 @@ const EditAccount = ({
     }))
   }
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault()
+
     let { errors: newErrors, isValid } = validateAccountForm(form)
-    const rpErr = validateField("repeatPassword", form.repeatPassword, form.password)
+    const rpErr = validateField(
+      "repeatPassword",
+      form.repeatPassword,
+      form.password
+    )
     if (rpErr) {
       newErrors.repeatPassword = rpErr
       isValid = false
     }
+
     setErrors(newErrors)
     setTouched({
       username: true,
@@ -130,7 +154,9 @@ const EditAccount = ({
                   onChange={handleChange}
                 />
                 {touched.username && errors.username && (
-                  <p className="text-red-500 text-sm mt-1">{errors.username}</p>
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.username}
+                  </p>
                 )}
               </div>
 
@@ -143,7 +169,9 @@ const EditAccount = ({
                   onChange={handleChange}
                 />
                 {touched.password && errors.password && (
-                  <p className="text-red-500 text-sm mt-1">{errors.password}</p>
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.password}
+                  </p>
                 )}
               </div>
 
@@ -164,20 +192,36 @@ const EditAccount = ({
 
               <div>
                 <Label>Role</Label>
-                <Select value={form.roleId} onValueChange={handleSelect}>
+                <Select
+                  value={form.roleId}
+                  onValueChange={handleSelect}
+                  disabled={!isAdmin}
+                >
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Select Role" />
                   </SelectTrigger>
                   <SelectContent>
-                    {roles.map((r) => (
-                      <SelectItem key={r.role_id} value={r.role_id.toString()}>
+                    {roles.map(r => (
+                      <SelectItem
+                        key={r.role_id}
+                        value={r.role_id.toString()}
+                      >
                         {r.role}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
                 {touched.roleId && errors.roleId && (
-                  <p className="text-red-500 text-sm mt-1">{errors.roleId}</p>
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.roleId}
+                  </p>
+                )}
+                {!isAdmin && (
+                  <input
+                    type="hidden"
+                    name="role_id"
+                    value={form.roleId}
+                  />
                 )}
               </div>
 

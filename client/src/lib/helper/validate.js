@@ -120,12 +120,12 @@ export function validateField(name, value, compareValue = null) {
 
     case "username":
       if (!value.trim()) return "Username is required"
-      if (value.length < 8) return "Username must be at least 8 characters"
+      if (value.length < 4) return "Username must be at least 4 characters"
       break
 
     case "password":
       if (!value.trim()) return "Password is required"
-      if (value.length < 8) return "Password must be at least 8 characters"
+      if (value.length < 4) return "Password must be at least 4 characters"
       break
 
     case "repeatPassword":
