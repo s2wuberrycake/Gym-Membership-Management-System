@@ -91,13 +91,13 @@ export default function Home() {
                   </Button>
                 ))}
               </div>
-              <Button variant="default" size="sm" asChild>
+              <Button variant="main" size="sm" asChild>
                 <a
                   href={`${ANALYTICS_API}/analytics-report.xlsx?period=${period}`}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  Download Analytics Report
+                  Generate Analytics Report
                 </a>
               </Button>
             </div>

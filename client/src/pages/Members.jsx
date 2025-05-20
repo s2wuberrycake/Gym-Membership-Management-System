@@ -200,7 +200,7 @@ export default function Members() {
 
               <Sheet open={isAddOpen} onOpenChange={setIsAddOpen}>
                 <SheetTrigger asChild>
-                  <Button size="sm" className="h-8 text-sm">
+                  <Button size="sm" variant="main" className="h-8 text-sm">
                     Add Member
                   </Button>
                 </SheetTrigger>

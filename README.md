@@ -34,14 +34,13 @@ STEP 5 : Verify installations
   - ACR122U (RFID scanner, use UUID as ID)
 
 - Optional
-  - Customization of date extension options table
+  - Customization of date extension options table (WIP)
   - Profile picture crop UI
   - Add batch delete of members with cancelled_status in settings
+  - Logged-in account icon should change if logged-in account is staff for clarity
 
 - FIX
   - Members info page and Account info page design
   - Apply same char limit of 25 before truncating name to other tables (update log, cancelled members, visit log)
   - Search filters needs customized filter for update_log table
-  - Logged-in account icon should change if logged-in account is staff for clarity
-  - Move dark mode toggle to Settings
-  - Make it so theres only maximum of 5 backup files before older files gets removed
+  - There should be a weekly automatic backup with cron job

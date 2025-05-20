@@ -1,11 +1,12 @@
 import { spawn, exec as execCb } from "child_process"
 import { pipeline } from "stream/promises"
-import { createWriteStream, existsSync, mkdirSync, readdirSync, createReadStream } from "fs"
+import { createWriteStream, existsSync, mkdirSync, readdirSync, unlinkSync, createReadStream } from "fs"
 import path from "path"
 import zlib from "zlib"
 import { fileURLToPath } from "url"
 import util from "util"
-import { getToday, formatDate } from "../utils/date.js"
+import { getToday, formatDate, TIMEZONE } from "../utils/date.js"
+import { DateTime } from "luxon"
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -24,7 +25,8 @@ export async function backupDatabase() {
   ensureBackupsDir()
 
   const dateStr = formatDate(getToday())
-  const filename = `backup-${dateStr}.sql.gz`
+  const timeStr = DateTime.now().setZone(TIMEZONE).toFormat("HHmmss")
+  const filename = `backup-${dateStr}-${timeStr}.sql.gz`
   const filepath = path.join(backupsDir, filename)
 
   const args = [
@@ -39,10 +41,24 @@ export async function backupDatabase() {
   ]
 
   const dump = spawn("mysqldump", args, { shell: true })
-
   const gzip = zlib.createGzip()
   const out = createWriteStream(filepath)
   await pipeline(dump.stdout, gzip, out)
+
+  const allFiles = readdirSync(backupsDir)
+    .filter(f => f.endsWith(".sql.gz"))
+    .sort()
+
+  if (allFiles.length > 8) {
+    const toRemove = allFiles.slice(0, allFiles.length - 8)
+    toRemove.forEach(f => {
+      try {
+        unlinkSync(path.join(backupsDir, f))
+      } catch (err) {
+        console.warn("Could not delete old backup", f, err)
+      }
+    })
+  }
 
   return { filepath, filename }
 }

@@ -176,8 +176,9 @@ export default function Visits() {
               className="flex-[3] h-8"
             />
             <Button
-              onClick={handleLogVisit}
               size="sm"
+              variant="main"
+              onClick={handleLogVisit}
               className="flex-1 h-8 text-sm"
             >
               Log Visit
