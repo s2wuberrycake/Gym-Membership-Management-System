@@ -1,12 +1,19 @@
+// src/pages/Account.jsx
 import React, { useEffect, useState } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { getAccountById } from "@/lib/api/settings"
-
 import { CornerDownLeft } from "lucide-react"
+import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
+import {
+  Container,
+  ContainerHeader,
+  ContainerTitle,
+  ContainerContent,
+} from "@/components/ui/container"
+import { Separator } from "@/components/ui/separator"
 import { Sheet, SheetTrigger } from "@/components/ui/sheet"
-import { toast } from "sonner"
 import EditAccount from "@/components/Account/Edit"
 import DeleteAccount from "@/components/Account/Delete"
 
@@ -19,9 +26,9 @@ const decodeJwt = (token) => {
   }
 }
 
-const Account = () => {
-  const { id } = useParams()
+export default function Account() {
   const navigate = useNavigate()
+  const { id } = useParams()
 
   const [account, setAccount] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -53,72 +60,96 @@ const Account = () => {
     loadAccount()
   }, [id, userRole, userId, navigate])
 
-  if (loading) return <div className="p-4">Loading...</div>
-  if (!account)
-    return (
-      <div className="p-4 text-red-500">
-        Account not found or failed to load.
-      </div>
-    )
+  if (loading) {
+    return <div className="p-6">Loading account…</div>
+  }
+  if (!account) {
+    return <div className="p-6 text-red-500">Account not found.</div>
+  }
 
   return (
-    <div className="p-6 max-w-2xl mx-auto space-y-6">
+    <div>
+      {/* Back button */}
       <Button
         variant="outline"
+        size="sm"
         onClick={() => navigate(-1)}
-        className="mb-4 flex items-center gap-2"
+        className="flex items-center gap-2 mb-2"
       >
         <CornerDownLeft className="w-4 h-4" />
-        Return
+        Back
       </Button>
 
-      <h1 className="text-2xl font-bold mb-4">
-        Viewing Account: {account.username}
-      </h1>
+      <div className="grid grid-cols-20 gap-4 mb-4 h-full">
+        {/* Left panel: Account Info */}
+        <div className="col-span-6 flex flex-col">
+          <Container>
+            <ContainerHeader>
+              <ContainerTitle className="font-bold">Account Info</ContainerTitle>
+              <p className="text-sm text-muted-foreground"><br/></p>
+            </ContainerHeader>
+            <Separator />
 
-      <div className="space-y-2">
-        <p>
-          <strong>Username:</strong> {account.username}
-        </p>
-        <p>
-          <strong>Role:</strong> {account.role}
-        </p>
-      </div>
+            <ContainerContent className="grid grid-cols-20 gap-4">
+              <div className="col-span-20 flex flex-col p-2">
+                <div className="flex justify-between mb-4">
+                  <div className="flex-1 min-w-0">
+                    <span className="text-5xl font-bold break-words">{account.username}</span>
+                  </div>
+                </div>
 
-      <div className="flex gap-3">
-        <Sheet open={isEditOpen} onOpenChange={setIsEditOpen}>
-          <SheetTrigger asChild>
-            <Button onClick={() => setIsEditOpen(true)}>
-              Edit Account
-            </Button>
-          </SheetTrigger>
-          <EditAccount
-            account={account}
-            isSheetOpen={isEditOpen}
-            onClose={() => setIsEditOpen(false)}
-            refreshAccount={loadAccount}
-          />
-        </Sheet>
+                <div className="w-full flex justify-between mb-1">
+                    <span className="text-lg font-medium">Role:</span>
+                    <span className="text-lg font-medium">{account.role}</span> 
+                </div>
+              </div>
+            </ContainerContent>
+          </Container>
+        </div>
 
-        <Sheet open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
-          <SheetTrigger asChild>
-            <Button
-              variant="destructive"
-              onClick={() => setIsDeleteOpen(true)}
-            >
-              Delete Account
-            </Button>
-          </SheetTrigger>
-          <DeleteAccount
-            account={account}
-            isSheetOpen={isDeleteOpen}
-            onClose={() => setIsDeleteOpen(false)}
-            onDeleted={() => navigate("/settings")}
-          />
-        </Sheet>
+        {/* Right panel: Actions */}
+        <div className="col-span-14 flex flex-col gap-4">
+          <Container className="flex-1 flex flex-col">
+            <ContainerHeader>
+              <ContainerTitle className="font-bold">Manage Account</ContainerTitle>
+              <p className="text-sm text-muted-foreground">
+                Edit or delete this account.
+              </p>
+            </ContainerHeader>
+            <Separator />
+
+            <ContainerContent className="flex flex-col items-start gap-4">
+              <div className="flex flex-wrap gap-2">
+                <Sheet open={isEditOpen} onOpenChange={setIsEditOpen}>
+                  <SheetTrigger asChild>
+                    <Button size="sm">Edit Account</Button>
+                  </SheetTrigger>
+                  <EditAccount
+                    account={account}
+                    isSheetOpen={isEditOpen}
+                    onClose={() => { setIsEditOpen(false); loadAccount() }}
+                    refreshAccount={loadAccount}
+                  />
+                </Sheet>
+
+                <Sheet open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
+                  <SheetTrigger asChild>
+                    <Button size="sm" variant="destructive">
+                      Delete Account
+                    </Button>
+                  </SheetTrigger>
+                  <DeleteAccount
+                    account={account}
+                    isSheetOpen={isDeleteOpen}
+                    onClose={() => setIsDeleteOpen(false)}
+                    onDeleted={() => navigate("/settings")}
+                  />
+                </Sheet>
+              </div>
+            </ContainerContent>
+          </Container>
+        </div>
       </div>
     </div>
   )
 }
-
-export default Account

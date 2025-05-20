@@ -80,7 +80,7 @@ export default function Home() {
 
           <ContainerContent className="grid grid-cols-1 md:grid-cols-20 gap-4">
             <div className="col-span-20 flex items-center justify-between -mb-2">
-              <div className="flex space-x-2">
+              <div className="flex gap-1">
                 {periods.map((p) => (
                   <Button
                     key={p.value}

@@ -9,6 +9,8 @@ const nowStr = () =>
     .setZone(TIMEZONE)
     .toFormat("yyyy-MM-dd HH:mm:ss")
 
+const fmtLocal = dt => dt.toFormat("yyyy-MM-dd HH:mm:ss")
+
 export const getAllUpdateLogs = async () => {
   const sql = `
     SELECT
@@ -73,35 +75,53 @@ export const getAllVisitLogs = async () => {
 }
 
 export const logVisit = async (member_id) => {
-  const sql1 = `
+  const sqlMember = `
     SELECT expiration_date, status_id
     FROM members
     WHERE member_id = ?
   `
-  const [memberRows] = await defaultDb.query(sql1, [member_id])
+  const [memberRows] = await defaultDb.query(sqlMember, [member_id])
   if (!memberRows.length) throw new Error("Member not found")
 
   const { expiration_date, status_id } = memberRows[0]
   if (status_id === 3) throw new Error("Membership cancelled")
   if (new Date(expiration_date) < new Date()) throw new Error("Membership expired")
 
-  const sql3 = `
+  const nowManila        = DateTime.now().setZone(TIMEZONE)
+  const startOfToday    = nowManila.startOf("day")
+  const startOfTomorrow = startOfToday.plus({ days: 1 })
+
+  const startStr = fmtLocal(startOfToday)
+  const endStr   = fmtLocal(startOfTomorrow)
+
+  const sqlCheck = `
     SELECT visit_id
     FROM visit_log
     WHERE member_id = ?
-      AND DATE(visit_date) = ?
+      AND visit_date >= ?
+      AND visit_date <  ?
   `
-  const [[existingVisit]] = await defaultDb.query(sql3, [member_id, todayStr])
-  if (existingVisit) return null
+  const [existingRows] = await defaultDb.query(sqlCheck, [
+    member_id,
+    startStr,
+    endStr,
+  ])
+  if (existingRows.length) {
+    return null
+  }
 
-  const sql4 = `
+  const nowStr = fmtLocal(nowManila)
+  const sqlInsert = `
     INSERT INTO visit_log (member_id, visit_date)
     VALUES (?, ?)
   `
-  const [insertResult] = await defaultDb.query(sql4, [member_id, nowStr()])
+  const [insertResult] = await defaultDb.query(sqlInsert, [
+    member_id,
+    nowStr,
+  ])
   const visitId = insertResult.insertId
 
-  const sql5 = `
+  const sqlFetch = `
     SELECT
       vl.visit_id,
       vl.member_id,
@@ -113,6 +133,6 @@ export const logVisit = async (member_id) => {
       ON vl.member_id = m.member_id
     WHERE vl.visit_id = ?
   `
-  const [[newVisit]] = await defaultDb.query(sql5, [visitId])
+  const [[newVisit]] = await defaultDb.query(sqlFetch, [visitId])
   return newVisit
 }

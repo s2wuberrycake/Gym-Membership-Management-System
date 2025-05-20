@@ -210,7 +210,7 @@ export default function Settings() {
             </div>
 
             <div className="flex items-center justify-between gap-4 mb-4">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1">
                 <Button
                   variant={roleFilter === "all" ? "default" : "outline"}
                   size="sm"
@@ -275,7 +275,7 @@ export default function Settings() {
           </ContainerHeader>
           <Separator />
           <ContainerContent className="flex-1 flex flex-col items-start justify-center gap-4">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1">
               <Button
                 size="sm"
                 disabled={!isAdmin}

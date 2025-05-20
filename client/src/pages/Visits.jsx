@@ -166,7 +166,7 @@ export default function Visits() {
           </ContainerHeader>
           <Separator />
 
-          <div className="flex gap-2 mb-4">
+          <div className="flex gap-1 mb-4">
             <Input
               value={uuid}
               onChange={e => setUuid(e.target.value)}
@@ -186,8 +186,8 @@ export default function Visits() {
           </div>
 
           <ContainerContent className="grid grid-cols-20 gap-4">
-            <div className="col-span-20 flex flex-col h-100">
-              <Avatar className="h-[100%] w-full overflow-hidden rounded-[1rem]">
+            <div className="col-span-20 flex flex-col h-100 items-center">
+              <Avatar className="h-100 w-100 overflow-hidden rounded-full">
                 <AvatarImage
                   className="w-full h-full object-cover object-center rounded-[1rem]"
                   src={
@@ -207,7 +207,7 @@ export default function Visits() {
             <div className="col-span-20 flex flex-col p-2">
               <div className="flex justify-between mb-4">
                 <div className="flex-1 min-w-0">
-                  <span className="text-4xl font-bold truncate block">
+                  <span className="text-5xl font-bold truncate block">
                     {member
                       ? `${member.first_name} ${member.last_name}`
                       : "Name"}
@@ -216,7 +216,7 @@ export default function Visits() {
               </div>
 
               <div className="flex justify-between mb-1">
-                <span className="text-lg font-medium">Status</span>
+                <span className="text-lg font-medium"><strong>Status</strong></span>
                 <span
                   className={`text-lg font-medium ${
                     member
@@ -229,15 +229,15 @@ export default function Visits() {
                   }`}>
                   {member
                     ? member.status?.toLowerCase() === "cancelled"
-                      ? "Cancelled"
+                      ? "cancelled"
                       : new Date(member.expiration_date) < new Date()
-                      ? "Expired"
-                      : "Active"
+                      ? "expired"
+                      : "active"
                     : ""}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-lg font-medium">Expiration Date</span>
+                <span className="text-lg font-medium"><strong>Expiration Date</strong></span>
                 <span className="text-lg font-medium">
                   {member?.expiration_date
                     ? format(
@@ -261,6 +261,7 @@ export default function Visits() {
             </p>
           </ContainerHeader>
           <Separator />
+
           <ContainerContent className="flex-1 flex flex-col">
             <div className="flex items-center justify-between flex-wrap gap-4 mb-2">
               <TableSearch

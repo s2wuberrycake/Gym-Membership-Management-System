@@ -7,13 +7,20 @@ import { CornerDownLeft } from "lucide-react"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
-import { Sheet, SheetTrigger } from "@/components/ui/sheet"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
+import {
+  Container,
+  ContainerHeader,
+  ContainerTitle,
+  ContainerContent,
+} from "@/components/ui/container"
+import { Separator } from "@/components/ui/separator"
+import { Sheet, SheetTrigger } from "@/components/ui/sheet"
 import EditMember from "@/components/Member/Edit"
 import ExtendMember from "@/components/Member/Extend"
 import CancelMember from "@/components/Member/Cancel"
 
-const Member = () => {
+export default function Member() {
   const navigate = useNavigate()
   const { id } = useParams()
 
@@ -40,102 +47,173 @@ const Member = () => {
     loadMember()
   }, [id])
 
+  const renderDate = date => (date ? format(new Date(date), "MMMM d, yyyy") : "N/A")
+  const initials = `${member?.first_name?.[0] || ""}${member?.last_name?.[0] || ""}`.toUpperCase()
+
   if (loading) {
-    return <div className="p-4">Loading...</div>
+    return <div className="p-6">Loading member…</div>
   }
   if (!member) {
-    return <div className="p-4 text-red-500">Member not found or failed to load.</div>
+    return <div className="p-6 text-red-500">Member not found.</div>
   }
 
-  const renderDate = date =>
-    date ? format(new Date(date), "MMMM d, yyyy") : "N/A"
-
-  const initials =
-    `${member.first_name?.[0] || ""}${member.last_name?.[0] || ""}`.toUpperCase()
+  // determine status color
+  const statusColor = member.status?.toLowerCase() === "cancelled"
+    ? "text-red-500"
+    : new Date(member.expiration_date) < new Date()
+      ? "text-orange-500"
+      : "text-green-500"
 
   return (
-    <div className="p-6 max-w-2xl mx-auto space-y-6">
+    <div>
+      {/* Back button (intentionally outside containers) */}
       <Button
         variant="outline"
+        size="sm"
         onClick={() => navigate(-1)}
-        className="mb-4 flex items-center gap-2"
+        className="flex items-center gap-2 mb-2"
       >
         <CornerDownLeft className="w-4 h-4" />
-        Return
+        Back
       </Button>
 
-      <div className="flex items-center gap-4">
-        <Avatar className="w-24 h-24 rounded-full overflow-hidden">
-          <AvatarImage
-            className="w-full h-full object-cover object-center"
-            src={
-              member.profile_picture
-                ? `/uploads/profiles/${member.profile_picture}`
-                : undefined
-            }
-            alt={`${member.first_name} ${member.last_name}`}
-          />
-          <AvatarFallback>{initials}</AvatarFallback>
-        </Avatar>
+      <div className="grid grid-cols-20 gap-4 mb-4 h-full">
+        {/* ← Left panel: Avatar & quick info */}
+        <div className="col-span-6 flex flex-col">
+          <Container>
+            <ContainerHeader>
+              <ContainerTitle className="font-bold">Member Info</ContainerTitle>
+              <p className="text-sm text-muted-foreground"><br></br></p>
+            </ContainerHeader>
+            <Separator />
 
-        <h1 className="text-2xl font-bold">
-          {member.first_name} {member.last_name}
-        </h1>
-      </div>
+            <ContainerContent className="grid grid-cols-20 gap-4">
+              <div className="col-span-20 flex flex-col h-100 items-center">
+                <Avatar className="h-100 w-100 overflow-hidden rounded-full">
+                  <AvatarImage
+                    src={
+                      member.profile_picture
+                        ? `/uploads/profiles/${member.profile_picture}`
+                        : undefined
+                    }
+                    alt={`${member.first_name} ${member.last_name}`}
+                    className="object-cover"
+                  />
+                  <AvatarFallback>{initials}</AvatarFallback>
+                </Avatar>
+              </div>
 
-      <div className="space-y-2">
-        <p><strong>Email:</strong> {member.email || "N/A"}</p>
-        <p><strong>Phone:</strong> {member.contact_number}</p>
-        <p><strong>Address:</strong> {member.address}</p>
-        <p><strong>Status:</strong> {member.status}</p>
-        <p><strong>Original Join Date:</strong> {renderDate(member.original_join_date)}</p>
-        <p><strong>Recent Join Date:</strong> {renderDate(member.recent_join_date)}</p>
-        <p><strong>Expiration Date:</strong> {renderDate(member.expiration_date)}</p>
-      </div>
+            <div className="col-span-20 flex flex-col p-2">
+              <div className="flex justify-between mb-4">
+                <div className="flex-1 min-w-0">
+                  <span className="text-5xl font-bold break-words">
+                    {member.first_name} {member.last_name}
+                  </span>
+                </div>
+              </div>
 
-      <div className="flex gap-3">
-        <Sheet open={isEditOpen} onOpenChange={setIsEditOpen}>
-          <SheetTrigger asChild>
-            <Button onClick={() => setIsEditOpen(true)}>Edit Info</Button>
-          </SheetTrigger>
-          <EditMember
-            member={member}
-            isSheetOpen={isEditOpen}
-            onClose={() => setIsEditOpen(false)}
-            refreshMember={loadMember}
-          />
-        </Sheet>
+              <div className="w-full flex justify-between mb-1">
+                <span className="text-lg font-medium"><strong>Status</strong></span>
+                <span className={`text-lg font-medium ${statusColor}`}>
+                  {member.status}
+                </span>
+              </div>
 
-        <Sheet open={isExtendOpen} onOpenChange={setIsExtendOpen}>
-          <SheetTrigger asChild>
-            <Button variant="outline" onClick={() => setIsExtendOpen(true)}>
-              Extend Membership
-            </Button>
-          </SheetTrigger>
-          <ExtendMember
-            memberId={member.id}
-            isSheetOpen={isExtendOpen}
-            onClose={() => setIsExtendOpen(false)}
-            refreshMember={loadMember}
-          />
-        </Sheet>
+              <div className="w-full flex justify-between">
+                <span className="text-lg font-medium"><strong>Expiration Date</strong></span>
+                <span className="text-lg font-medium">{renderDate(member.expiration_date)}</span>
+              </div>
+            </div>
+            </ContainerContent>
+          </Container>
+        </div>
 
-        <Sheet open={isCancelOpen} onOpenChange={setIsCancelOpen}>
-          <SheetTrigger asChild>
-            <Button variant="destructive" onClick={() => setIsCancelOpen(true)}>
-              Cancel Membership
-            </Button>
-          </SheetTrigger>
-          <CancelMember
-            member={member}
-            isSheetOpen={isCancelOpen}
-            onClose={() => setIsCancelOpen(false)}
-            refreshMember={loadMember}
-          />
-        </Sheet>
+        {/* → Right panel: Detailed info & actions */}
+        <div className="col-span-14 flex flex-col gap-4">
+          <Container className="flex-1 flex flex-col">
+            <ContainerHeader>
+              <ContainerTitle className="font-bold">Member Details</ContainerTitle>
+              <p className="text-sm text-muted-foreground">
+                View and manage this member’s full information.
+              </p>
+            </ContainerHeader>
+            <Separator />
+
+            <ContainerContent className="flex-1 flex flex-col">
+              <div className="flex items-center justify-between flex-wrap gap-4 mb-4">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <Sheet open={isEditOpen} onOpenChange={setIsEditOpen}>
+                    <SheetTrigger asChild>
+                      <Button size="sm">Edit Info</Button>
+                    </SheetTrigger>
+                    <EditMember
+                      member={member}
+                      isSheetOpen={isEditOpen}
+                      onClose={() => { setIsEditOpen(false); loadMember() }}
+                      refreshMember={loadMember}
+                    />
+                  </Sheet>
+
+                  <Sheet open={isExtendOpen} onOpenChange={setIsExtendOpen}>
+                    <SheetTrigger asChild>
+                      <Button size="sm" variant="outline">
+                        Extend Membership
+                      </Button>
+                    </SheetTrigger>
+                    <ExtendMember
+                      memberId={member.member_id}
+                      isSheetOpen={isExtendOpen}
+                      onClose={() => { setIsExtendOpen(false); loadMember() }}
+                      refreshMember={loadMember}
+                    />
+                  </Sheet>
+
+                  <Sheet open={isCancelOpen} onOpenChange={setIsCancelOpen}>
+                    <SheetTrigger asChild>
+                      <Button size="sm" variant="destructive">
+                        Cancel Membership
+                      </Button>
+                    </SheetTrigger>
+                    <CancelMember
+                      member={member}
+                      isSheetOpen={isCancelOpen}
+                      onClose={() => { setIsCancelOpen(false); loadMember() }}
+                      refreshMember={loadMember}
+                    />
+                  </Sheet>
+                </div>
+              </div>
+              
+<div className="grid grid-cols-1 sm:grid-cols-2 gap-1 text-md font-medium">
+  <div className="flex justify-between">
+    <span className="font-medium text-muted-foreground">Email:</span>
+    <span className="mr-12">{member.email || "N/A"}</span>
+  </div>
+  <div className="flex justify-between">
+    <span className="font-medium text-muted-foreground">Phone:</span>
+    <span>{member.contact_number}</span>
+  </div>
+  <div className="flex justify-between sm:col-span-2 items-start min-w-0">
+    <span className="font-medium text-muted-foreground">Address:</span>
+    <span className="ml-2 flex-1 min-w-0 break-words -mr-1">
+      {member.address}
+    </span>
+  </div>
+  <div className="flex justify-between">
+    <span className="font-medium text-muted-foreground">Joined:</span>
+    <span className="mr-12">{renderDate(member.original_join_date)}</span>
+  </div>
+  <div className="flex justify-between">
+    <span className="font-medium text-muted-foreground">Recent Join:</span>
+    <span>{renderDate(member.recent_join_date)}</span>
+  </div>
+</div>
+
+
+            </ContainerContent>
+          </Container>
+        </div>
       </div>
     </div>
   )
 }
-
-export default Member

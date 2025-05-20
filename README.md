@@ -38,9 +38,6 @@
   - Profile picture crop UI
   - Add batch delete of members with cancelled_status in settings
   - Logged-in account icon should change if logged-in account is staff for clarity
-  - Redesign login window (Inspired by riot launcher)
 
 - FIX
-  - Members info page and Account info page design
-  
   - Add RFID (not priority) column in members table. Make visit log manual input accept RFID column

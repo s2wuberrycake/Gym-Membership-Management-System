@@ -99,7 +99,7 @@ const RestoreMember = ({
           <form onSubmit={handleSubmit}>
             <div className="p-6 pb-2 max-w-md">
               <h2 className="text-xl font-bold">
-                Re-enroll {fullName}?
+                Re-enroll Member?
               </h2>
               <p className="text-sm text-muted-foreground">
                 Select a membership duration to re-enroll this member. Their status will

@@ -36,12 +36,12 @@ const CancelMember = ({ member, isSheetOpen, onClose, refreshMember }) => {
   return (
     <SheetContent className="overflow-y-auto">
       <SheetHeader>
-        <SheetTitle className="mb-4">Cancel {fullName}</SheetTitle>
+        <SheetTitle className="mb-4">Cancel Membership</SheetTitle>
         <SheetDescription asChild>
           <form onSubmit={handleSubmit}>
             <div className="p-6 pb-2 max-w-md">
               <h2 className="pb-0.5 text-xl font-bold">
-                Cancel {fullName}?
+                Cancel Membership Validty?
               </h2>
               <p>
                 Cancelling a membership will update their status to <strong>Cancelled</strong> and will promptly be
