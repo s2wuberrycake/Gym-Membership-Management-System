@@ -1,4 +1,13 @@
 import { defaultDb } from "../config/db.js"
+import { getToday, formatDate, TIMEZONE } from "../utils/date.js"
+import { DateTime } from "luxon"
+
+const todayStr = formatDate(getToday())
+
+const nowStr = () =>
+  DateTime.now()
+    .setZone(TIMEZONE)
+    .toFormat("yyyy-MM-dd HH:mm:ss")
 
 export const getAllUpdateLogs = async () => {
   const sql = `
@@ -32,9 +41,14 @@ export const logUpdate = async (member_id, action_id, account_id) => {
       action_id,
       account_id,
       log_date
-    ) VALUES (?, ?, ?, NOW())
+    ) VALUES (?, ?, ?, ?)
   `
-  const [result] = await defaultDb.query(sql, [member_id, action_id, account_id])
+  const [result] = await defaultDb.query(sql, [
+    member_id,
+    action_id,
+    account_id,
+    nowStr(),
+  ])
   console.log(`DEBUG >> logged action ${action_id} for member ${member_id}`)
   return result
 }
@@ -50,39 +64,41 @@ export const getAllVisitLogs = async () => {
     FROM visit_log vl
     JOIN members m
       ON vl.member_id = m.member_id
-    WHERE m.expiration_date >= CURDATE()
+    WHERE m.expiration_date >= ?
     ORDER BY
       vl.visit_id DESC
   `
-  const [rows] = await defaultDb.query(sql)
+  const [rows] = await defaultDb.query(sql, [todayStr])
   return rows
 }
 
 export const logVisit = async (member_id) => {
-  const sql1 = `SELECT expiration_date, status_id
+  const sql1 = `
+    SELECT expiration_date, status_id
     FROM members
-    WHERE member_id = ?`
+    WHERE member_id = ?
+  `
   const [memberRows] = await defaultDb.query(sql1, [member_id])
   if (!memberRows.length) throw new Error("Member not found")
-  const { expiration_date, status_id } = memberRows[0]
 
-  const sql2 = `SELECT status_label
-    FROM status_types
-    WHERE status_id = ?`
-  const [statusRows] = await defaultDb.query(sql2, [status_id])
-  const statusLabel = statusRows[0]?.status_label?.toLowerCase()
-  if (statusLabel === "cancelled") throw new Error("Membership cancelled")
+  const { expiration_date, status_id } = memberRows[0]
+  if (status_id === 3) throw new Error("Membership cancelled")
   if (new Date(expiration_date) < new Date()) throw new Error("Membership expired")
 
-  const sql3 = `SELECT visit_id
+  const sql3 = `
+    SELECT visit_id
     FROM visit_log
     WHERE member_id = ?
-      AND DATE(visit_date) = CURDATE()`
-  const [[existingVisit]] = await defaultDb.query(sql3, [member_id])
+      AND DATE(visit_date) = ?
+  `
+  const [[existingVisit]] = await defaultDb.query(sql3, [member_id, todayStr])
   if (existingVisit) return null
 
-  const sql4 = `INSERT INTO visit_log (member_id, visit_date) VALUES (?, NOW())`
-  const [insertResult] = await defaultDb.query(sql4, [member_id])
+  const sql4 = `
+    INSERT INTO visit_log (member_id, visit_date)
+    VALUES (?, ?)
+  `
+  const [insertResult] = await defaultDb.query(sql4, [member_id, nowStr()])
   const visitId = insertResult.insertId
 
   const sql5 = `

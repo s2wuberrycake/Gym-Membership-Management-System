@@ -38,9 +38,9 @@
   - Profile picture crop UI
   - Add batch delete of members with cancelled_status in settings
   - Logged-in account icon should change if logged-in account is staff for clarity
+  - Redesign login window (Inspired by riot launcher)
 
 - FIX
   - Members info page and Account info page design
-  - Apply same char limit of 25 before truncating name to other tables (update log, cancelled members, visit log)
   - Search filters needs customized filter for update_log table
   - There should be a weekly automatic backup with cron job

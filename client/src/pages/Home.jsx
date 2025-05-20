@@ -200,27 +200,29 @@ export default function Home() {
             <div className="col-span-6">
               <Container className="h-full flex flex-col">
                 <ContainerHeader>
-                  <ContainerTitle>Most Recent Visit</ContainerTitle>
+                  <ContainerTitle className="text-4xl font-extrabold">Most Recent Visit</ContainerTitle>
                 </ContainerHeader>
-                <ContainerContent className="flex items-center space-x-4">
+                <ContainerContent className="flex items-center space-x-4 overflow-hidden">
                   {recentVisit ? (
                     <>
-                      <Avatar className="h-12 w-12">
+                      <Avatar className="h-20 w-50 rounded-[1rem_1rem_0_1rem]">
                         <AvatarImage
-                          className="w-full h-full object-cover object-center rounded-[0_1rem_0_1rem]"
+                          className="w-full h-full object-cover object-center"
                           src={`${API_BASE}/uploads/profiles/${recentVisit.profile_picture}`}
                           alt={`${recentVisit.first_name} ${recentVisit.last_name}`}
                         />
-                        <AvatarFallback>
+                        <AvatarFallback className="h-20 w-50 rounded-[1rem_1rem_0_1rem]">
                           {getInitials(
                             recentVisit.first_name,
                             recentVisit.last_name
                           )}
                         </AvatarFallback>
                       </Avatar>
-                      <div>
-                        <div className="font-bold">
-                          {recentVisit.first_name} {recentVisit.last_name}
+                      <div className="-mt-10 flex-1 min-w-0">
+                        <div className="font-bold text-2xl max-w-[180px]">
+                          <span className="truncate block">
+                            {recentVisit.first_name} {recentVisit.last_name}
+                          </span>
                         </div>
                         <div className="text-sm text-muted-foreground">
                           {format(new Date(recentVisit.visit_date), "hh:mm a")}

@@ -205,17 +205,20 @@ export default function Visits() {
             </div>
 
             <div className="col-span-20 flex flex-col p-2">
-              <div className="flex justify-between mb-1">
-                <span className="text-3xl font-bold">
-                  {member
-                    ? `${member.first_name} ${member.last_name}`
-                    : "Name"}
-                </span>
+              <div className="flex justify-between mb-4">
+                <div className="flex-1 min-w-0">
+                  <span className="text-4xl font-bold truncate block">
+                    {member
+                      ? `${member.first_name} ${member.last_name}`
+                      : "Name"}
+                  </span>
+                </div>
               </div>
+
               <div className="flex justify-between mb-1">
-                <span className="font-medium">Status</span>
+                <span className="text-lg font-medium">Status</span>
                 <span
-                  className={
+                  className={`text-lg font-medium ${
                     member
                       ? member.status?.toLowerCase() === "cancelled"
                         ? "text-red-500"
@@ -223,8 +226,7 @@ export default function Visits() {
                         ? "text-orange-500"
                         : "text-green-600"
                       : ""
-                  }
-                >
+                  }`}>
                   {member
                     ? member.status?.toLowerCase() === "cancelled"
                       ? "Cancelled"
@@ -235,8 +237,8 @@ export default function Visits() {
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="font-medium">Expiration Date</span>
-                <span>
+                <span className="text-lg font-medium">Expiration Date</span>
+                <span className="text-lg font-medium">
                   {member?.expiration_date
                     ? format(
                         new Date(member.expiration_date),

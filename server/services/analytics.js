@@ -1,4 +1,5 @@
 import { defaultDb } from "../config/db.js"
+import { getToday, formatDate } from "../utils/date.js"
 
 export const getMemberGrowth = async (period) => {
   let query
@@ -102,24 +103,21 @@ export const getMemberRatio = async () => {
 
 export const getDashboardStats = async () => {
   const ratioRows = await getMemberRatio()
-  const totalMembers   = ratioRows.reduce((sum, r) => sum + Number(r.value), 0)
-  const activeMembers  = ratioRows.find(r => r.status_id === 1)?.value || 0
-  const expiredMembers = ratioRows.find(r => r.status_id === 2)?.value || 0
-  const cancelledMembers = ratioRows.find(r => r.status_id === 3)?.value || 0
+  const totalMembers    = ratioRows.reduce((sum, r) => sum + Number(r.value), 0)
+  const activeMembers   = ratioRows.find(r => r.status_id === 1)?.value || 0
+  const expiredMembers  = ratioRows.find(r => r.status_id === 2)?.value || 0
+  const cancelledMembers= ratioRows.find(r => r.status_id === 3)?.value || 0
 
-  const sumVisits = (rows) => rows.reduce((sum, r) => sum + Number(r.visits || 0), 0)
+  const sumVisits = rows => rows.reduce((sum, r) => sum + Number(r.visits || 0), 0)
   const todayRows = await getVisitRate("default")
   const weekRows  = await getVisitRate("week")
   const yearRows  = await getVisitRate("year")
 
-  const [last30Row] = await defaultDb.query(
-    `
-      SELECT
-        COUNT(*) AS last30
-      FROM visit_log
-      WHERE DATE(visit_date) BETWEEN DATE_SUB(CURDATE(), INTERVAL 29 DAY) AND CURDATE()
-    `
-  )
+  const [last30Row] = await defaultDb.query(`
+    SELECT COUNT(*) AS last30
+    FROM visit_log
+    WHERE DATE(visit_date) BETWEEN DATE_SUB(CURDATE(), INTERVAL 29 DAY) AND CURDATE()
+  `)
   const last30 = last30Row[0]?.last30 || 0
 
   return {
@@ -128,15 +126,17 @@ export const getDashboardStats = async () => {
     expiredMembers,
     cancelledMembers,
     visits: {
-      today:  sumVisits(todayRows),
-      week:   sumVisits(weekRows),
+      today: sumVisits(todayRows),
+      week:  sumVisits(weekRows),
       last30,
-      year:   sumVisits(yearRows),
+      year:  sumVisits(yearRows),
     }
   }
 }
 
 export const getMostRecentVisit = async () => {
+  const todayStr = formatDate(getToday())
+
   const sql = `
     SELECT
       m.first_name,
@@ -146,9 +146,10 @@ export const getMostRecentVisit = async () => {
     FROM visit_log vl
     JOIN members m
       ON vl.member_id = m.member_id
+    WHERE DATE(vl.visit_date) = ?
     ORDER BY vl.visit_date DESC
     LIMIT 1
   `
-  const [rows] = await defaultDb.query(sql)
+  const [rows] = await defaultDb.query(sql, [todayStr])
   return rows[0] || null
 }

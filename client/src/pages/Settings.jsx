@@ -363,7 +363,7 @@ export default function Settings() {
             </p>
           </ContainerHeader>
           <Separator />
-          <ContainerContent className="flex items-center flex-wrap gap-4 mb-4">
+          <ContainerContent className="flex items-center justify-between flex-wrap gap-4 mb-4">
             <p> Dark Mode</p>
             <Switch
               checked={isDark}
