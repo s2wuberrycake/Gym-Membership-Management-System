@@ -241,7 +241,7 @@ export default function Home() {
         </Container>
       </div>
 
-      {/* Update Log Section */}
+      {/* Update Log*/}
       <div className="col-span-20 flex flex-col">
         <Container className="flex-1 flex flex-col">
           <ContainerHeader>

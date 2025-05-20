@@ -1,4 +1,3 @@
-// src/pages/Account.jsx
 import React, { useEffect, useState } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { getAccountById } from "@/lib/api/settings"
@@ -69,7 +68,6 @@ export default function Account() {
 
   return (
     <div>
-      {/* Back button */}
       <Button
         variant="outline"
         size="sm"
@@ -81,7 +79,6 @@ export default function Account() {
       </Button>
 
       <div className="grid grid-cols-20 gap-4 mb-4 h-full">
-        {/* Left panel: Account Info */}
         <div className="col-span-6 flex flex-col">
           <Container>
             <ContainerHeader>
@@ -107,7 +104,6 @@ export default function Account() {
           </Container>
         </div>
 
-        {/* Right panel: Actions */}
         <div className="col-span-14 flex flex-col gap-4">
           <Container className="flex-1 flex flex-col">
             <ContainerHeader>

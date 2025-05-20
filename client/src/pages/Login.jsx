@@ -46,7 +46,6 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex">
-      {/* sidebar */}
       <div className="w-100 bg-background dark:bg-foreground/95 dark:text-background backdrop-blur-md p-12 flex flex-col border-r border-muted-foreground/80">
         <Toaster />
         <div className="pt-40">
@@ -85,7 +84,6 @@ export default function Login() {
         </div>
       </div>
 
-      {/* background panel */}
       <div
         className="flex-1 bg-cover bg-center"
         style={{ backgroundImage: `url(${bgLogin})` }}

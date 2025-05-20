@@ -57,7 +57,6 @@ export default function Member() {
     return <div className="p-6 text-red-500">Member not found.</div>
   }
 
-  // determine status color
   const statusColor = member.status?.toLowerCase() === "cancelled"
     ? "text-red-500"
     : new Date(member.expiration_date) < new Date()
@@ -66,7 +65,6 @@ export default function Member() {
 
   return (
     <div>
-      {/* Back button (intentionally outside containers) */}
       <Button
         variant="outline"
         size="sm"
@@ -78,7 +76,6 @@ export default function Member() {
       </Button>
 
       <div className="grid grid-cols-20 gap-4 mb-4 h-full">
-        {/* ← Left panel: Avatar & quick info */}
         <div className="col-span-6 flex flex-col">
           <Container>
             <ContainerHeader>
@@ -128,7 +125,6 @@ export default function Member() {
           </Container>
         </div>
 
-        {/* → Right panel: Detailed info & actions */}
         <div className="col-span-14 flex flex-col gap-4">
           <Container className="flex-1 flex flex-col">
             <ContainerHeader>
@@ -184,31 +180,30 @@ export default function Member() {
                 </div>
               </div>
               
-<div className="grid grid-cols-1 sm:grid-cols-2 gap-1 text-md font-medium">
-  <div className="flex justify-between">
-    <span className="font-medium text-muted-foreground">Email:</span>
-    <span className="mr-12">{member.email || "N/A"}</span>
-  </div>
-  <div className="flex justify-between">
-    <span className="font-medium text-muted-foreground">Phone:</span>
-    <span>{member.contact_number}</span>
-  </div>
-  <div className="flex justify-between sm:col-span-2 items-start min-w-0">
-    <span className="font-medium text-muted-foreground">Address:</span>
-    <span className="ml-2 flex-1 min-w-0 break-words -mr-1">
-      {member.address}
-    </span>
-  </div>
-  <div className="flex justify-between">
-    <span className="font-medium text-muted-foreground">Joined:</span>
-    <span className="mr-12">{renderDate(member.original_join_date)}</span>
-  </div>
-  <div className="flex justify-between">
-    <span className="font-medium text-muted-foreground">Recent Join:</span>
-    <span>{renderDate(member.recent_join_date)}</span>
-  </div>
-</div>
-
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 text-md font-medium">
+                <div className="flex justify-between">
+                  <span className="font-medium text-muted-foreground">Email:</span>
+                  <span className="mr-12">{member.email || "N/A"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="font-medium text-muted-foreground">Phone:</span>
+                  <span>{member.contact_number}</span>
+                </div>
+                <div className="flex justify-between sm:col-span-2 items-start min-w-0">
+                  <span className="font-medium text-muted-foreground">Address:</span>
+                  <span className="ml-2 flex-1 min-w-0 break-words -mr-1">
+                    {member.address}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="font-medium text-muted-foreground">Joined:</span>
+                  <span className="mr-12">{renderDate(member.original_join_date)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="font-medium text-muted-foreground">Recent Join:</span>
+                  <span>{renderDate(member.recent_join_date)}</span>
+                </div>
+              </div>
 
             </ContainerContent>
           </Container>
