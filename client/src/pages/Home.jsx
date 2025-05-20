@@ -77,7 +77,7 @@ export default function Home() {
           <Separator />
 
           <ContainerContent className="grid grid-cols-1 md:grid-cols-20 gap-4">
-            <div className="col-span-20 flex items-center justify-between mb-4">
+            <div className="col-span-20 flex items-center justify-between -mb-2">
               <div className="flex space-x-2">
                 {periods.map((p) => (
                   <Button
