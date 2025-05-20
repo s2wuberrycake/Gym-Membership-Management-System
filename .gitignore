@@ -23,7 +23,7 @@ dist-ssr
 *.sln
 *.sw?
 
-/server/uploads/profiles/
+/server/uploads/profiles/*
 !/server/uploads/profiles/.gitkeep
-/server/backups/
+/server/backups/*
 !/server/backups/.gitkeep

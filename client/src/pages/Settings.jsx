@@ -137,7 +137,7 @@ export default function Settings() {
   const displayedData = isAdmin ? filteredData : []
 
   const globalFilterFn = (row, _, filterValue) =>
-    ["account_id", "username", "role"].some((field) =>
+    ["account_id", "username"].some((field) =>
       String(row.original[field] ?? "")
         .toLowerCase()
         .includes(filterValue.toLowerCase())

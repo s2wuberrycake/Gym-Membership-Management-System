@@ -48,14 +48,16 @@ export default function Home() {
 
   const globalFilterFn = (row, columnId, filterValue) => {
     const fields = [
-      "update_id",
       "member_id",
-      "action_label",
-      "account_username",
-      "log_date",
-      "logged_expiration_date"
+      "first_name",
+      "last_name",
+      "name",
     ]
     const lower = filterValue.toLowerCase()
+    const fullName = `${row.original.first_name} ${row.original.last_name}`.toLowerCase()
+    if (fullName.includes(lower)) {
+      return true
+    }
     return fields.some((f) =>
       String(row.original[f] ?? "").toLowerCase().includes(lower)
     )

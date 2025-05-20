@@ -90,32 +90,43 @@ export default function Members() {
     localStorage.removeItem("membersStatusFilter")
   }
 
+
   const filteredData =
     statusFilter === "all"
       ? data
       : data.filter(member => member.status?.toLowerCase() === statusFilter)
 
   const globalFilterFn = (row, _colId, filterValue) => {
-    const fields = ["id", "first_name", "last_name"]
+    const lower = filterValue.toLowerCase()
+
+    const fullName = `${row.original.first_name} ${row.original.last_name}`.toLowerCase()
+    if (fullName.includes(lower)) {
+      return true
+    }
+
+    const fields = ["id"]
     if (visibleColumns.contactNumber) fields.push("contact_number")
     if (visibleColumns.expireDate)   fields.push("expiration_date")
 
-    return fields.some(field => {
-      const value = row.original[field]
+    return fields.some((field) => {
+      let value = row.original[field] ?? ""
+
       if (field === "expiration_date") {
-        const date = value ? new Date(value) : null
-        const formatted = date
-          ? date.toLocaleDateString("en-US", {
-              year:  "numeric",
-              month: "short",
-              day:   "2-digit"
-            })
-          : ""
-        return formatted.toLowerCase().includes(filterValue.toLowerCase())
+        const date = new Date(value)
+        if (!isNaN(date)) {
+          value = date.toLocaleDateString("en-US", {
+            year:  "numeric",
+            month: "short",
+            day:   "2-digit",
+          })
+        } else {
+          value = ""
+        }
       }
-      return String(value ?? "")
+
+      return String(value)
         .toLowerCase()
-        .includes(filterValue.toLowerCase())
+        .includes(lower)
     })
   }
 

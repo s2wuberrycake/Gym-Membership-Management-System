@@ -69,24 +69,33 @@ const Archive = () => {
     localStorage.removeItem("archiveVisibleColumns")
   }
 
-  const globalFilterFn = (row, columnId, filterValue) => {
-    const fields = ["id", "first_name", "last_name"]
-    if (visibleColumns.contactNumber) fields.push("contact_number")
-    if (visibleColumns.cancelDate) fields.push("cancel_date")
+  const globalFilterFn = (row, _colId, filterValue) => {
     const lower = filterValue.toLowerCase()
+
+    const fullName = `${row.original.first_name} ${row.original.last_name}`.toLowerCase()
+    if (fullName.includes(lower)) {
+     return true
+    }
+
+    const fields = ["id"]
+    if (visibleColumns.contactNumber) fields.push("contact_number")
+    if (visibleColumns.cancelDate)    fields.push("cancel_date")
+
     return fields.some(field => {
-      const value = row.original[field]
-      const text =
-        field === "cancel_date" && value
-          ? new Date(value).toLocaleDateString("en-US", {
-              year: "numeric",
+      let text = String(row.original[field] ?? "")
+      if (field === "cancel_date" && text) {
+        const d = new Date(text)
+        text = !isNaN(d)
+          ? d.toLocaleDateString("en-US", {
+              year:  "numeric",
               month: "short",
-              day: "2-digit"
+              day:   "2-digit",
             })
-          : String(value ?? "")
+          : ""
+      }
       return text.toLowerCase().includes(lower)
     })
-  }
+ }
 
   const hasActiveFilters =
     globalFilter || Object.values(visibleColumns).some(v => !v)
