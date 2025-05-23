@@ -186,17 +186,14 @@ export default function Visits() {
           </div>
 
           <ContainerContent className="grid grid-cols-20 gap-4">
-            <div className="col-span-20 flex flex-col h-100 items-center">
-              <Avatar className="h-100 w-100 overflow-hidden rounded-full">
+            <div className="col-span-20 flex flex-col items-center">
+              <Avatar className="h-70 w-70 overflow-hidden rounded-full">
                 <AvatarImage
-                  className="w-full h-full object-cover object-center rounded-[1rem]"
-                  src={
-                    member?.profile_picture &&
-                    `/uploads/profiles/${member.profile_picture}`
-                  }
+                  src={member?.profile_picture && `/uploads/profiles/${member.profile_picture}`}
                   alt={member ? `${member.first_name} ${member.last_name}` : ""}
+                  className="h-full w-full object-cover"
                 />
-                <AvatarFallback className="flex items-center justify-center rounded-[1rem]">
+                <AvatarFallback className="h-70 w-70 overflow-hidden rounded-full">
                   {member
                     ? `${member.first_name[0] || ""}${member.last_name[0] || ""}`
                     : ""}

@@ -85,8 +85,8 @@ export default function Member() {
             <Separator />
 
             <ContainerContent className="grid grid-cols-20 gap-4">
-              <div className="col-span-20 flex flex-col h-100 items-center">
-                <Avatar className="h-100 w-100 overflow-hidden rounded-full">
+              <div className="col-span-20 flex flex-col h-full items-center">
+                <Avatar className="h-70 w-70 overflow-hidden rounded-full">
                   <AvatarImage
                     src={
                       member.profile_picture
@@ -94,9 +94,9 @@ export default function Member() {
                         : undefined
                     }
                     alt={`${member.first_name} ${member.last_name}`}
-                    className="object-cover"
+                    className="h-full w-full object-cover"
                   />
-                  <AvatarFallback>{initials}</AvatarFallback>
+                  <AvatarFallback className="h-70 w-70 overflow-hidden rounded-full">{initials}</AvatarFallback>
                 </Avatar>
               </div>
 
