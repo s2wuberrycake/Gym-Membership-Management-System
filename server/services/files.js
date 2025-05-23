@@ -1,3 +1,4 @@
+// server/services/files.js
 import fs from "fs/promises"
 import path from "path"
 import { defaultDb } from "../config/db.js"
@@ -7,13 +8,20 @@ export const saveProfilePic = async (member_id, file) => {
 
   const ext = path.extname(file.originalname)
   const filename = `${member_id}${ext}`
-  const dest = path.resolve("uploads", "profiles", filename)
+  const destDir = path.resolve("uploads", "profiles")
+  const dest = path.join(destDir, filename)
 
+  // Ensure the profiles directory exists
+  await fs.mkdir(destDir, { recursive: true })
+
+  // Write the file to disk
   await fs.writeFile(dest, file.buffer)
+
+  // Update the database record
   const [result] = await defaultDb.query(
     `UPDATE members
-    SET profile_picture = ?
-    WHERE member_id = ?`,
+     SET profile_picture = ?
+     WHERE member_id = ?`,
     [filename, member_id]
   )
   console.log(`DEBUG >> saved profile pic for member ${member_id}`)

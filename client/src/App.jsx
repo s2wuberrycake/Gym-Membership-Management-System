@@ -16,6 +16,8 @@ import Login from "./pages/Login"
 import Member from "./pages/Member"
 import Account from "./pages/Account"
 
+import RequireAuth from "./auth/RequireAuth"   // ← import your auth wrapper
+
 function Layout() {
   const defaultOpen = Cookies.get("sidebar_state") === "true"
 
@@ -41,36 +43,46 @@ function App() {
   useEffect(() => {
     const handleStorage = (event) => {
       if (event.key === "token") {
+        // If token was removed or changed, reload to re-run RequireAuth
         window.location.reload()
       }
-  
       if (event.key === "logout") {
-        navigate("/login")
+        navigate("/login", { replace: true })
       }
     }
-  
-    window.addEventListener("storage", handleStorage)
 
+    window.addEventListener("storage", handleStorage)
     return () => {
       window.removeEventListener("storage", handleStorage)
     }
-  }, [navigate])  
-  
+  }, [navigate])
+
   return (
     <Routes>
-      <Route element={<Layout />}>
-        <Route path="/" element={<Home />} />
+      {/* Public route */}
+      <Route path="/login" element={<Login />} />
+
+      {/* All other routes require a valid token */}
+      <Route
+        path="/*"
+        element={
+          <RequireAuth>
+            <Layout />
+          </RequireAuth>
+        }
+      >
+        <Route index element={<Home />} />
+
         <Route path="members">
           <Route index element={<Members />} />
           <Route path=":id" element={<Member />} />
         </Route>
-        <Route path="accounts/:id" element={<Account />} />
-        <Route path="archive" element={<Archive />} />
-        <Route path="visits" element={<Visits />} />
-        <Route path="settings" element={<Settings />} />
-      </Route>
 
-      <Route path="/login" element={<Login />} />
+        <Route path="accounts/:id" element={<Account />} />
+        <Route path="archive"         element={<Archive />} />
+        <Route path="visits"          element={<Visits />} />
+        <Route path="settings"        element={<Settings />} />
+      </Route>
     </Routes>
   )
 }
