@@ -1,16 +1,4 @@
-## HOW TO RUN (DEVELOPMENT)
-- STEP 1 : Open project root folder
-- STEP 2 : Open new terminal
-- STEP 3 : Execute "cd client"
-- STEP 4 : Execute "pnpm i"
-- STEP 5 : Execute "pnpm dev"
-- STEP 6 : Repeat steps 2-5, but for step 3. execute "cd server" instead
-- STEP 7 : Open mysql, open "mysql init.sql" and run query
-
-## TROUBLESHOOT
-1. if pnpm is not working, run npm i -g pnpm@latest (installs pnpm globally)
-
-## DEPLOYMENT
+## PREREQUISITES
 - STEP 1 : Install MySQL, Node
 - STEP 2 : Set account for MySQL localhost, user: root, pass: root
 - STEP 3 : Set MySQL path
@@ -28,6 +16,31 @@
   - STEP 5.3 : Find { Gzip: [Function: Gzip], … }
   - STEP 5.4 : Open new terminal
   - STEP 5.5 : Execute "gzip --version"
+
+## HOW TO RUN (VITE and NODE DEVELOPMENT)
+- STEP 1 : Open project root folder
+- STEP 2 : Open new terminal
+- STEP 3 : Execute "cd client"
+- STEP 4 : Execute "pnpm i"
+- STEP 5 : Execute "pnpm dev"
+- STEP 6 : Repeat steps 2-5, but for step 3. execute "cd server" instead
+- STEP 7 : Open mysql, open "mysql init.sql" and run query
+- STEP 8 : Open given localhost link in browser
+
+## HOW TO RUN (ELECTRON DEVELOPMENT)
+- STEP 1 : Open project root folder
+- STEP 2 : Open new terminal
+- STEP 3 : Execute "pnpm i"
+- STEP 4 : Execute "pnpm --filter client build"
+- STEP 5 : Execute "pnpm dev" to test electron development
+- STEP 6 : Execute "pnpm build" to build and package electron app
+- STEP 7 : Open "root/dist/win-unpacked" and run "membership-management-system.exe"
+
+NOTE: Make sure MySQL account is localhost, root with pass: root OR change .env credintials to match
+your existing MySQL account
+
+## TROUBLESHOOT
+1. if pnpm is not working, run npm i -g pnpm@latest (installs pnpm globally)
 
 ## TODOs
 - Visits
