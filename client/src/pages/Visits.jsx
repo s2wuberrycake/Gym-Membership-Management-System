@@ -3,6 +3,7 @@ import { getAllVisitLogs, logVisit } from "@/lib/api/log"
 import { getMemberById } from "@/lib/api/members"
 import { format } from "date-fns"
 import { ListRestart } from "lucide-react"
+import { API_BASE } from "@/lib/api/index.js"
 
 import DataTable from "@/components/ui/data-table"
 import TableSearch from "@/components/ui/table-search"
@@ -189,7 +190,9 @@ export default function Visits() {
             <div className="col-span-20 flex flex-col items-center">
               <Avatar className="h-70 w-70 overflow-hidden rounded-full">
                 <AvatarImage
-                  src={member?.profile_picture && `/uploads/profiles/${member.profile_picture}`}
+                  src={member && member.profile_picture
+                    ? `${API_BASE}/uploads/profiles/${member.profile_picture}`
+                    : undefined}
                   alt={member ? `${member.first_name} ${member.last_name}` : ""}
                   className="h-full w-full object-cover"
                 />

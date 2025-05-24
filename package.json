@@ -1,0 +1,47 @@
+{
+  "name": "membership-management-system",
+  "version": "1.0.0",
+  "private": true,
+	"type": "module",
+  "workspaces": [
+    "client",
+    "server"
+  ],
+  "main": "electron-main.js",
+  "scripts": {
+    "dev": "cross-env NODE_ENV=development concurrently \"pnpm --filter './server' dev\" \"pnpm --filter './client' dev\" \"wait-on http://localhost:5173 && electron .\"",
+    "build:client": "pnpm --filter ./client build",
+    "build": "pnpm run build:client && cross-env NODE_ENV=production electron-builder"
+  },
+  "build": {
+		"asar": false,
+    "appId": "com.yourname.gymapp",
+    "files": [
+      "electron-main.js",
+      "preload.cjs",
+      "client/dist/**/*",
+      "server/**/*",
+			"server/.env",
+			"node_modules/**/*"
+    ],
+    "directories": {
+      "buildResources": "assets"
+    },
+    "mac": {
+      "target": "dmg"
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "linux": {
+      "target": "AppImage"
+    }
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "cross-env": "^7.0.3",
+    "electron": "^36.3.1",
+    "electron-builder": "^26.0.12",
+    "wait-on": "^8.0.3"
+  }
+}

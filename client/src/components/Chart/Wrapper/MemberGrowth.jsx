@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react"
-import axios from "axios"
 import MemberGrowth from "../Data/MemberGrowth"
 import { format, subDays, subMonths } from "date-fns"
+import { getMemberGrowth } from "@/lib/api/analytics"
 import { Skeleton } from "@/components/ui/skeleton"
 
 export default function MemberGrowthChart({ period }) {
@@ -12,17 +12,14 @@ export default function MemberGrowthChart({ period }) {
     async function fetchData() {
       setLoading(true)
       try {
-        const res = await axios.get(
-          "/api/analytics/member-growth",
-          { params: { period } }
-        )
+        const resData = await getMemberGrowth(period)
         const now = new Date()
         let formatted = []
 
         if (period === "default") {
           formatted = Array.from({ length: 24 }, (_, i) => {
             const label = `${String(i).padStart(2, "0")}:00`
-            const found = res.data.find(r => r.label === label)
+            const found = resData.find(r => r.label === label)
             return {
               label,
               enrolled: found ? found.enrolled : 0,
@@ -33,7 +30,7 @@ export default function MemberGrowthChart({ period }) {
           formatted = Array.from({ length: 7 }, (_, i) => {
             const date = subDays(now, 6 - i)
             const label = format(date, "MM-dd")
-            const found = res.data.find(r => r.label === label)
+            const found = resData.find(r => r.label === label)
             return {
               label,
               enrolled: found ? found.enrolled : 0,
@@ -47,7 +44,7 @@ export default function MemberGrowthChart({ period }) {
             const yy = format(date, "yy")
             const monthName = format(date, "MMM")
             const label = `${yy}' ${monthName}`
-            const found = res.data.find(r => r.label === key)
+            const found = resData.find(r => r.label === key)
             return {
               label,
               enrolled: found ? found.enrolled : 0,
@@ -55,7 +52,7 @@ export default function MemberGrowthChart({ period }) {
             }
           })
         } else {
-          formatted = res.data
+          formatted = resData
         }
 
         setData(formatted)

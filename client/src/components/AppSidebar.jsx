@@ -155,7 +155,7 @@ export default function AppSidebar() {
               className="hover:bg-transparent active:bg-transparent focus:outline-none"
             >
               <Link to="/" className="flex items-center font-medium">
-                <img src="./src/assets/logo.png" alt="logo" width={30} height={30} />
+                <img src="logo.png" alt="logo" width={30} height={30} />
                 <p className="pl-2">Membership Management System</p>
               </Link>
             </SidebarMenuButton>

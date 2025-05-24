@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { getMemberById } from "@/lib/api/members"
 import { format } from "date-fns"
+import { API_BASE } from "@/lib/api/index.js"
 
 import { CornerDownLeft } from "lucide-react"
 import { toast } from "sonner"
@@ -88,11 +89,9 @@ export default function Member() {
               <div className="col-span-20 flex flex-col h-full items-center">
                 <Avatar className="h-70 w-70 overflow-hidden rounded-full">
                   <AvatarImage
-                    src={
-                      member.profile_picture
-                        ? `/uploads/profiles/${member.profile_picture}`
-                        : undefined
-                    }
+                    src={member && member.profile_picture
+                      ? `${API_BASE}/uploads/profiles/${member.profile_picture}`
+                      : undefined}
                     alt={`${member.first_name} ${member.last_name}`}
                     className="h-full w-full object-cover"
                   />
