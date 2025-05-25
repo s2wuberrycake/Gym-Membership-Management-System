@@ -6,7 +6,7 @@ export default function MemberGrowth({ data }) {
   const dataKeys = ["enrolled", "cancelled"]
   const colors   = {
     enrolled: "var(--chart-1)",
-    cancelled: "var(--chart-2)"
+    cancelled: "var(--chart-3)"
   }
 
   return (
