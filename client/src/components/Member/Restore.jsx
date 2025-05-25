@@ -74,7 +74,7 @@ const RestoreMember = ({
     try {
       setSubmitting(true)
       await restoreCancelledMemberById(memberId, durationId)
-      toast.success("Member re-enrolled successfully")
+      toast.success("Member re-enrolled")
       onClose()
       refreshMember?.()
     } catch (err) {

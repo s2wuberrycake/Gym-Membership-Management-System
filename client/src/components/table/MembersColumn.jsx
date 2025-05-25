@@ -23,8 +23,8 @@ const statusStyles = {
 export const membersColumns = (navigate, visibleColumns = {}) => {
   const columns = [
     columnHelper.accessor("id", {
-      header: "UUID",
-      cell: info => info.getValue()
+      header: "Member ID",
+      cell: info => `MEM-${info.getValue()}`
     }),
 
     columnHelper.accessor(
@@ -56,7 +56,6 @@ export const membersColumns = (navigate, visibleColumns = {}) => {
         const label = status
           ? status.charAt(0).toUpperCase() + status.slice(1)
           : "Unknown"
-
         return <Badge className={badgeClass}>{label}</Badge>
       }
     }),
@@ -66,7 +65,6 @@ export const membersColumns = (navigate, visibleColumns = {}) => {
       header: "View",
       cell: ({ row }) => {
         const member = row.original
-
         return (
           <Button
             variant="ghost"

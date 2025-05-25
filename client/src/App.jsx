@@ -16,7 +16,7 @@ import Login from "./pages/Login"
 import Member from "./pages/Member"
 import Account from "./pages/Account"
 
-import RequireAuth from "./auth/RequireAuth"   // ← import your auth wrapper
+import RequireAuth from "./auth/RequireAuth"
 
 function Layout() {
   const defaultOpen = Cookies.get("sidebar_state") === "true"
@@ -43,7 +43,6 @@ function App() {
   useEffect(() => {
     const handleStorage = (event) => {
       if (event.key === "token") {
-        // If token was removed or changed, reload to re-run RequireAuth
         window.location.reload()
       }
       if (event.key === "logout") {

@@ -26,6 +26,7 @@ export default function AddMember({ refreshMembers, isSheetOpen, onClose }) {
     last_name: "",
     email: "",
     contact_number: "",
+    rfid: "",
     address: "",
     durationId: ""
   })
@@ -48,6 +49,7 @@ export default function AddMember({ refreshMembers, isSheetOpen, onClose }) {
         last_name: "",
         email: "",
         contact_number: "",
+        rfid: "",
         address: "",
         durationId: ""
       })
@@ -84,6 +86,7 @@ export default function AddMember({ refreshMembers, isSheetOpen, onClose }) {
       last_name: true,
       email: true,
       contact_number: true,
+      rfid: true,
       address: true,
       durationId: true
     })
@@ -91,23 +94,24 @@ export default function AddMember({ refreshMembers, isSheetOpen, onClose }) {
 
     const fd = new FormData()
     fd.append("first_name", form.first_name)
-    fd.append("last_name",  form.last_name)
-    fd.append("email",      form.email)
+    fd.append("last_name", form.last_name)
+    fd.append("email", form.email)
     fd.append("contact_number", form.contact_number)
-    fd.append("address",    form.address)
+    if (form.rfid) fd.append("rfid", form.rfid)
+    fd.append("address", form.address)
     fd.append("extend_date_id", form.durationId)
     if (photoFile) fd.append("photo", photoFile)
 
     try {
       setSubmitting(true)
       await addMember(fd)
-      toast.success("Member added!")
+      toast.success("Member enrolled")
       refreshMembers?.()
       onClose()
     } catch (err) {
       console.error("Submit error", err)
-      setErrors({ submit: "Failed to add member" })
-      toast.error("Failed to add member")
+      setErrors({ submit: "Failed to enroll member" })
+      toast.error("Failed to enroll member")
     } finally {
       setSubmitting(false)
     }
@@ -124,7 +128,7 @@ export default function AddMember({ refreshMembers, isSheetOpen, onClose }) {
             </div>
 
             <div className="p-6 pt-2 space-y-4 max-w-md">
-              {["first_name","last_name","email","contact_number","address"].map(field => (
+              {["first_name","last_name","email","contact_number"].map(field => (
                 <div key={field}>
                   <Label className="pb-0.5 capitalize">
                     {field.replace("_", " ")}
@@ -139,6 +143,32 @@ export default function AddMember({ refreshMembers, isSheetOpen, onClose }) {
                   )}
                 </div>
               ))}
+
+              <div>
+                <Label className="pb-0.5">RFID Code <span className="text-xs text-muted-foreground">(optional)</span></Label>
+                <Input
+                  name="rfid"
+                  value={form.rfid}
+                  onChange={handleChange}
+                  placeholder="Scan or enter RFID code"
+                  autoComplete="off"
+                />
+                {touched.rfid && errors.rfid && (
+                  <p className="text-red-500 text-sm mt-1">{errors.rfid}</p>
+                )}
+              </div>
+
+              <div>
+                <Label className="pb-0.5">Address</Label>
+                <Input
+                  name="address"
+                  value={form.address}
+                  onChange={handleChange}
+                />
+                {touched.address && errors.address && (
+                  <p className="text-red-500 text-sm mt-1">{errors.address}</p>
+                )}
+              </div>
 
               <div className="grid w-full max-w-sm items-center gap-1.5">
                 <Label htmlFor="photo">Profile Picture</Label>

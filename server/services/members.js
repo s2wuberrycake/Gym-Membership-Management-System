@@ -22,25 +22,25 @@ export const insertMember = async (data, account_id) => {
     contact_number,
     address,
     profile_picture = null,
+    rfid = null,
     extend_date_id,
     status_id = 1
   } = data
 
-  const [[{ member_id }]] = await defaultDb.query("SELECT UUID() AS member_id")
   const daysToAdd  = await getDaysToAdd(extend_date_id)
   const today      = getToday()
   const expiration = today.plus({ days: daysToAdd })
 
   const sql = `
     INSERT INTO members (
-      member_id, first_name, last_name, email,
+      rfid, first_name, last_name, email,
       contact_number, address, profile_picture,
       original_join_date, recent_join_date,
       expiration_date, status_id
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `
-  await defaultDb.query(sql, [
-    member_id,
+  const [result] = await defaultDb.query(sql, [
+    rfid,
     first_name,
     last_name,
     email || null,
@@ -52,6 +52,8 @@ export const insertMember = async (data, account_id) => {
     formatDate(expiration),
     status_id
   ])
+
+  const member_id = result.insertId
 
   await logUpdate(member_id, 1, account_id)
   return member_id
@@ -131,7 +133,9 @@ export const updateMember = async (memberId, data, account_id) => {
     contact_number,
     address,
     recent_join_date,
-    expiration_date
+    expiration_date,
+    profile_picture = null,
+    rfid = null
   } = data
 
   const recent = DateTime.fromISO(recent_join_date, { zone: TIMEZONE })
@@ -145,7 +149,9 @@ export const updateMember = async (memberId, data, account_id) => {
           contact_number   = ?,
           address          = ?,
           recent_join_date = ?,
-          expiration_date  = ?
+          expiration_date  = ?,
+          profile_picture  = ?,
+          rfid             = ?
     WHERE member_id = ?
   `
   const [result] = await defaultDb.query(sql, [
@@ -156,6 +162,8 @@ export const updateMember = async (memberId, data, account_id) => {
     address,
     formatDate(recent),
     formatDate(exp),
+    profile_picture,
+    rfid,
     memberId
   ])
 
@@ -170,7 +178,6 @@ export const updateMember = async (memberId, data, account_id) => {
   return rows[0] || null
 }
 
-// Cancel membership
 export const cancelMember = async (memberId, account_id) => {
   const conn = await defaultDb.getConnection()
   try {
@@ -210,7 +217,6 @@ export const cancelMember = async (memberId, account_id) => {
   return { memberId }
 }
 
-// Expire due members
 export async function expireMembers(systemAccountId) {
   const selectSql = `
     SELECT member_id
@@ -251,6 +257,7 @@ export const getMembers = async () => {
   const sql = `
     SELECT
       m.member_id       AS id,
+      m.rfid,
       m.first_name,
       m.last_name,
       m.contact_number,
@@ -264,7 +271,7 @@ export const getMembers = async () => {
     LEFT JOIN status_types st
       ON m.status_id = st.status_id
     WHERE m.status_id IN (1, 2)
-    ORDER BY m.recent_join_date DESC, m.last_name ASC
+    ORDER BY m.recent_join_date DESC, m.member_id DESC
   `
   const [rows] = await defaultDb.query(sql)
   return rows
@@ -274,6 +281,7 @@ export const getMemberById = async memberId => {
   const sql = `
     SELECT
       m.member_id       AS id,
+      m.rfid,
       m.first_name,
       m.last_name,
       m.email,
@@ -309,7 +317,7 @@ export const getCancelledMembers = async () => {
     FROM cancelled_members cm
     LEFT JOIN status_types st
       ON cm.status_id = st.status_id
-    ORDER BY cm.cancel_date DESC, cm.last_name ASC
+    ORDER BY cm.cancel_date DESC, cm.member_id DESC
   `
   const [rows] = await defaultDb.query(sql)
   return rows
@@ -334,5 +342,31 @@ export const getCancelledMemberById = async memberId => {
     WHERE cm.member_id = ?
   `
   const [rows] = await defaultDb.query(sql, [memberId])
+  return rows[0] || null
+}
+
+export const getMemberByRFID = async (rfid) => {
+  const sql = `
+    SELECT
+      m.member_id       AS id,
+      m.first_name,
+      m.last_name,
+      m.email,
+      m.contact_number,
+      m.address,
+      m.profile_picture,
+      m.original_join_date,
+      m.recent_join_date,
+      m.expiration_date,
+      m.status_id,
+      m.rfid,
+      st.status_label   AS status
+    FROM members m
+    LEFT JOIN status_types st
+      ON m.status_id = st.status_id
+    WHERE m.rfid = ?
+    LIMIT 1
+  `
+  const [rows] = await defaultDb.query(sql, [rfid])
   return rows[0] || null
 }

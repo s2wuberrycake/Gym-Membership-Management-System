@@ -15,7 +15,6 @@ const exec = util.promisify(execCb)
 
 const backupsDir = path.resolve(__dirname, "../backups")
 
-// ← change this to match your install location if different
 const MYSQL_CLI = `"C:\\Program Files\\MySQL\\MySQL Server 8.0\\bin\\mysql.exe"`
 const MYSQLDUMP_CLI = `"C:\\Program Files\\MySQL\\MySQL Server 8.0\\bin\\mysqldump.exe"`
 
@@ -44,27 +43,20 @@ export async function backupDatabase({ prefix = "backup" } = {}) {
     process.env.DB_DEFAULT_NAME
   ]
 
-  // run dump → gzip → file
   const dump = spawn(MYSQLDUMP_CLI, args, { shell: true })
   const gzip = zlib.createGzip()
   const out = createWriteStream(filepath)
   await pipeline(dump.stdout, gzip, out)
 
-  // prune old backups, keep last 8 by file modification time
-  const allFiles = readdirSync(backupsDir)
-    .filter(f => f.endsWith(".sql.gz"))
-
-  // map to {name, mtime}
+  const allFiles = readdirSync(backupsDir).filter(f => f.endsWith(".sql.gz"))
   const filesWithTimes = allFiles.map(name => {
     const fullPath = path.join(backupsDir, name)
     const { mtimeMs } = statSync(fullPath)
     return { name, time: mtimeMs }
   })
 
-  // sort oldest-first
   filesWithTimes.sort((a, b) => a.time - b.time)
 
-  // if too many, delete the earliest ones
   if (filesWithTimes.length > 8) {
     const toRemove = filesWithTimes.slice(0, filesWithTimes.length - 8)
     toRemove.forEach(({ name }) => {
@@ -76,7 +68,6 @@ export async function backupDatabase({ prefix = "backup" } = {}) {
     })
   }
 
-
   return { filepath, filename }
 }
 
@@ -85,14 +76,12 @@ export async function restoreDatabase(filename) {
   const db = process.env.DB_DEFAULT_NAME
   const backupPath = path.join(backupsDir, filename)
 
-  // perform DROP + CREATE using full path to mysql
   const dropCreateCmd =
     `${MYSQL_CLI} -h ${process.env.DB_HOST} -u ${process.env.DB_USER} -p${process.env.DB_PASSWORD} ` +
     `-e "DROP DATABASE IF EXISTS \`${db}\`; CREATE DATABASE \`${db}\`;"`
 
   await exec(dropCreateCmd)
 
-  // restore via spawn, piping the gunzipped SQL into mysql
   const mysqlProc = spawn(
     MYSQL_CLI,
     [
@@ -125,6 +114,6 @@ export function listBackups() {
       const full = path.join(backupsDir, name)
       return { name, mtime: statSync(full).mtimeMs }
     })
-    .sort((a, b) => b.mtime - a.mtime)   // newest first
+    .sort((a, b) => b.mtime - a.mtime)
     .map(f => f.name)
 }

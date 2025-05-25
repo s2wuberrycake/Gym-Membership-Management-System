@@ -103,10 +103,10 @@ export const getMemberRatio = async () => {
 
 export const getDashboardStats = async () => {
   const ratioRows = await getMemberRatio()
-  const totalMembers    = ratioRows.reduce((sum, r) => sum + Number(r.value), 0)
-  const activeMembers   = ratioRows.find(r => r.status_id === 1)?.value || 0
-  const expiredMembers  = ratioRows.find(r => r.status_id === 2)?.value || 0
-  const cancelledMembers= ratioRows.find(r => r.status_id === 3)?.value || 0
+  const totalMembers     = ratioRows.reduce((sum, r) => sum + Number(r.value), 0)
+  const activeMembers    = ratioRows.find(r => r.status_id === 1)?.value || 0
+  const expiredMembers   = ratioRows.find(r => r.status_id === 2)?.value || 0
+  const cancelledMembers = ratioRows.find(r => r.status_id === 3)?.value || 0
 
   const sumVisits = rows => rows.reduce((sum, r) => sum + Number(r.visits || 0), 0)
   const todayRows = await getVisitRate("default")

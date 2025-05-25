@@ -27,6 +27,7 @@ export default function EditMember({ member, isSheetOpen, onClose, refreshMember
     email: "",
     contact_number: "",
     address: "",
+    rfid: "",
     recent_join_date: null,
     expiration_date: null
   })
@@ -47,6 +48,7 @@ export default function EditMember({ member, isSheetOpen, onClose, refreshMember
         email:      member.email      || "",
         contact_number: member.contact_number || "",
         address:    member.address    || "",
+        rfid:       member.rfid       || "",
         recent_join_date: member.recent_join_date
           ? new Date(member.recent_join_date)
           : null,
@@ -84,7 +86,8 @@ export default function EditMember({ member, isSheetOpen, onClose, refreshMember
       last_name:  true,
       email:      true,
       contact_number: true,
-      address:    true
+      address:    true,
+      rfid:       true
     })
     if (!isValid) return
 
@@ -94,6 +97,7 @@ export default function EditMember({ member, isSheetOpen, onClose, refreshMember
     fd.append("email",      form.email)
     fd.append("contact_number", form.contact_number)
     fd.append("address",    form.address)
+    fd.append("rfid",       form.rfid)
     if (form.recent_join_date) {
       fd.append(
         "recent_join_date",
@@ -119,12 +123,12 @@ export default function EditMember({ member, isSheetOpen, onClose, refreshMember
     try {
       setSubmitting(true)
       await updateMemberById(member.id, fd)
-      toast.success("Member updated successfully")
+      toast.success("Member info updated")
       refreshMember?.()
       onClose()
     } catch (err) {
       console.error("Update failed:", err)
-      toast.error("Failed to update member")
+      toast.error("Failed to update member info")
     } finally {
       setSubmitting(false)
     }
@@ -144,12 +148,16 @@ export default function EditMember({ member, isSheetOpen, onClose, refreshMember
             </div>
 
             <div className="p-6 pt-2 space-y-4 max-w-md">
-              {["first_name","last_name","email","contact_number","address"].map(field => (
+              {["first_name","last_name","email","contact_number","address","rfid"].map(field => (
                 <div key={field}>
                   <Label className="pb-0.5">
-                    {field === "email" ? "Email (optional)"
-                     : field === "contact_number" ? "Contact Number"
-                     : field.replace(/_/g," ").replace(/\b\w/g,c=>c.toUpperCase())
+                    {field === "email"
+                      ? "Email (optional)"
+                      : field === "contact_number"
+                        ? "Contact Number"
+                        : field === "rfid"
+                          ? "RFID (optional)"
+                          : field.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase())
                     }
                   </Label>
                   <Input

@@ -69,33 +69,38 @@ const Archive = () => {
     localStorage.removeItem("archiveVisibleColumns")
   }
 
-  const globalFilterFn = (row, _colId, filterValue) => {
-    const lower = filterValue.toLowerCase()
+const globalFilterFn = (row, _colId, filterValue) => {
+  const lower = filterValue.toLowerCase()
 
-    const fullName = `${row.original.first_name} ${row.original.last_name}`.toLowerCase()
-    if (fullName.includes(lower)) {
-     return true
+  const fullName = `${row.original.first_name} ${row.original.last_name}`.toLowerCase()
+  if (fullName.includes(lower)) {
+    return true
+  }
+
+  const memId = `mem-${row.original.id}`
+  if (memId.includes(lower)) {
+    return true
+  }
+
+  const fields = []
+  if (visibleColumns.contactNumber) fields.push("contact_number")
+  if (visibleColumns.cancelDate)    fields.push("cancel_date")
+
+  return fields.some(field => {
+    let text = String(row.original[field] ?? "")
+    if (field === "cancel_date" && text) {
+      const d = new Date(text)
+      text = !isNaN(d)
+        ? d.toLocaleDateString("en-US", {
+            year:  "numeric",
+            month: "short",
+            day:   "2-digit",
+          })
+        : ""
     }
-
-    const fields = ["id"]
-    if (visibleColumns.contactNumber) fields.push("contact_number")
-    if (visibleColumns.cancelDate)    fields.push("cancel_date")
-
-    return fields.some(field => {
-      let text = String(row.original[field] ?? "")
-      if (field === "cancel_date" && text) {
-        const d = new Date(text)
-        text = !isNaN(d)
-          ? d.toLocaleDateString("en-US", {
-              year:  "numeric",
-              month: "short",
-              day:   "2-digit",
-            })
-          : ""
-      }
-      return text.toLowerCase().includes(lower)
-    })
- }
+    return text.toLowerCase().includes(lower)
+  })
+}
 
   const hasActiveFilters =
     globalFilter || Object.values(visibleColumns).some(v => !v)

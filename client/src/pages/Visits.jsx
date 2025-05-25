@@ -1,10 +1,9 @@
 import React, { useEffect, useState, useRef } from "react"
 import { getAllVisitLogs, logVisit } from "@/lib/api/log"
-import { getMemberById } from "@/lib/api/members"
+import { getMemberById, getMemberByRFID } from "@/lib/api/members"
 import { format } from "date-fns"
 import { ListRestart } from "lucide-react"
 import { API_BASE } from "@/lib/api/index.js"
-
 import DataTable from "@/components/ui/data-table"
 import TableSearch from "@/components/ui/table-search"
 import { visitLogColumns } from "@/components/table/VisitLogColumn"
@@ -32,6 +31,12 @@ const nextDate = {
   today:   "7days",
   "7days": "month",
   month:   "all",
+}
+
+function parseInput(value = "") {
+  const match = value.trim().match(/^MEM-(\d+)$/i)
+  if (match) return { type: "memberId", id: match[1] }
+  return { type: "rfid", code: value.trim() }
 }
 
 export default function Visits() {
@@ -78,16 +83,19 @@ export default function Visits() {
   }
 
   const handleLogVisit = async () => {
-    const memberId = uuid.trim()
-    if (!memberId) return
+    const rawInput = uuid.trim()
+    if (!rawInput) return
 
-    if (clearTimer.current) {
-      clearTimeout(clearTimer.current)
-    }
+    if (clearTimer.current) clearTimeout(clearTimer.current)
 
+    const parsed = parseInput(rawInput)
     let m
     try {
-      m = await getMemberById(memberId)
+      if (parsed.type === "memberId") {
+        m = await getMemberById(parsed.id)
+      } else {
+        m = await getMemberByRFID(parsed.code)
+      }
       setMember(m)
     } catch {
       toast.error("Member not found")
@@ -103,12 +111,12 @@ export default function Visits() {
       toast.error(cancelled ? "Membership cancelled" : "Membership expired")
     } else {
       try {
-        const resp = await logVisit(memberId)
+        const resp = await logVisit(m.id)
         if (resp.message) {
           toast.error(resp.message)
         } else {
           setVisits(v => [resp, ...v])
-          toast.success("Visit logged successfully!")
+          toast.success("Visit logged")
         }
       } catch (err) {
         console.error(err)
@@ -162,7 +170,7 @@ export default function Visits() {
               Visiting Member Info
             </ContainerTitle>
             <p className="text-sm text-muted-foreground">
-              Scan the card or manually input the RFID tag (UUID)
+              Scan the card or manually input the <b>RFID tag</b> or <b>MEM-ID</b>
             </p>
           </ContainerHeader>
           <Separator />
@@ -171,10 +179,10 @@ export default function Visits() {
             <Input
               value={uuid}
               onChange={e => setUuid(e.target.value)}
-              placeholder="Member UUID"
+              placeholder="Scan MEM-# or RFID code"
               onKeyDown={e => e.key === "Enter" && handleLogVisit()}
               autoFocus
-              className="flex-[3] h-8"
+              className="flex-[3] h-8 mr-0.5"
             />
             <Button
               size="sm"
@@ -251,7 +259,6 @@ export default function Visits() {
           </ContainerContent>
         </Container>
       </div>
-
       <div className="col-span-14 flex flex-col gap-4">
         <Container className="flex-1 flex flex-col">
           <ContainerHeader>

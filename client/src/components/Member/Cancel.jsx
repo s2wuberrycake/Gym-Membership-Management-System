@@ -1,5 +1,4 @@
 import React, { useState } from "react"
-import { format } from "date-fns"
 import { cancelMemberById } from "@/lib/api/members"
 import { useNavigate } from "react-router-dom"
 
@@ -19,8 +18,7 @@ const CancelMember = ({ member, isSheetOpen, onClose, refreshMember }) => {
     e.preventDefault()
     try {
       setSubmitting(true)
-      const today = format(new Date(), "yyyy-MM-dd")
-      await cancelMemberById(member.id, today)
+      await cancelMemberById(member.id)
       toast.success("Membership cancelled")
       onClose()
       refreshMember?.()
@@ -41,7 +39,7 @@ const CancelMember = ({ member, isSheetOpen, onClose, refreshMember }) => {
           <form onSubmit={handleSubmit}>
             <div className="p-6 pb-2 max-w-md">
               <h2 className="pb-0.5 text-xl font-bold">
-                Cancel Membership Validty?
+                Cancel Membership Validity?
               </h2>
               <p>
                 Cancelling a membership will update their status to <strong>Cancelled</strong> and will promptly be

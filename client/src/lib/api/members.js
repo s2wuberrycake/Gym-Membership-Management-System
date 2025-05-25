@@ -94,3 +94,8 @@ export const restoreMemberById = async (id) => {
   )
   return data
 }
+
+export const getMemberByRFID = async rfid => {
+  const { data } = await axios.get(`${MEMBERS_API}?rfid=${encodeURIComponent(rfid)}`)
+  return data
+}

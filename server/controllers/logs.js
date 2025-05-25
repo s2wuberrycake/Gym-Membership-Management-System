@@ -38,7 +38,7 @@ export const logVisitController = async (req, res, next) => {
     const { member_id } = req.body
     const visit = await logVisit(member_id)
     if (!visit) {
-      return res.status(200).json({ message: "Visit already logged today" })
+      return res.status(200).json({ message: "Member has already visited today" })
     }
     res.json(visit)
   } catch (err) {

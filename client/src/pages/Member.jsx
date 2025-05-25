@@ -185,7 +185,7 @@ export default function Member() {
                   <span className="mr-12">{member.email || "N/A"}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="font-medium text-muted-foreground">Phone:</span>
+                  <span className="font-medium text-muted-foreground">Contact Number:</span>
                   <span>{member.contact_number}</span>
                 </div>
                 <div className="flex justify-between sm:col-span-2 items-start min-w-0">
@@ -194,12 +194,17 @@ export default function Member() {
                     {member.address}
                   </span>
                 </div>
+                <div className="flex justify-between mb-8">
+                  <span className="font-medium text-muted-foreground">RFID Tag:</span>
+                  <span className="mr-12">{member.rfid || "N/A"}</span>
+                </div>
+                <div className="flex justify-between mb-8"></div>
                 <div className="flex justify-between">
-                  <span className="font-medium text-muted-foreground">Joined:</span>
+                  <span className="font-medium text-muted-foreground">Original Join Date:</span>
                   <span className="mr-12">{renderDate(member.original_join_date)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="font-medium text-muted-foreground">Recent Join:</span>
+                  <span className="font-medium text-muted-foreground">Recent Join Date:</span>
                   <span>{renderDate(member.recent_join_date)}</span>
                 </div>
               </div>

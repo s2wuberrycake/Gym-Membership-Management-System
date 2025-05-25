@@ -2,6 +2,7 @@ import {
   getDurations,
   getMembers,
   getMemberById,
+  getMemberByRFID,
   insertMember,
   updateMember,
   extendMember,
@@ -32,6 +33,13 @@ export const getAllMembersController = async (req, res, next) => {
 
 export const getMemberByIdController = async (req, res, next) => {
   try {
+    if (req.query.rfid) {
+      const member = await getMemberByRFID(req.query.rfid)
+      if (!member) {
+        return res.status(404).json({ success: false, message: "Member not found" })
+      }
+      return res.json(member)
+    }
     const member = await getMemberById(req.params.id)
     if (!member) {
       return res.status(404).json({ success: false, message: "Member not found" })

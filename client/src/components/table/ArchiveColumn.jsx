@@ -19,8 +19,8 @@ const statusStyles = {
 export const archiveColumns = (visibleColumns = {}, actions = {}) => {
   const columns = [
     columnHelper.accessor("id", {
-      header: "UUID",
-      cell: info => info.getValue()
+      header: "Member ID",
+      cell: info => `MEM-${info.getValue()}`
     }),
 
     columnHelper.accessor(
@@ -60,7 +60,6 @@ export const archiveColumns = (visibleColumns = {}, actions = {}) => {
         const label = status
           ? status.charAt(0).toUpperCase() + status.slice(1)
           : "Unknown"
-
         return <Badge className={badgeClass}>{label}</Badge>
       }
     })

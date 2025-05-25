@@ -12,9 +12,8 @@ import {
   ArrowUpWideNarrow
 } from "lucide-react"
 import { format } from "date-fns"
-import TablePagination from "./table-pagination" // Adjust path if needed
+import TablePagination from "./table-pagination"
 
-// Default filter logic for member data
 const defaultMemberFilterFn = (row, columnId, filterValue) => {
   const member = row.original
   const lower = filterValue.toLowerCase()
@@ -44,8 +43,8 @@ const DataTable = ({
   data,
   globalFilter,
   onGlobalFilterChange,
-  globalFilterFn, // <- optional override
-  setTableRef // ✅ NEW
+  globalFilterFn,
+  setTableRef
 }) => {
   const [sorting, setSorting] = React.useState([])
   const [pagination, setPagination] = React.useState({

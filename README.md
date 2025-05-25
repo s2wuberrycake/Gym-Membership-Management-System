@@ -27,7 +27,7 @@
 - STEP 7 : Open mysql, open "mysql init.sql" and run query
 - STEP 8 : Open given localhost link in browser
 
-## HOW TO RUN (ELECTRON DEVELOPMENT)
+## HOW TO TEST AND DEPLOY (ELECTRON DEVELOPMENT)
 - STEP 1 : Open project root folder
 - STEP 2 : Open new terminal
 - STEP 3 : Execute "pnpm i"
@@ -53,4 +53,6 @@ your existing MySQL account
   - Logged-in account icon should change if logged-in account is staff for clarity
 
 - FIX
-  - Add RFID (not priority) column in members table. Make visit log manual input accept RFID column
+  - Add RFID (not priority) column in members table. Make visit log manual input accept RFID 
+  - Change member_id from uuid to auto-
+  - Accounts should not delete, but only disable

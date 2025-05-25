@@ -96,39 +96,41 @@ export default function Members() {
       ? data
       : data.filter(member => member.status?.toLowerCase() === statusFilter)
 
-  const globalFilterFn = (row, _colId, filterValue) => {
-    const lower = filterValue.toLowerCase()
+const globalFilterFn = (row, _colId, filterValue) => { 
+  const lower = filterValue.toLowerCase()
 
-    const fullName = `${row.original.first_name} ${row.original.last_name}`.toLowerCase()
-    if (fullName.includes(lower)) {
-      return true
-    }
-
-    const fields = ["id"]
-    if (visibleColumns.contactNumber) fields.push("contact_number")
-    if (visibleColumns.expireDate)   fields.push("expiration_date")
-
-    return fields.some((field) => {
-      let value = row.original[field] ?? ""
-
-      if (field === "expiration_date") {
-        const date = new Date(value)
-        if (!isNaN(date)) {
-          value = date.toLocaleDateString("en-US", {
-            year:  "numeric",
-            month: "short",
-            day:   "2-digit",
-          })
-        } else {
-          value = ""
-        }
-      }
-
-      return String(value)
-        .toLowerCase()
-        .includes(lower)
-    })
+  const fullName = `${row.original.first_name} ${row.original.last_name}`.toLowerCase()
+  if (fullName.includes(lower)) {
+    return true
   }
+
+  const memId = `mem-${row.original.id}`
+  if (memId.includes(lower)) {
+    return true
+  }
+
+  const fields = []
+  if (visibleColumns.contactNumber) fields.push("contact_number")
+  if (visibleColumns.expireDate)   fields.push("expiration_date")
+
+  return fields.some((field) => {
+    let value = row.original[field] ?? ""
+    if (field === "expiration_date") {
+      const date = new Date(value)
+      if (!isNaN(date)) {
+        value = date.toLocaleDateString("en-US", {
+          year:  "numeric",
+          month: "short",
+          day:   "2-digit",
+        })
+      } else {
+        value = ""
+      }
+    }
+    return String(value).toLowerCase().includes(lower)
+  })
+}
+
 
   const hasActiveFilters =
     globalFilter ||
