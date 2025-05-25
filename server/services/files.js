@@ -2,16 +2,19 @@ import fs from "fs/promises"
 import path from "path"
 import { defaultDb } from "../config/db.js"
 
+import { fileURLToPath } from "url"
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+
 export const saveProfilePic = async (member_id, file) => {
   if (!file) return null
 
   const ext = path.extname(file.originalname)
   const filename = `${member_id}${ext}`
-  const destDir = path.resolve("uploads", "profiles")
+  const destDir = path.resolve(__dirname, "../uploads/profiles")
   const dest = path.join(destDir, filename)
 
   await fs.mkdir(destDir, { recursive: true })
-
   await fs.writeFile(dest, file.buffer)
 
   const [result] = await defaultDb.query(

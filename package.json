@@ -11,7 +11,8 @@
   "scripts": {
     "dev": "cross-env NODE_ENV=development concurrently \"pnpm --filter './server' dev\" \"pnpm --filter './client' dev\" \"wait-on http://localhost:5173 && electron .\"",
     "build:client": "pnpm --filter ./client build",
-    "build": "pnpm run build:client && cross-env NODE_ENV=production electron-builder"
+    "prepack:server": "cd server && pnpm install --prod --shamefully-hoist",
+    "build": "pnpm run build:client && pnpm run prepack:server && cross-env NODE_ENV=production electron-builder"
   },
   "build": {
 		"asar": false,
@@ -21,6 +22,7 @@
       "preload.cjs",
       "client/dist/**/*",
       "server/**/*",
+      "server/node_modules/**/*", 
 			"server/.env",
 			"node_modules/**/*"
     ],
