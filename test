@@ -1,0 +1,98 @@
+<?php
+session_start()
+
+// initialize session storage
+if (!isset($_SESSION["users"])) {
+    $_SESSION["users"] = []
+}
+
+// handle form submit
+if (isset($_POST["submit"])) {
+    $firstname = $_POST["firstname"]
+    $middlename = $_POST["middlename"]
+    $lastname = $_POST["lastname"]
+    $password = $_POST["password"]
+    $retry = $_POST["retry"]
+
+    if ($password === $retry) {
+        $_SESSION["users"][] = [
+            "firstname" => $firstname,
+            "middlename" => $middlename,
+            "lastname" => $lastname
+        ]
+    } else {
+        echo "<p style='color:red'>Passwords do not match!</p>"
+    }
+}
+
+// handle delete
+if (isset($_GET["delete"])) {
+    $index = $_GET["delete"]
+    unset($_SESSION["users"][$index])
+    $_SESSION["users"] = array_values($_SESSION["users"])
+}
+
+?>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Basic PHP Form</title>
+    <style>
+        table, td, th {
+            border: 1px solid black
+            border-collapse: collapse
+            padding: 8px
+        }
+    </style>
+</head>
+<body>
+
+<h2>Registration Form UwU</h2>
+
+<form method="POST">
+    <label>First Name:</label><br>
+    <input type="text" name="firstname" required><br><br>
+
+    <label>Middle Name:</label><br>
+    <input type="text" name="middlename" required><br><br>
+
+    <label>Last Name:</label><br>
+    <input type="text" name="lastname" required><br><br>
+
+    <label>Password:</label><br>
+    <input type="password" name="password" required><br><br>
+
+    <label>Retry Password:</label><br>
+    <input type="password" name="retry" required><br><br>
+
+    <button type="submit" name="submit">Submit</button>
+</form>
+
+<hr>
+
+<h2>Users Table</h2>
+
+<table>
+    <tr>
+        <th>First Name</th>
+        <th>Middle Name</th>
+        <th>Last Name</th>
+        <th>Actions</th>
+    </tr>
+
+    <?php foreach ($_SESSION["users"] as $index => $user): ?>
+    <tr>
+        <td><?php echo $user["firstname"] ?></td>
+        <td><?php echo $user["middlename"] ?></td>
+        <td><?php echo $user["lastname"] ?></td>
+        <td>
+            <a href="?update=<?php echo $index ?>">Update</a> |
+            <a href="?delete=<?php echo $index ?>">Delete</a>
+        </td>
+    </tr>
+    <?php endforeach ?>
+</table>
+
+</body>
+</html>
